@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "baseUrl": ".",
+    "allowJs": false,
+    "checkJs": false,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@spendwise/shared": ["packages/shared/src/index.ts"],
+      "@spendwise/shared/*": ["packages/shared/src/*"],
+      "@spendwise/ai": ["packages/ai/src/index.ts"],
+      "@spendwise/ai/*": ["packages/ai/src/*"],
+      "@spendwise/ui": ["packages/ui/src/index.ts"],
+      "@spendwise/ui/*": ["packages/ui/src/*"]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@spendwise/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "exports": {
+    "./prettier": "./prettier.config.cjs",
+    "./eslint/base": "./eslint/base.cjs",
+    "./eslint/next": "./eslint/next.cjs",
+    "./eslint/react-native": "./eslint/react-native.cjs",
+    "./eslint/nest": "./eslint/nest.cjs",
+    "./typescript/base": "./typescript/base.json",
+    "./typescript/nextjs": "./typescript/nextjs.json",
+    "./typescript/react-native": "./typescript/react-native.json",
+    "./typescript/nest": "./typescript/nest.json"
+  }
+}

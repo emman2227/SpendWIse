@@ -1,0 +1,37 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build output
+dist
+.turbo
+.next
+.expo
+coverage
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+
+# Expo / mobile
+apps/mobile/.expo
+apps/mobile/web-build
+
+# Next.js
+apps/web/.next
+
+# Nest
+apps/api/dist
