@@ -6,20 +6,35 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: '#0F172A',
-        brand: '#0F766E',
-        sand: '#F6F3EC',
-        accent: '#F59E0B',
-        mist: '#E2E8F0'
+        ink: '#13263F',
+        brand: '#0F7B71',
+        emerald: '#157B63',
+        cream: '#F8F5ED',
+        paper: '#FFFDF9',
+        sage: '#DFE9E0',
+        mint: '#D7EAE4',
+        cloud: '#EEF3F3',
+        line: '#D7E0E3',
+        warning: '#CE9844',
+        danger: '#C76D58'
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui']
+        sans: ['var(--font-jakarta)', 'ui-sans-serif', 'system-ui'],
+        display: ['var(--font-fraunces)', 'ui-serif', 'Georgia']
       },
       backgroundImage: {
-        mesh: 'radial-gradient(circle at top left, rgba(15,118,110,0.18), transparent 40%), radial-gradient(circle at top right, rgba(245,158,11,0.16), transparent 30%)'
+        aura: 'radial-gradient(circle at top left, rgba(15,123,113,0.18), transparent 36%), radial-gradient(circle at top right, rgba(215,234,228,0.9), transparent 34%)',
+        'soft-grid':
+          'linear-gradient(rgba(255,255,255,0.38) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.38) 1px, transparent 1px)'
       },
       boxShadow: {
-        soft: '0 20px 60px rgba(15, 23, 42, 0.08)'
+        soft: '0 20px 60px rgba(16, 28, 45, 0.08)',
+        lift: '0 28px 80px rgba(16, 28, 45, 0.12)',
+        inset: 'inset 0 1px 0 rgba(255,255,255,0.65)'
+      },
+      borderRadius: {
+        '4xl': '2rem',
+        '5xl': '2.5rem'
       }
     }
   },
