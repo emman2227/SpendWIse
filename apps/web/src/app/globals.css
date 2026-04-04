@@ -120,4 +120,29 @@ a {
       inset 0 0 0 1px rgba(255, 255, 255, 0.6),
       0 12px 36px rgba(16, 28, 45, 0.05);
   }
-}
+
+  .sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(91, 106, 125, 0.45) transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: rgba(91, 106, 125, 0.35);
+    background-clip: padding-box;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(91, 106, 125, 0.5);
+    background-clip: padding-box;
+  }
+  }

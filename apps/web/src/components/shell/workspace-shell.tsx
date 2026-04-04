@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, LifeBuoy, Plus, Search, Sparkles } from 'lucide-react';
+import { Bell, CreditCard, LifeBuoy, Plus, Search, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -19,9 +19,36 @@ interface WorkspaceShellProps {
 const isPathActive = (pathname: string, href: string) =>
   pathname === href || pathname.startsWith(`${href}/`);
 
-const navigationItemClasses = (active: boolean) =>
+const desktopNavigationSections = [
+  {
+    title: 'Main',
+    items: [
+      ...primaryNavigation.filter((item) =>
+        ['/dashboard', '/transactions', '/budgets'].includes(item.href),
+      ),
+      ...secondaryNavigation.filter((item) => item.href === '/categories'),
+    ],
+  },
+  {
+    title: 'Intelligence',
+    items: primaryNavigation.filter((item) =>
+      ['/insights', '/forecasts', '/reports'].includes(item.href),
+    ),
+  },
+  {
+    title: 'Workspace',
+    items: [
+      ...primaryNavigation.filter((item) => ['/recurring', '/goals'].includes(item.href)),
+      ...secondaryNavigation.filter((item) =>
+        ['/anomalies', '/notifications', '/profile', '/settings', '/help'].includes(item.href),
+      ),
+    ],
+  },
+];
+
+const desktopNavigationItemClasses = (active: boolean) =>
   cn(
-    'group flex items-start gap-3 rounded-[22px] px-4 py-3 transition-all duration-200',
+    'group flex items-center gap-2.5 rounded-[14px] px-2.5 py-2 text-[14px] font-medium leading-4 transition-all duration-200',
     active
       ? 'bg-gradient-to-r from-brand/10 to-white text-ink shadow-sm'
       : 'text-slate-600 hover:bg-white/70 hover:text-ink',
@@ -31,108 +58,72 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1600px] gap-6 px-4 pb-24 pt-4 md:px-6 lg:px-8">
-        <aside className="panel-surface-strong sticky top-4 hidden h-[calc(100vh-2rem)] w-[286px] shrink-0 flex-col overflow-hidden p-5 lg:flex">
-          <Link href="/" className="rounded-[24px] bg-ink px-5 py-5 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold tracking-[0.18em] text-white/70">SPENDWISE</p>
-                <h1 className="mt-2 text-2xl font-semibold tracking-tight">
-                  Calm control over every peso.
-                </h1>
-              </div>
+    <div className="min-h-screen lg:pl-[248px]">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-[color:var(--line-strong)] bg-[rgba(255,253,250,0.96)] text-ink backdrop-blur-xl lg:flex">
+        <div className="sidebar-scroll flex h-full flex-col overflow-y-auto px-4 py-4">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-brand to-[#52c6ab] text-white shadow-[0_14px_32px_rgba(15,123,113,0.18)]">
+              <CreditCard className="h-4 w-4" />
             </div>
-            <p className="mt-3 text-sm leading-6 text-white/75">
-              A premium workspace for tracking spend, understanding behavior, and planning what
-              comes next.
-            </p>
+            <div className="min-w-0">
+              <p className="truncate text-[17px] font-semibold tracking-tight text-ink">
+                SpendWise
+              </p>
+            </div>
           </Link>
 
-          <div className="mt-7 space-y-2">
-            <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-              Primary
-            </p>
-            <nav className="space-y-1">
-              {primaryNavigation.map((item) => {
-                const active = isPathActive(pathname, item.href);
-                const Icon = item.icon;
+          {desktopNavigationSections.map((section) => (
+            <div key={section.title} className="mt-5 first:mt-7">
+              <p className="px-2.5 text-[9px] font-semibold uppercase tracking-[0.17em] text-slate-400">
+                {section.title}
+              </p>
+              <nav className="mt-2 space-y-1">
+                {section.items.map((item) => {
+                  const active = isPathActive(pathname, item.href);
+                  const Icon = item.icon;
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={active ? 'page' : undefined}
-                    className={navigationItemClasses(active)}
-                  >
-                    <div
-                      className={cn(
-                        'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition-colors',
-                        active
-                          ? 'bg-white text-brand'
-                          : 'bg-white/70 text-slate-500 group-hover:text-brand',
-                      )}
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={active ? 'page' : undefined}
+                      className={desktopNavigationItemClasses(active)}
                     >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold">{item.label}</p>
-                      <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </nav>
+                      <Icon
+                        className={cn(
+                          'h-4 w-4 shrink-0 transition-colors',
+                          active ? 'text-brand' : 'text-slate-500 group-hover:text-brand',
+                        )}
+                      />
+                      <span className="truncate">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+          ))}
+
+          <div className="mt-auto pt-4">
+            <div className="rounded-[20px] border border-white/80 bg-gradient-to-br from-mint to-white px-3.5 py-3.5 shadow-soft">
+              <Badge variant="info" className="px-2 py-1 text-[10px]">
+                AI pulse
+              </Badge>
+              <p className="mt-2 text-[13px] leading-5 text-slate-600">
+                SpendWise is monitoring budgets, recurring charges, and unusual shopping patterns.
+              </p>
+              <Button asChild size="sm" variant="secondary" className="mt-2.5 h-8 w-full px-3 text-[11.5px]">
+                <Link href="/insights">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Review insights
+                </Link>
+              </Button>
+            </div>
           </div>
+        </div>
+      </aside>
 
-          <div className="mt-6 space-y-2">
-            <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-              Workspace
-            </p>
-            <nav className="space-y-1">
-              {secondaryNavigation.map((item) => {
-                const active = isPathActive(pathname, item.href);
-                const Icon = item.icon;
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={active ? 'page' : undefined}
-                    className={cn(
-                      'flex items-center gap-3 rounded-[18px] px-4 py-3 text-sm font-medium transition-all',
-                      active
-                        ? 'bg-white text-ink shadow-sm'
-                        : 'text-slate-600 hover:bg-white/70 hover:text-ink',
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-
-          <div className="mt-auto rounded-[28px] border border-white/80 bg-gradient-to-br from-mint to-white px-5 py-5 shadow-soft">
-            <Badge variant="info">AI pulse</Badge>
-            <h2 className="mt-4 text-lg font-semibold text-ink">
-              SpendWise is monitoring 3 signals today
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              One budget is over plan, one recurring charge is approaching, and shopping behavior
-              looks unusual.
-            </p>
-            <Button asChild size="sm" variant="secondary" className="mt-5 w-full">
-              <Link href="/insights">
-                <Sparkles className="h-4 w-4" />
-                Review insights
-              </Link>
-            </Button>
-          </div>
-        </aside>
-
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1600px] px-4 pb-24 pt-4 md:px-6 lg:px-8">
+        <div className="flex min-w-0 flex-1 flex-col gap-6 lg:pl-6">
           <header className="panel-surface sticky top-4 z-30 px-4 py-3 md:px-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-3">
