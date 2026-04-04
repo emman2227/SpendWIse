@@ -124,7 +124,7 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
 
       <div className="mx-auto flex min-h-screen w-full max-w-[1600px] px-4 pb-24 pt-4 md:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 flex-col gap-6 lg:pl-6">
-          <header className="panel-surface sticky top-4 z-30 px-4 py-3 md:px-5">
+          <header className="sticky top-4 z-30 rounded-[28px] border border-white/65 bg-[rgba(255,253,250,0.58)] px-4 py-3 shadow-soft backdrop-blur-xl md:px-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-3">
                 <Link
