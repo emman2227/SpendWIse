@@ -208,13 +208,31 @@ export default function RegisterPage() {
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f7f2ea_0%,#f4efe7_100%)] px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden">
       <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-white shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:grid-cols-[0.93fr,0.83fr]">
-        <section className="relative overflow-hidden bg-[#dce8de] px-5 py-4 md:px-5 md:py-5 lg:min-h-[460px]">
+        <section
+          className={cn(
+            'relative overflow-hidden px-5 py-4 md:px-5 md:py-5 lg:min-h-[460px]',
+            step === 1 ? 'bg-[#dce8de]' : 'bg-[#d8e4df]',
+          )}
+        >
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute -left-10 top-0 h-40 w-56 rounded-full bg-white/28 blur-sm" />
-            <div className="absolute right-6 top-12 h-52 w-52 rounded-full bg-[#f6efe1] opacity-95 blur-[2px]" />
-            <div className="absolute -left-16 bottom-8 h-44 w-52 rounded-[42%_58%_57%_43%/51%_33%_67%_49%] bg-[#f6ecda] opacity-95" />
-            <div className="absolute -right-12 bottom-[-4rem] h-44 w-52 rounded-[55%_45%_57%_43%/44%_37%_63%_56%] bg-white/36" />
-            <div className="absolute left-8 top-5 h-52 w-52 rounded-[38%_62%_63%_37%/50%_45%_55%_50%] border border-white/30 bg-white/12" />
+            {step === 1 ? (
+              <>
+                <div className="absolute -left-10 top-0 h-40 w-56 rounded-full bg-white/28 blur-sm" />
+                <div className="absolute right-6 top-12 h-52 w-52 rounded-full bg-[#f6efe1] opacity-95 blur-[2px]" />
+                <div className="absolute -left-16 bottom-8 h-44 w-52 rounded-[42%_58%_57%_43%/51%_33%_67%_49%] bg-[#f6ecda] opacity-95" />
+                <div className="absolute -right-12 bottom-[-4rem] h-44 w-52 rounded-[55%_45%_57%_43%/44%_37%_63%_56%] bg-white/36" />
+                <div className="absolute left-8 top-5 h-52 w-52 rounded-[38%_62%_63%_37%/50%_45%_55%_50%] border border-white/30 bg-white/12" />
+              </>
+            ) : (
+              <>
+                <div className="absolute -left-8 top-[-1.5rem] h-36 w-52 rounded-full bg-white/24 blur-sm" />
+                <div className="absolute right-[7%] top-[10%] h-44 w-44 rounded-full bg-[#efe8d9] opacity-95" />
+                <div className="absolute left-[9%] top-[18%] h-48 w-44 rounded-[42%_58%_48%_52%/50%_35%_65%_50%] border border-white/30 bg-white/12" />
+                <div className="absolute left-[20%] top-[30%] h-10 w-56 rounded-full bg-[linear-gradient(90deg,rgba(15,43,39,0.88),rgba(15,123,113,0.62),rgba(255,255,255,0.08))] opacity-90 blur-[1px]" />
+                <div className="absolute -left-16 bottom-8 h-40 w-52 rounded-[48%_52%_57%_43%/45%_34%_66%_55%] bg-[#f4e7d5] opacity-95" />
+                <div className="absolute right-[-9%] bottom-[-12%] h-48 w-52 rounded-[56%_44%_61%_39%/42%_52%_48%_58%] bg-white/30" />
+              </>
+            )}
           </div>
 
           <div className="relative flex h-full flex-col">
@@ -237,14 +255,27 @@ export default function RegisterPage() {
             </div>
 
             <div className="relative mt-auto hidden pt-8 md:block">
-              <div className="relative h-[138px] max-w-[330px]">
-                <div className="absolute left-0 top-5 h-24 w-40 rounded-[30px] border border-white/35 bg-white/18 backdrop-blur-sm" />
-                <div className="absolute left-5 top-0 h-20 w-20 rounded-[26px] bg-[linear-gradient(160deg,rgba(16,52,46,0.84),rgba(17,131,121,0.58))] shadow-[0_18px_36px_rgba(16,52,46,0.18)]" />
-                <div className="absolute left-[7.25rem] top-8 h-16 w-28 rounded-[24px] border border-white/40 bg-white/26 backdrop-blur-sm" />
-                <div className="absolute left-[10.5rem] top-3 h-10 w-36 rounded-full bg-[linear-gradient(90deg,rgba(18,40,33,0.82),rgba(15,123,113,0.56),rgba(255,255,255,0.08))] opacity-90 blur-[1px]" />
-                <div className="absolute bottom-0 left-6 h-3 w-24 rounded-full bg-slate-700/12" />
-                <div className="absolute bottom-5 left-[9.5rem] h-9 w-20 rounded-[20px] border border-white/35 bg-[#f4eddf]/70" />
-              </div>
+              {step === 1 ? (
+                <div className="relative h-[138px] max-w-[330px]">
+                  <div className="absolute left-0 top-5 h-24 w-40 rounded-[30px] border border-white/35 bg-white/18 backdrop-blur-sm" />
+                  <div className="absolute left-5 top-0 h-20 w-20 rounded-[26px] bg-[linear-gradient(160deg,rgba(16,52,46,0.84),rgba(17,131,121,0.58))] shadow-[0_18px_36px_rgba(16,52,46,0.18)]" />
+                  <div className="absolute left-[7.25rem] top-8 h-16 w-28 rounded-[24px] border border-white/40 bg-white/26 backdrop-blur-sm" />
+                  <div className="absolute left-[10.5rem] top-3 h-10 w-36 rounded-full bg-[linear-gradient(90deg,rgba(18,40,33,0.82),rgba(15,123,113,0.56),rgba(255,255,255,0.08))] opacity-90 blur-[1px]" />
+                  <div className="absolute bottom-0 left-6 h-3 w-24 rounded-full bg-slate-700/12" />
+                  <div className="absolute bottom-5 left-[9.5rem] h-9 w-20 rounded-[20px] border border-white/35 bg-[#f4eddf]/70" />
+                </div>
+              ) : (
+                <div className="relative h-[148px] max-w-[334px]">
+                  <div className="absolute left-0 top-3 h-28 w-48 rounded-[34px] border border-white/35 bg-white/16 backdrop-blur-sm" />
+                  <div className="absolute left-6 top-7 h-14 w-28 rounded-[24px] bg-[linear-gradient(135deg,rgba(14,51,46,0.9),rgba(18,124,113,0.54))] shadow-[0_18px_34px_rgba(16,52,46,0.16)]" />
+                  <div className="absolute left-[10.5rem] top-0 h-20 w-20 rounded-[28px] border border-white/38 bg-[#f5ede0]/76" />
+                  <div className="absolute left-[9.5rem] top-[4.25rem] h-18 w-32 rounded-[24px] border border-white/38 bg-white/24 backdrop-blur-sm" />
+                  <div className="absolute right-1 top-6 h-12 w-24 rounded-full bg-[linear-gradient(90deg,rgba(18,40,33,0.82),rgba(15,123,113,0.5),rgba(255,255,255,0.1))] opacity-90 blur-[1px]" />
+                  <div className="absolute bottom-4 left-5 h-2.5 w-20 rounded-full bg-slate-700/12" />
+                  <div className="absolute bottom-0 left-[10.5rem] h-10 w-24 rounded-[22px] border border-white/35 bg-white/22 backdrop-blur-sm" />
+                  <div className="absolute bottom-3 left-[11.75rem] h-3 w-12 rounded-full bg-brand/24" />
+                </div>
+              )}
             </div>
           </div>
         </section>
