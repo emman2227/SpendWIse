@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Fraunces, Plus_Jakarta_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 
+import { AuthSessionManager } from '@/components/providers/auth-session-manager';
 import { QueryProvider } from '@/components/providers/query-provider';
 
 const jakarta = Plus_Jakarta_Sans({
@@ -33,7 +34,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         className={`${jakarta.variable} ${fraunces.variable} min-h-screen bg-[var(--bg)] text-[var(--ink)]`}
       >
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <AuthSessionManager>{children}</AuthSessionManager>
+        </QueryProvider>
       </body>
     </html>
   );

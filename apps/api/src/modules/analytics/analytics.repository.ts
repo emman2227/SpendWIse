@@ -27,7 +27,7 @@ export class AnalyticsRepository {
   async replaceInsights(userId: string, insights: Omit<Insight, 'id'>[]) {
     await this.insightModel.deleteMany({ userId }).exec();
     const documents = await this.insightModel.insertMany(insights);
-    return documents.map((document) => this.toInsight(document));
+    return documents.map((document) => this.toInsight(document as unknown as InsightDocument));
   }
 
   async saveForecast(forecast: ForecastRecordInput) {

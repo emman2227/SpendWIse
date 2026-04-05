@@ -1,12 +1,17 @@
 'use client';
 
+import { AUTH_LOGIN_PASSWORD_MIN_LENGTH, authEmailPattern } from '@spendwise/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { type ChangeEvent, type FocusEvent, type FormEvent, useState } from 'react';
+import { type ChangeEvent, type FocusEvent, type FormEvent, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { authQueryKey, getAuthErrorMessage, loginWithCredentials } from '@/lib/auth/client';
+import { INACTIVITY_TIMEOUT_MINUTES } from '@/lib/auth/constants';
+import { sanitizeEmailInput, sanitizePasswordInput } from '@/lib/auth/input';
 import { cn } from '@/lib/utils';
 
 type LoginField = 'email' | 'password';
@@ -25,16 +30,24 @@ const initialTouched: LoginTouched = {
   password: false,
 };
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 const validateField = (field: LoginField, values: LoginValues) => {
   switch (field) {
     case 'email':
-      if (!values.email.trim()) return 'Please enter your email address.';
-      return emailPattern.test(values.email.trim()) ? '' : 'Please use a valid email address.';
+      if (!values.email) {
+        return 'Please enter your email address.';
+      }
+
+      return authEmailPattern.test(values.email)
+        ? ''
+        : 'Use a valid email address without spaces or emoji.';
     case 'password':
-      if (!values.password) return 'Please enter your password.';
-      return values.password.length >= 8 ? '' : 'Password must be at least 8 characters.';
+      if (!values.password) {
+        return 'Please enter your password.';
+      }
+
+      return values.password.length >= AUTH_LOGIN_PASSWORD_MIN_LENGTH
+        ? ''
+        : `Password must be at least ${AUTH_LOGIN_PASSWORD_MIN_LENGTH} characters.`;
     default:
       return '';
   }
@@ -83,20 +96,39 @@ const AppleMark = ({ className }: { className?: string }) => (
 );
 
 export default function LoginPage() {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const [values, setValues] = useState<LoginValues>(initialValues);
   const [errors, setErrors] = useState<LoginErrors>({});
   const [touched, setTouched] = useState<LoginTouched>(initialTouched);
+  const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [authReason, setAuthReason] = useState<string | null>(null);
+  const sessionMessage =
+    authReason === 'inactive'
+      ? `You were logged out after ${INACTIVITY_TIMEOUT_MINUTES} minutes of inactivity.`
+      : authReason === 'expired'
+        ? 'Your session expired. Sign in again to continue.'
+        : '';
+
+  useEffect(() => {
+    setAuthReason(new URLSearchParams(window.location.search).get('reason'));
+  }, []);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const field = event.target.name as LoginField;
+    const sanitizedValue =
+      field === 'email'
+        ? sanitizeEmailInput(event.target.value)
+        : sanitizePasswordInput(event.target.value);
     const nextValues = {
       ...values,
-      [field]: event.target.value,
+      [field]: sanitizedValue,
     };
 
     setValues(nextValues);
+    setFormError('');
     setErrors((currentErrors) => ({
       ...currentErrors,
       [field]: touched[field] ? validateField(field, nextValues) : currentErrors[field],
@@ -117,7 +149,7 @@ export default function LoginPage() {
     }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const nextErrors: LoginErrors = {
@@ -130,9 +162,24 @@ export default function LoginPage() {
       password: true,
     });
     setErrors(nextErrors);
+    setFormError('');
 
-    if (hasErrors(nextErrors)) return;
-    router.push('/dashboard');
+    if (hasErrors(nextErrors)) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const user = await loginWithCredentials(values);
+
+      queryClient.setQueryData(authQueryKey, user);
+      router.replace('/dashboard');
+    } catch (error) {
+      setFormError(getAuthErrorMessage(error, 'Unable to log in right now.'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -193,7 +240,6 @@ export default function LoginPage() {
                 >
                   Financial intelligence, <span className="text-brand">refined.</span>
                 </h1>
-                
               </div>
             </div>
           </div>
@@ -233,6 +279,12 @@ export default function LoginPage() {
               <span className="h-px flex-1 bg-[#ece7df]" />
             </div>
 
+            {sessionMessage ? (
+              <div className="mt-3.5 rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-slate-700">
+                {sessionMessage}
+              </div>
+            ) : null}
+
             <form className="mt-3.5 space-y-3" noValidate onSubmit={handleSubmit}>
               <div className="space-y-1">
                 <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500" htmlFor="email">
@@ -246,6 +298,7 @@ export default function LoginPage() {
                     'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
                     errors.email && 'border-[var(--danger)]',
                   )}
+                  disabled={isSubmitting}
                   id="email"
                   name="email"
                   onBlur={handleBlur}
@@ -254,7 +307,14 @@ export default function LoginPage() {
                   type="email"
                   value={values.email}
                 />
-                <p className={cn('min-h-[0.75rem] text-[10px] leading-4', errors.email ? 'text-[var(--danger)]' : 'text-transparent')} id="email-error" role="alert">
+                <p
+                  className={cn(
+                    'min-h-[0.75rem] text-[10px] leading-4',
+                    errors.email ? 'text-[var(--danger)]' : 'text-transparent',
+                  )}
+                  id="email-error"
+                  role="alert"
+                >
                   {errors.email ?? ' '}
                 </p>
               </div>
@@ -277,6 +337,7 @@ export default function LoginPage() {
                       'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] pr-11 text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
                       errors.password && 'border-[var(--danger)]',
                     )}
+                    disabled={isSubmitting}
                     id="password"
                     name="password"
                     onBlur={handleBlur}
@@ -294,18 +355,33 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                   </button>
                 </div>
-                <p className={cn('min-h-[0.75rem] text-[10px] leading-4', errors.password ? 'text-[var(--danger)]' : 'text-transparent')} id="password-error" role="alert">
-                  {errors.password ?? ' '}
+                <p
+                  className={cn(
+                    'min-h-[0.75rem] text-[10px] leading-4',
+                    errors.password ? 'text-[var(--danger)]' : 'text-slate-400',
+                  )}
+                  id="password-error"
+                  role="alert"
+                >
+                  {errors.password ??
+                    `Spaces and emoji are blocked. Use at least ${AUTH_LOGIN_PASSWORD_MIN_LENGTH} characters.`}
                 </p>
               </div>
 
+              {formError ? (
+                <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3 text-[12px] text-[var(--danger)]">
+                  {formError}
+                </div>
+              ) : null}
+
               <Button
                 className="mt-0.5 h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                disabled={isSubmitting}
                 size="lg"
                 type="submit"
                 variant="secondary"
               >
-                Log In
+                {isSubmitting ? 'Logging In...' : 'Log In'}
               </Button>
 
               <p className="text-center text-[12px] text-slate-500">

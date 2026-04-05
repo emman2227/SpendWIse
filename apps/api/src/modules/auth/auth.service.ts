@@ -11,6 +11,29 @@ import type { AuthSession, AuthTokens, JwtPayload } from '@spendwise/shared';
 
 import { UsersRepository } from '../users/users.repository';
 
+const ttlToSeconds = (value: string) => {
+  const match = value.trim().match(/^(\d+)([smhd])?$/i);
+
+  if (!match) {
+    return 15 * 60;
+  }
+
+  const amount = Number(match[1]);
+  const unit = match[2]?.toLowerCase() ?? 's';
+
+  switch (unit) {
+    case 'm':
+      return amount * 60;
+    case 'h':
+      return amount * 60 * 60;
+    case 'd':
+      return amount * 60 * 60 * 24;
+    case 's':
+    default:
+      return amount;
+  }
+};
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -28,8 +51,8 @@ export class AuthService {
 
     const passwordHash = await hash(input.password, 12);
     const user = await this.usersRepository.create({
-      name: input.name,
-      email: input.email,
+      name: input.name.trim(),
+      email: input.email.trim().toLowerCase(),
       passwordHash
     });
 
@@ -44,7 +67,7 @@ export class AuthService {
   }
 
   async login(input: { email: string; password: string }): Promise<AuthSession> {
-    const user = await this.usersRepository.findByEmail(input.email);
+    const user = await this.usersRepository.findByEmail(input.email.trim().toLowerCase());
 
     if (!user || !(await compare(input.password, user.passwordHash))) {
       throw new UnauthorizedException('Invalid email or password');
@@ -112,7 +135,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      expiresIn: 15 * 60
+      expiresIn: ttlToSeconds(accessTtl)
     };
   }
 

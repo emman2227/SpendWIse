@@ -1,24 +1,99 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const AUTH_COOKIE = 'spendwise_access_token';
+import {
+  ACCESS_TOKEN_COOKIE,
+  HOME_ROUTE,
+  INACTIVITY_TIMEOUT_SECONDS,
+  REFRESH_TOKEN_COOKIE,
+  SESSION_ACTIVITY_COOKIE,
+  isGuestOnlyRoute,
+  isProtectedRoute,
+  isSessionInactive,
+  isTokenExpired,
+} from '@/lib/auth/constants';
 
 export function middleware(request: NextRequest) {
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/profile');
+  const { pathname } = request.nextUrl;
+  const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+  const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
+  const lastActivity = request.cookies.get(SESSION_ACTIVITY_COOKIE)?.value;
+  const hasRefreshSession = Boolean(refreshToken) && !isTokenExpired(refreshToken);
+  const hasActiveSession = (Boolean(accessToken) && !isTokenExpired(accessToken)) || hasRefreshSession;
+  const sessionExpiredFromInactivity = hasActiveSession && isSessionInactive(lastActivity);
 
-  if (!isProtectedRoute) {
-    return NextResponse.next();
+  if (sessionExpiredFromInactivity) {
+    const response = NextResponse.redirect(new URL('/login?reason=inactive', request.url));
+
+    response.cookies.delete(ACCESS_TOKEN_COOKIE);
+    response.cookies.delete(REFRESH_TOKEN_COOKIE);
+    response.cookies.delete(SESSION_ACTIVITY_COOKIE);
+
+    return response;
   }
 
-  const token = request.cookies.get(AUTH_COOKIE)?.value;
+  if (isProtectedRoute(pathname) && !hasActiveSession) {
+    const response = NextResponse.redirect(new URL('/login', request.url));
 
-  if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    response.cookies.delete(ACCESS_TOKEN_COOKIE);
+    response.cookies.delete(REFRESH_TOKEN_COOKIE);
+    response.cookies.delete(SESSION_ACTIVITY_COOKIE);
+
+    return response;
   }
 
-  return NextResponse.next();
+  if (isGuestOnlyRoute(pathname) && hasActiveSession) {
+    return NextResponse.redirect(new URL(HOME_ROUTE, request.url));
+  }
+
+  const response = NextResponse.next();
+
+  if (hasActiveSession && (isProtectedRoute(pathname) || isGuestOnlyRoute(pathname))) {
+    response.cookies.set({
+      name: SESSION_ACTIVITY_COOKIE,
+      value: String(Date.now()),
+      httpOnly: false,
+      maxAge: INACTIVITY_TIMEOUT_SECONDS,
+      path: '/',
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+    });
+  }
+
+  return response;
 }
 
 export const config = {
-  matcher: ['/profile/:path*']
+  matcher: [
+    '/dashboard',
+    '/dashboard/:path*',
+    '/transactions',
+    '/transactions/:path*',
+    '/budgets',
+    '/budgets/:path*',
+    '/categories',
+    '/categories/:path*',
+    '/insights',
+    '/insights/:path*',
+    '/forecasts',
+    '/forecasts/:path*',
+    '/reports',
+    '/reports/:path*',
+    '/recurring',
+    '/recurring/:path*',
+    '/goals',
+    '/goals/:path*',
+    '/anomalies',
+    '/anomalies/:path*',
+    '/notifications',
+    '/notifications/:path*',
+    '/profile',
+    '/profile/:path*',
+    '/settings',
+    '/settings/:path*',
+    '/help',
+    '/help/:path*',
+    '/login',
+    '/register',
+  ]
 };

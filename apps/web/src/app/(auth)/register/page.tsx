@@ -1,12 +1,26 @@
 'use client';
 
-import { Eye, EyeOff } from 'lucide-react';
+import {
+  AUTH_PASSWORD_MIN_LENGTH,
+  authEmailPattern,
+  authNameSegmentPattern,
+  authPasswordLowercasePattern,
+  authPasswordNumberPattern,
+  authPasswordSpecialCharacterPattern,
+  authPasswordUppercasePattern,
+} from '@spendwise/shared';
+import { useQueryClient } from '@tanstack/react-query';
+import { CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type ChangeEvent, type FocusEvent, type FormEvent, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ProgressBar } from '@/components/ui/progress-bar';
+import { authQueryKey, getAuthErrorMessage, registerWithCredentials } from '@/lib/auth/client';
+import { sanitizeEmailInput, sanitizeNameInput, sanitizePasswordInput } from '@/lib/auth/input';
+import { getPasswordStrength } from '@/lib/auth/password-strength';
 import { cn } from '@/lib/utils';
 
 type RegisterField = 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword';
@@ -32,31 +46,53 @@ const initialTouched: RegisterTouched = {
   confirmPassword: false,
 };
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const specialCharacterPattern = /[^A-Za-z0-9]/;
-
 const stepFields: Record<RegisterStep, RegisterField[]> = {
   1: ['firstName', 'lastName', 'email'],
   2: ['password', 'confirmPassword'],
 };
 
-const validateField = (field: RegisterField, values: RegisterValues) => {
-  const value = values[field].trim();
+const validatePassword = (password: string) => {
+  if (!password) return 'Please create a password.';
+  if (password.length < AUTH_PASSWORD_MIN_LENGTH) {
+    return `Password must be at least ${AUTH_PASSWORD_MIN_LENGTH} characters.`;
+  }
+  if (!authPasswordUppercasePattern.test(password)) {
+    return 'Password must include at least one uppercase letter.';
+  }
+  if (!authPasswordLowercasePattern.test(password)) {
+    return 'Password must include at least one lowercase letter.';
+  }
+  if (!authPasswordNumberPattern.test(password)) {
+    return 'Password must include at least one number.';
+  }
+  if (!authPasswordSpecialCharacterPattern.test(password)) {
+    return 'Password must include at least one special character.';
+  }
 
+  return '';
+};
+
+const validateField = (field: RegisterField, values: RegisterValues) => {
   switch (field) {
     case 'firstName':
-      return value.length < 2 ? 'Please enter your first name.' : '';
-    case 'lastName':
-      return value.length < 2 ? 'Please enter your last name.' : '';
-    case 'email':
-      if (!value) return 'Please enter your email address.';
-      return emailPattern.test(value) ? '' : 'Please use a valid email address.';
-    case 'password':
-      if (!values.password) return 'Please create a password.';
-      if (values.password.length < 8) return 'Password must be at least 8 characters.';
-      return specialCharacterPattern.test(values.password)
+      if (!values.firstName) return 'Please enter your first name.';
+      if (values.firstName.length < 2) return 'First name must be at least 2 characters.';
+      return authNameSegmentPattern.test(values.firstName)
         ? ''
-        : 'Password must include at least one special symbol.';
+        : 'Only letters, apostrophes, and hyphens are allowed.';
+    case 'lastName':
+      if (!values.lastName) return 'Please enter your last name.';
+      if (values.lastName.length < 2) return 'Last name must be at least 2 characters.';
+      return authNameSegmentPattern.test(values.lastName)
+        ? ''
+        : 'Only letters, apostrophes, and hyphens are allowed.';
+    case 'email':
+      if (!values.email) return 'Please enter your email address.';
+      return authEmailPattern.test(values.email)
+        ? ''
+        : 'Use a valid email address without spaces or emoji.';
+    case 'password':
+      return validatePassword(values.password);
     case 'confirmPassword':
       if (!values.confirmPassword) return 'Please confirm your password.';
       return values.confirmPassword === values.password ? '' : 'Passwords do not match.';
@@ -114,22 +150,33 @@ const AppleMark = ({ className }: { className?: string }) => (
 );
 
 export default function RegisterPage() {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const [step, setStep] = useState<RegisterStep>(1);
   const [values, setValues] = useState<RegisterValues>(initialValues);
   const [errors, setErrors] = useState<RegisterErrors>({});
   const [touched, setTouched] = useState<RegisterTouched>(initialTouched);
+  const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const passwordStrength = getPasswordStrength(values.password);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const field = event.target.name as RegisterField;
+    const nextValue =
+      field === 'firstName' || field === 'lastName'
+        ? sanitizeNameInput(event.target.value)
+        : field === 'email'
+          ? sanitizeEmailInput(event.target.value)
+          : sanitizePasswordInput(event.target.value);
     const nextValues = {
       ...values,
-      [field]: event.target.value,
+      [field]: nextValue,
     };
 
     setValues(nextValues);
+    setFormError('');
     setErrors((currentErrors) => ({
       ...currentErrors,
       [field]: touched[field] ? validateField(field, nextValues) : currentErrors[field],
@@ -175,7 +222,7 @@ export default function RegisterPage() {
     setStep(2);
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (step === 1) {
@@ -190,14 +237,31 @@ export default function RegisterPage() {
 
     markStepTouched(2);
     setErrors(nextErrors);
+    setFormError('');
 
     if (hasErrors(nextErrors)) return;
-    router.push('/verify-email');
+
+    setIsSubmitting(true);
+
+    try {
+      const user = await registerWithCredentials({
+        name: `${values.firstName} ${values.lastName}`,
+        email: values.email,
+        password: values.password,
+      });
+
+      queryClient.setQueryData(authQueryKey, user);
+      router.replace('/dashboard');
+    } catch (error) {
+      setFormError(getAuthErrorMessage(error, 'Unable to create your account right now.'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const passwordHelperText = errors.password
     ? errors.password
-    : 'Must be at least 8 characters with one special symbol.';
+    : `Spaces and emoji are blocked. Use ${AUTH_PASSWORD_MIN_LENGTH}+ characters with upper/lowercase, number, and symbol.`;
 
   const stepTitle = step === 1 ? "Let's start with your details." : 'Create your secure password.';
   const stepDescription =
@@ -345,6 +409,7 @@ export default function RegisterPage() {
                           'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
                           errors.firstName && 'border-[var(--danger)]',
                         )}
+                        disabled={isSubmitting}
                         id="firstName"
                         name="firstName"
                         onBlur={handleBlur}
@@ -369,6 +434,7 @@ export default function RegisterPage() {
                           'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
                           errors.lastName && 'border-[var(--danger)]',
                         )}
+                        disabled={isSubmitting}
                         id="lastName"
                         name="lastName"
                         onBlur={handleBlur}
@@ -394,6 +460,7 @@ export default function RegisterPage() {
                         'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
                         errors.email && 'border-[var(--danger)]',
                       )}
+                      disabled={isSubmitting}
                       id="email"
                       name="email"
                       onBlur={handleBlur}
@@ -407,8 +474,15 @@ export default function RegisterPage() {
                     </p>
                   </div>
 
+                  {formError ? (
+                    <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3 text-[12px] text-[var(--danger)]">
+                      {formError}
+                    </div>
+                  ) : null}
+
                   <Button
                     className="mt-0.5 h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                    disabled={isSubmitting}
                     size="lg"
                     type="button"
                     variant="secondary"
@@ -439,6 +513,7 @@ export default function RegisterPage() {
                           'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] pr-11 text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
                           errors.password && 'border-[var(--danger)]',
                         )}
+                        disabled={isSubmitting}
                         id="password"
                         name="password"
                         onBlur={handleBlur}
@@ -461,6 +536,35 @@ export default function RegisterPage() {
                     </p>
                   </div>
 
+                  <div className="rounded-[18px] border border-[#ebe6df] bg-[#faf7f2] px-3.5 py-3">
+                    <ProgressBar
+                      helper={passwordStrength.label}
+                      label="Password strength"
+                      size="sm"
+                      status={passwordStrength.status}
+                      value={passwordStrength.progress}
+                    />
+                    <div className="mt-2.5 grid gap-x-4 gap-y-1.5 sm:grid-cols-2">
+                      {passwordStrength.checklist.map((item) => (
+                        <div
+                          key={item.label}
+                          className={cn(
+                            'flex items-center gap-1.5 text-[10.5px] leading-4',
+                            item.passed ? 'text-emerald-700' : 'text-slate-500',
+                          )}
+                        >
+                          <CheckCircle2
+                            className={cn(
+                              'h-3.5 w-3.5 shrink-0',
+                              item.passed ? 'text-emerald-600' : 'text-slate-300',
+                            )}
+                          />
+                          <span>{item.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500" htmlFor="confirmPassword">
                       Confirm Password
@@ -474,6 +578,7 @@ export default function RegisterPage() {
                           'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] pr-11 text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
                           errors.confirmPassword && 'border-[var(--danger)]',
                         )}
+                        disabled={isSubmitting}
                         id="confirmPassword"
                         name="confirmPassword"
                         onBlur={handleBlur}
@@ -496,17 +601,24 @@ export default function RegisterPage() {
                     </p>
                   </div>
 
+                  {formError ? (
+                    <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3 text-[12px] text-[var(--danger)]">
+                      {formError}
+                    </div>
+                  ) : null}
+
                   <div className="mt-1 grid grid-cols-2 gap-2.5">
-                    <Button className="h-10 rounded-full text-sm" size="lg" type="button" variant="outline" onClick={() => setStep(1)}>
+                    <Button className="h-10 rounded-full text-sm" disabled={isSubmitting} size="lg" type="button" variant="outline" onClick={() => setStep(1)}>
                       Back
                     </Button>
                     <Button
                       className="h-11 rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                      disabled={isSubmitting}
                       size="lg"
                       type="submit"
                       variant="secondary"
                     >
-                      Sign Up
+                      {isSubmitting ? 'Creating...' : 'Sign Up'}
                     </Button>
                   </div>
                   </>

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nest start --watch",
+    "dev": "pnpm --filter @spendwise/shared build && pnpm --filter @spendwise/ai build && nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",

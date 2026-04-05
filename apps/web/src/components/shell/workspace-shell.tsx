@@ -1,10 +1,13 @@
 'use client';
 
-import { Bell, CreditCard, LifeBuoy, Plus, Search, Sparkles } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Bell, CreditCard, LifeBuoy, LogOut, Plus, Search, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { type ReactNode, useState } from 'react';
 
+import { authQueryKey, logoutSession, useCurrentUserQuery } from '@/lib/auth/client';
+import { getUserInitials, LOGOUT_INTENT_STORAGE_KEY } from '@/lib/auth/constants';
 import { mobileNavigation, primaryNavigation, secondaryNavigation } from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 
@@ -56,6 +59,24 @@ const desktopNavigationItemClasses = (active: boolean) =>
 
 export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
   const pathname = usePathname();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const { data: user } = useCurrentUserQuery();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const initials = getUserInitials(user?.name);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+
+    try {
+      await logoutSession();
+    } finally {
+      window.sessionStorage.setItem(LOGOUT_INTENT_STORAGE_KEY, 'manual');
+      queryClient.setQueryData(authQueryKey, null);
+      router.replace('/login');
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <div className="min-h-screen lg:pl-[248px]">
@@ -104,6 +125,20 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
           ))}
 
           <div className="mt-auto pt-4">
+            {user ? (
+              <div className="mb-3 rounded-[20px] border border-white/80 bg-white/80 px-3.5 py-3.5 shadow-soft">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white">
+                    {initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-ink">{user.name}</p>
+                    <p className="truncate text-xs text-slate-500">{user.email}</p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
             <div className="rounded-[20px] border border-white/80 bg-gradient-to-br from-mint to-white px-3.5 py-3.5 shadow-soft">
               <Badge variant="info" className="px-2 py-1 text-[10px]">
                 AI pulse
@@ -118,6 +153,18 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
                 </Link>
               </Button>
             </div>
+
+            <Button
+              className="mt-3 h-10 w-full justify-start rounded-[18px] px-3 text-[13px]"
+              disabled={isLoggingOut}
+              variant="outline"
+              onClick={() => {
+                void handleLogout();
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+              {isLoggingOut ? 'Logging out...' : 'Log out'}
+            </Button>
           </div>
         </div>
       </aside>
@@ -171,11 +218,15 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
                   className="hidden items-center gap-3 rounded-full border border-white/70 bg-white/75 px-3 py-2 shadow-sm sm:flex"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white">
-                    MT
+                    {initials}
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-ink">Maya Tan</p>
-                    <p className="text-xs text-slate-500">Personal plan</p>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-ink">
+                      {user?.name ?? 'Loading profile'}
+                    </p>
+                    <p className="truncate text-xs text-slate-500">
+                      {user?.email ?? 'Secure workspace'}
+                    </p>
                   </div>
                 </Link>
               </div>

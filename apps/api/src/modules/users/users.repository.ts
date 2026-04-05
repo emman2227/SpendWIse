@@ -15,7 +15,7 @@ export class UsersRepository {
   }
 
   findByEmail(email: string) {
-    return this.userModel.findOne({ email }).exec();
+    return this.userModel.findOne({ email: email.trim().toLowerCase() }).exec();
   }
 
   findById(id: string) {

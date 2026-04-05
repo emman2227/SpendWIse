@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { createExpenseSchema, loginSchema } from '../src';
+import {
+  AUTH_PASSWORD_MIN_LENGTH,
+  createExpenseSchema,
+  loginSchema,
+  registerSchema
+} from '../src';
 
 describe('shared schemas', () => {
   it('accepts a valid expense payload', () => {
@@ -19,6 +24,26 @@ describe('shared schemas', () => {
     const result = loginSchema.safeParse({
       email: 'not-an-email',
       password: 'password123'
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects weak register passwords', () => {
+    const result = registerSchema.safeParse({
+      name: 'Maya Tan',
+      email: 'maya@spendwise.app',
+      password: 'Password1'
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects emoji in auth fields', () => {
+    const result = registerSchema.safeParse({
+      name: 'Maya Tan',
+      email: 'maya🙂@spendwise.app',
+      password: `SecurePass1!${'a'.repeat(AUTH_PASSWORD_MIN_LENGTH - 12)}`
     });
 
     expect(result.success).toBe(false);
