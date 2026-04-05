@@ -23,7 +23,7 @@ import { sanitizeEmailInput, sanitizeNameInput, sanitizePasswordInput } from '@/
 import { getPasswordStrength } from '@/lib/auth/password-strength';
 import { cn } from '@/lib/utils';
 
-type RegisterField = 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword';
+type RegisterField = 'firstName' | 'lastName' | 'email' | 'password';
 type RegisterStep = 1 | 2;
 
 type RegisterValues = Record<RegisterField, string>;
@@ -35,7 +35,6 @@ const initialValues: RegisterValues = {
   lastName: '',
   email: '',
   password: '',
-  confirmPassword: '',
 };
 
 const initialTouched: RegisterTouched = {
@@ -43,12 +42,11 @@ const initialTouched: RegisterTouched = {
   lastName: false,
   email: false,
   password: false,
-  confirmPassword: false,
 };
 
 const stepFields: Record<RegisterStep, RegisterField[]> = {
   1: ['firstName', 'lastName', 'email'],
-  2: ['password', 'confirmPassword'],
+  2: ['password'],
 };
 
 const validatePassword = (password: string) => {
@@ -93,9 +91,6 @@ const validateField = (field: RegisterField, values: RegisterValues) => {
         : 'Use a valid email address without spaces or emoji.';
     case 'password':
       return validatePassword(values.password);
-    case 'confirmPassword':
-      if (!values.confirmPassword) return 'Please confirm your password.';
-      return values.confirmPassword === values.password ? '' : 'Passwords do not match.';
     default:
       return '';
   }
@@ -159,7 +154,6 @@ export default function RegisterPage() {
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const passwordStrength = getPasswordStrength(values.password);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -180,9 +174,6 @@ export default function RegisterPage() {
     setErrors((currentErrors) => ({
       ...currentErrors,
       [field]: touched[field] ? validateField(field, nextValues) : currentErrors[field],
-      ...(field === 'password' && touched.confirmPassword
-        ? { confirmPassword: validateField('confirmPassword', nextValues) }
-        : {}),
     }));
   };
 
@@ -197,9 +188,6 @@ export default function RegisterPage() {
     setErrors((currentErrors) => ({
       ...currentErrors,
       [field]: validateField(field, values),
-      ...(field === 'password' && touched.confirmPassword
-        ? { confirmPassword: validateField('confirmPassword', values) }
-        : {}),
     }));
   };
 
@@ -563,42 +551,6 @@ export default function RegisterPage() {
                         </div>
                       ))}
                     </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500" htmlFor="confirmPassword">
-                      Confirm Password
-                    </label>
-                    <div className="relative">
-                      <Input
-                        aria-describedby="confirmPassword-error"
-                        aria-invalid={Boolean(errors.confirmPassword)}
-                        autoComplete="new-password"
-                        className={cn(
-                          'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] pr-11 text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
-                          errors.confirmPassword && 'border-[var(--danger)]',
-                        )}
-                        disabled={isSubmitting}
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        placeholder="Repeat your password"
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        value={values.confirmPassword}
-                      />
-                      <button
-                        aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-                        className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-slate-400 transition hover:text-slate-700"
-                        type="button"
-                        onClick={() => setShowConfirmPassword((currentValue) => !currentValue)}
-                      >
-                        {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                      </button>
-                    </div>
-                    <p className={cn('min-h-[0.75rem] text-[10px] leading-4', errors.confirmPassword ? 'text-[var(--danger)]' : 'text-transparent')} id="confirmPassword-error" role="alert">
-                      {errors.confirmPassword ?? ' '}
-                    </p>
                   </div>
 
                   {formError ? (
