@@ -1,16 +1,16 @@
-import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 import {
   ACCESS_TOKEN_COOKIE,
   HOME_ROUTE,
   INACTIVITY_TIMEOUT_SECONDS,
-  REFRESH_TOKEN_COOKIE,
-  SESSION_ACTIVITY_COOKIE,
   isGuestOnlyRoute,
   isProtectedRoute,
   isSessionInactive,
   isTokenExpired,
+  REFRESH_TOKEN_COOKIE,
+  SESSION_ACTIVITY_COOKIE,
 } from '@/lib/auth/constants';
 
 export function middleware(request: NextRequest) {
@@ -19,7 +19,8 @@ export function middleware(request: NextRequest) {
   const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
   const lastActivity = request.cookies.get(SESSION_ACTIVITY_COOKIE)?.value;
   const hasRefreshSession = Boolean(refreshToken) && !isTokenExpired(refreshToken);
-  const hasActiveSession = (Boolean(accessToken) && !isTokenExpired(accessToken)) || hasRefreshSession;
+  const hasActiveSession =
+    (Boolean(accessToken) && !isTokenExpired(accessToken)) || hasRefreshSession;
   const sessionExpiredFromInactivity = hasActiveSession && isSessionInactive(lastActivity);
 
   if (sessionExpiredFromInactivity) {
@@ -95,5 +96,6 @@ export const config = {
     '/help/:path*',
     '/login',
     '/register',
-  ]
+    '/verify-email',
+  ],
 };

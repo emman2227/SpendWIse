@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const AUTH_PASSWORD_MIN_LENGTH = 12;
 export const AUTH_PASSWORD_MAX_LENGTH = 72;
 export const AUTH_LOGIN_PASSWORD_MIN_LENGTH = 8;
+export const AUTH_EMAIL_VERIFICATION_CODE_LENGTH = 6;
 
 export const authNamePattern = /^[A-Za-z]+(?:['-][A-Za-z]+)*(?: [A-Za-z]+(?:['-][A-Za-z]+)*)*$/;
 export const authNameSegmentPattern = /^[A-Za-z]+(?:['-][A-Za-z]+)*$/;
@@ -48,7 +49,7 @@ export const registerSchema = z.object({
     .max(80, 'Name must be at most 80 characters.')
     .regex(authNamePattern, 'Name can only use letters, spaces, apostrophes, and hyphens.'),
   email: emailSchema,
-  password: strongPasswordSchema
+  password: strongPasswordSchema,
 });
 
 export const loginSchema = z.object({
@@ -58,9 +59,27 @@ export const loginSchema = z.object({
       AUTH_LOGIN_PASSWORD_MIN_LENGTH,
       `Password must be at least ${AUTH_LOGIN_PASSWORD_MIN_LENGTH} characters.`,
     )
-    .max(AUTH_PASSWORD_MAX_LENGTH, `Password must be at most ${AUTH_PASSWORD_MAX_LENGTH} characters.`)
+    .max(
+      AUTH_PASSWORD_MAX_LENGTH,
+      `Password must be at most ${AUTH_PASSWORD_MAX_LENGTH} characters.`,
+    ),
 });
 
 export const refreshTokenSchema = z.object({
-  refreshToken: z.string().min(20)
+  refreshToken: z.string().min(20),
+});
+
+export const verifyEmailSchema = z.object({
+  email: emailSchema,
+  code: z
+    .string()
+    .trim()
+    .regex(
+      new RegExp(`^\\d{${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}}$`),
+      `Enter the ${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit verification code.`,
+    ),
+});
+
+export const resendVerificationCodeSchema = z.object({
+  email: emailSchema,
 });

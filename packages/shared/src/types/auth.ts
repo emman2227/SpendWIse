@@ -11,6 +11,20 @@ export interface AuthSession {
   tokens: AuthTokens;
 }
 
+export type VerificationDeliveryMethod = 'smtp' | 'log';
+
+export interface RegisterResult {
+  user: UserProfile;
+  requiresEmailVerification: true;
+  verificationDeliveryMethod: VerificationDeliveryMethod;
+}
+
+export interface VerificationDispatchResult {
+  success: true;
+  email: string;
+  verificationDeliveryMethod: VerificationDeliveryMethod;
+}
+
 export interface JwtPayload {
   sub: string;
   email: string;

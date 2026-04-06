@@ -51,9 +51,20 @@ pnpm install
 Copy and fill these examples as needed:
 
 - `.env.example`
-- `apps/api/.env.example`
-- `apps/web/.env.example`
-- `apps/mobile/.env.example`
+
+If you want email verification to send through Gmail SMTP, also set these in your root `.env`:
+
+```bash
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=yourgmail@gmail.com
+SMTP_PASS=your-16-character-app-password
+SMTP_FROM_EMAIL=yourgmail@gmail.com
+SMTP_FROM_NAME=SpendWise
+```
+
+Google SMTP requires a Gmail or Google Workspace account with 2-Step Verification enabled plus an App Password. If SMTP is not configured yet, SpendWise falls back to logging the verification code in the API terminal during local development.
 
 ### 3. Run the apps
 
@@ -96,6 +107,8 @@ pnpm --filter @spendwise/api seed
 Important starter routes:
 
 - `POST /api/v1/auth/register`
+- `POST /api/v1/auth/verify-email`
+- `POST /api/v1/auth/resend-verification-code`
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/refresh`
 - `POST /api/v1/auth/logout`

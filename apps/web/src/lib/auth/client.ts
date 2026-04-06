@@ -1,6 +1,6 @@
 'use client';
 
-import type { UserProfile } from '@spendwise/shared';
+import type { RegisterResult, UserProfile, VerificationDispatchResult } from '@spendwise/shared';
 import { useQuery } from '@tanstack/react-query';
 
 export const authQueryKey = ['auth', 'current-user'] as const;
@@ -84,12 +84,20 @@ export const loginWithCredentials = (input: { email: string; password: string })
     body: JSON.stringify(input),
   });
 
-export const registerWithCredentials = (input: {
-  name: string;
-  email: string;
-  password: string;
-}) =>
-  request<UserProfile>('/api/auth/register', {
+export const registerWithCredentials = (input: { name: string; email: string; password: string }) =>
+  request<RegisterResult>('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+
+export const verifyEmailCode = (input: { email: string; code: string }) =>
+  request<UserProfile>('/api/auth/verify-email', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+
+export const resendVerificationCode = (input: { email: string }) =>
+  request<VerificationDispatchResult>('/api/auth/resend-verification-code', {
     method: 'POST',
     body: JSON.stringify(input),
   });

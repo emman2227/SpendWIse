@@ -1,15 +1,28 @@
 import {
+  BadRequestException,
   ConflictException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
-  UnauthorizedException
+  UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import type { ConfigService } from '@nestjs/config';
+import type { JwtService } from '@nestjs/jwt';
+import type {
+  AuthSession,
+  AuthTokens,
+  JwtPayload,
+  RegisterResult,
+  VerificationDeliveryMethod,
+  VerificationDispatchResult,
+} from '@spendwise/shared';
 import { compare, hash } from 'bcryptjs';
+import { randomInt } from 'crypto';
 
-import type { AuthSession, AuthTokens, JwtPayload } from '@spendwise/shared';
-
-import { UsersRepository } from '../users/users.repository';
+import type { MailService } from '../mail/mail.service';
+import type { UserDocument } from '../users/user.schema';
+import type { UsersRepository } from '../users/users.repository';
 
 const ttlToSeconds = (value: string) => {
   const match = value.trim().match(/^(\d+)([smhd])?$/i);
@@ -40,29 +53,51 @@ export class AuthService {
     private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly mailService: MailService,
   ) {}
 
-  async register(input: { name: string; email: string; password: string }): Promise<AuthSession> {
-    const existing = await this.usersRepository.findByEmail(input.email);
-
-    if (existing) {
-      throw new ConflictException('An account with this email already exists');
-    }
+  async register(input: {
+    name: string;
+    email: string;
+    password: string;
+  }): Promise<RegisterResult> {
+    const normalizedEmail = input.email.trim().toLowerCase();
+    const trimmedName = input.name.trim();
+    const existing = await this.usersRepository.findByEmail(normalizedEmail);
 
     const passwordHash = await hash(input.password, 12);
-    const user = await this.usersRepository.create({
-      name: input.name.trim(),
-      email: input.email.trim().toLowerCase(),
-      passwordHash
-    });
 
-    const tokens = await this.issueTokens(user.id, user.email);
-    const refreshTokenHash = await hash(tokens.refreshToken, 10);
-    await this.usersRepository.updateRefreshToken(user.id, refreshTokenHash);
+    let user: UserDocument;
+
+    if (existing) {
+      if (existing.emailVerified) {
+        throw new ConflictException('An account with this email already exists');
+      }
+
+      const updatedUser = await this.usersRepository.updatePendingRegistration(existing.id, {
+        name: trimmedName,
+        passwordHash,
+      });
+
+      if (!updatedUser) {
+        throw new UnauthorizedException('Unable to continue registration for this account');
+      }
+
+      user = updatedUser;
+    } else {
+      user = await this.usersRepository.create({
+        name: trimmedName,
+        email: normalizedEmail,
+        passwordHash,
+      });
+    }
+
+    const verificationDeliveryMethod = await this.sendEmailVerificationCode(user);
 
     return {
       user: this.usersRepository.toProfile(user),
-      tokens
+      requiresEmailVerification: true,
+      verificationDeliveryMethod,
     };
   }
 
@@ -73,13 +108,66 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const tokens = await this.issueTokens(user.id, user.email);
-    const refreshTokenHash = await hash(tokens.refreshToken, 10);
-    await this.usersRepository.updateRefreshToken(user.id, refreshTokenHash);
+    if (!user.emailVerified) {
+      throw new ForbiddenException('Verify your email before signing in.');
+    }
+
+    return this.createAuthenticatedSession(user.id, user.email);
+  }
+
+  async verifyEmail(input: { email: string; code: string }): Promise<AuthSession> {
+    const user = await this.usersRepository.findByEmail(input.email.trim().toLowerCase());
+
+    if (!user) {
+      throw new BadRequestException('This verification request is no longer valid.');
+    }
+
+    if (user.emailVerified) {
+      throw new ConflictException('This email is already verified. Please sign in.');
+    }
+
+    if (!user.emailVerificationCodeHash || !user.emailVerificationCodeExpiresAt) {
+      throw new BadRequestException('Request a new verification code to continue.');
+    }
+
+    if (user.emailVerificationCodeExpiresAt.getTime() < Date.now()) {
+      throw new BadRequestException('Your verification code has expired. Request a new one.');
+    }
+
+    const isValidCode = await compare(input.code.trim(), user.emailVerificationCodeHash);
+
+    if (!isValidCode) {
+      throw new BadRequestException('That verification code is incorrect.');
+    }
+
+    const verifiedUser = await this.usersRepository.markEmailVerified(user.id);
+
+    if (!verifiedUser) {
+      throw new UnauthorizedException('Unable to verify this account');
+    }
+
+    return this.createAuthenticatedSession(verifiedUser.id, verifiedUser.email);
+  }
+
+  async resendVerificationCode(input: { email: string }): Promise<VerificationDispatchResult> {
+    const user = await this.usersRepository.findByEmail(input.email.trim().toLowerCase());
+
+    if (!user) {
+      throw new BadRequestException('No account was found for this email address.');
+    }
+
+    if (user.emailVerified) {
+      throw new ConflictException('This email is already verified. Please sign in.');
+    }
+
+    const verificationDeliveryMethod = await this.sendEmailVerificationCode(user, {
+      enforceCooldown: true,
+    });
 
     return {
-      user: this.usersRepository.toProfile(user),
-      tokens
+      success: true,
+      email: user.email,
+      verificationDeliveryMethod,
     };
   }
 
@@ -103,13 +191,30 @@ export class AuthService {
 
     return {
       user: this.usersRepository.toProfile(user),
-      tokens
+      tokens,
     };
   }
 
   async logout(userId: string) {
     await this.usersRepository.updateRefreshToken(userId, undefined);
     return { success: true };
+  }
+
+  private async createAuthenticatedSession(userId: string, email: string): Promise<AuthSession> {
+    const user = await this.usersRepository.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const tokens = await this.issueTokens(user.id, email);
+    const refreshTokenHash = await hash(tokens.refreshToken, 10);
+    await this.usersRepository.updateRefreshToken(user.id, refreshTokenHash);
+
+    return {
+      user: this.usersRepository.toProfile(user),
+      tokens,
+    };
   }
 
   private async issueTokens(userId: string, email: string): Promise<AuthTokens> {
@@ -124,28 +229,71 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(accessPayload, {
         secret: accessSecret,
-        expiresIn: accessTtl
+        expiresIn: accessTtl,
       }),
       this.jwtService.signAsync(refreshPayload, {
         secret: refreshSecret,
-        expiresIn: refreshTtl
-      })
+        expiresIn: refreshTtl,
+      }),
     ]);
 
     return {
       accessToken,
       refreshToken,
-      expiresIn: ttlToSeconds(accessTtl)
+      expiresIn: ttlToSeconds(accessTtl),
     };
   }
 
   private verifyRefreshToken(refreshToken: string) {
     return this.jwtService
       .verifyAsync<JwtPayload>(refreshToken, {
-        secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET')
+        secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
       })
       .catch(() => {
         throw new UnauthorizedException('Refresh token is invalid or expired');
       });
+  }
+
+  private async sendEmailVerificationCode(
+    user: UserDocument,
+    options: { enforceCooldown?: boolean } = {},
+  ): Promise<VerificationDeliveryMethod> {
+    const sentAt = new Date();
+    const resendCooldownSeconds = this.configService.getOrThrow<number>(
+      'EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS',
+    );
+
+    if (options.enforceCooldown && user.emailVerificationSentAt) {
+      const nextAllowedAt = user.emailVerificationSentAt.getTime() + resendCooldownSeconds * 1000;
+
+      if (nextAllowedAt > sentAt.getTime()) {
+        const remainingSeconds = Math.max(1, Math.ceil((nextAllowedAt - sentAt.getTime()) / 1000));
+
+        throw new HttpException(
+          `Please wait ${remainingSeconds} seconds before requesting another code.`,
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+    }
+
+    const expiresInMinutes = this.configService.getOrThrow<number>(
+      'EMAIL_VERIFICATION_CODE_TTL_MINUTES',
+    );
+    const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
+    const codeHash = await hash(code, 10);
+    const expiresAt = new Date(sentAt.getTime() + expiresInMinutes * 60 * 1000);
+
+    await this.usersRepository.updateEmailVerification(user.id, {
+      codeHash,
+      expiresAt,
+      sentAt,
+    });
+
+    return this.mailService.sendVerificationCode({
+      code,
+      expiresInMinutes,
+      name: user.name,
+      to: user.email,
+    });
   }
 }

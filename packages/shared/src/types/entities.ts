@@ -1,4 +1,4 @@
-import { FORECAST_PERIODS, INSIGHT_TYPES, PAYMENT_METHODS } from '../constants/app';
+import type { FORECAST_PERIODS, INSIGHT_TYPES, PAYMENT_METHODS } from '../constants/app';
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 export type InsightType = (typeof INSIGHT_TYPES)[number];
@@ -13,6 +13,7 @@ export interface BaseEntity {
 export interface User extends BaseEntity {
   name: string;
   email: string;
+  emailVerified: boolean;
   passwordHash: string;
 }
 
@@ -20,6 +21,7 @@ export interface UserProfile {
   id: string;
   name: string;
   email: string;
+  emailVerified: boolean;
   createdAt: string;
   updatedAt: string;
 }

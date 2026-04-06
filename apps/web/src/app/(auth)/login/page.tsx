@@ -111,6 +111,7 @@ export default function LoginPage() {
       : authReason === 'expired'
         ? 'Your session expired. Sign in again to continue.'
         : '';
+  const showVerificationLink = formError.toLowerCase().includes('verify your email');
 
   useEffect(() => {
     setAuthReason(new URLSearchParams(window.location.search).get('reason'));
@@ -198,7 +199,10 @@ export default function LoginPage() {
 
           <div className="relative flex h-full flex-col justify-between">
             <div>
-              <Link href="/" className="text-lg font-extrabold tracking-[-0.04em] text-brand md:text-xl">
+              <Link
+                href="/"
+                className="text-lg font-extrabold tracking-[-0.04em] text-brand md:text-xl"
+              >
                 SpendWise
               </Link>
 
@@ -287,7 +291,10 @@ export default function LoginPage() {
 
             <form className="mt-3.5 space-y-3" noValidate onSubmit={handleSubmit}>
               <div className="space-y-1">
-                <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500" htmlFor="email">
+                <label
+                  className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                  htmlFor="email"
+                >
                   Email Address
                 </label>
                 <Input
@@ -321,7 +328,10 @@ export default function LoginPage() {
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between gap-3">
-                  <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500" htmlFor="password">
+                  <label
+                    className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                    htmlFor="password"
+                  >
                     Password
                   </label>
                   <Link className="text-[11px] font-semibold text-brand" href="/forgot-password">
@@ -352,7 +362,11 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => setShowPassword((currentValue) => !currentValue)}
                   >
-                    {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    {showPassword ? (
+                      <EyeOff className="h-3.5 w-3.5" />
+                    ) : (
+                      <Eye className="h-3.5 w-3.5" />
+                    )}
                   </button>
                 </div>
                 <p
@@ -371,6 +385,18 @@ export default function LoginPage() {
               {formError ? (
                 <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3 text-[12px] text-[var(--danger)]">
                   {formError}
+                </div>
+              ) : null}
+
+              {showVerificationLink ? (
+                <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-slate-700">
+                  <Link
+                    className="font-semibold text-brand"
+                    href={`/verify-email?email=${encodeURIComponent(values.email)}`}
+                  >
+                    Enter your verification code
+                  </Link>{' '}
+                  to finish setting up this account.
                 </div>
               ) : null}
 

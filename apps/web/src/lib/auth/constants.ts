@@ -25,7 +25,7 @@ export const protectedRouteRoots = [
   '/help',
 ] as const;
 
-export const guestOnlyRoutes = ['/login', '/register'] as const;
+export const guestOnlyRoutes = ['/login', '/register', '/verify-email'] as const;
 
 const matchesRoute = (pathname: string, route: string) =>
   pathname === route || pathname.startsWith(`${route}/`);
@@ -114,11 +114,7 @@ export const getUserInitials = (name?: string) => {
     return 'SW';
   }
 
-  const parts = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2);
+  const parts = name.trim().split(/\s+/).filter(Boolean).slice(0, 2);
 
   if (!parts.length) {
     return 'SW';

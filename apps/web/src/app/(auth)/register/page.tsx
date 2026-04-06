@@ -9,7 +9,6 @@ import {
   authPasswordSpecialCharacterPattern,
   authPasswordUppercasePattern,
 } from '@spendwise/shared';
-import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -18,7 +17,7 @@ import { type ChangeEvent, type FocusEvent, type FormEvent, useState } from 'rea
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ProgressBar } from '@/components/ui/progress-bar';
-import { authQueryKey, getAuthErrorMessage, registerWithCredentials } from '@/lib/auth/client';
+import { getAuthErrorMessage, registerWithCredentials } from '@/lib/auth/client';
 import { sanitizeEmailInput, sanitizeNameInput, sanitizePasswordInput } from '@/lib/auth/input';
 import { getPasswordStrength } from '@/lib/auth/password-strength';
 import { cn } from '@/lib/utils';
@@ -145,7 +144,6 @@ const AppleMark = ({ className }: { className?: string }) => (
 );
 
 export default function RegisterPage() {
-  const queryClient = useQueryClient();
   const router = useRouter();
   const [step, setStep] = useState<RegisterStep>(1);
   const [values, setValues] = useState<RegisterValues>(initialValues);
@@ -232,14 +230,15 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      const user = await registerWithCredentials({
+      const result = await registerWithCredentials({
         name: `${values.firstName} ${values.lastName}`,
         email: values.email,
         password: values.password,
       });
 
-      queryClient.setQueryData(authQueryKey, user);
-      router.replace('/dashboard');
+      router.replace(
+        `/verify-email?email=${encodeURIComponent(result.user.email)}&delivery=${encodeURIComponent(result.verificationDeliveryMethod)}`,
+      );
     } catch (error) {
       setFormError(getAuthErrorMessage(error, 'Unable to create your account right now.'));
     } finally {
@@ -288,7 +287,10 @@ export default function RegisterPage() {
           </div>
 
           <div className="relative flex h-full flex-col">
-            <Link href="/" className="text-lg font-extrabold tracking-[-0.04em] text-brand md:text-xl">
+            <Link
+              href="/"
+              className="text-lg font-extrabold tracking-[-0.04em] text-brand md:text-xl"
+            >
               SpendWise
             </Link>
 
@@ -301,8 +303,8 @@ export default function RegisterPage() {
               </h1>
 
               <p className="max-w-sm text-[13px] leading-6 text-slate-600">
-                Join a community of modern planners using calm, sophisticated tools to master
-                their financial story with more confidence.
+                Join a community of modern planners using calm, sophisticated tools to master their
+                financial story with more confidence.
               </p>
             </div>
 
@@ -338,8 +340,18 @@ export default function RegisterPage() {
               <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
                 <span>Step {step} of 2</span>
                 <div className="flex items-center gap-2">
-                  <span className={cn('h-1.5 w-10 rounded-full', step >= 1 ? 'bg-brand' : 'bg-slate-200')} />
-                  <span className={cn('h-1.5 w-10 rounded-full', step === 2 ? 'bg-brand' : 'bg-slate-200')} />
+                  <span
+                    className={cn(
+                      'h-1.5 w-10 rounded-full',
+                      step >= 1 ? 'bg-brand' : 'bg-slate-200',
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      'h-1.5 w-10 rounded-full',
+                      step === 2 ? 'bg-brand' : 'bg-slate-200',
+                    )}
+                  />
                 </div>
               </div>
               <h2 className="text-[1.45rem] font-semibold tracking-[-0.04em] text-slate-900 md:text-[1.55rem]">
@@ -384,195 +396,246 @@ export default function RegisterPage() {
               <div className={cn('min-h-[292px] space-y-3', step === 2 && '-mt-1')}>
                 {step === 1 ? (
                   <>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500" htmlFor="firstName">
-                        First Name
-                      </label>
-                      <Input
-                        aria-describedby="firstName-error"
-                        aria-invalid={Boolean(errors.firstName)}
-                        autoComplete="given-name"
-                        className={cn(
-                          'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
-                          errors.firstName && 'border-[var(--danger)]',
-                        )}
-                        disabled={isSubmitting}
-                        id="firstName"
-                        name="firstName"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        placeholder="John"
-                        value={values.firstName}
-                      />
-                      <p className={cn('min-h-[0.75rem] text-[10px] leading-4', errors.firstName ? 'text-[var(--danger)]' : 'text-transparent')} id="firstName-error" role="alert">
-                        {errors.firstName ?? ' '}
-                      </p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500" htmlFor="lastName">
-                        Last Name
-                      </label>
-                      <Input
-                        aria-describedby="lastName-error"
-                        aria-invalid={Boolean(errors.lastName)}
-                        autoComplete="family-name"
-                        className={cn(
-                          'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
-                          errors.lastName && 'border-[var(--danger)]',
-                        )}
-                        disabled={isSubmitting}
-                        id="lastName"
-                        name="lastName"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        placeholder="Doe"
-                        value={values.lastName}
-                      />
-                      <p className={cn('min-h-[0.75rem] text-[10px] leading-4', errors.lastName ? 'text-[var(--danger)]' : 'text-transparent')} id="lastName-error" role="alert">
-                        {errors.lastName ?? ' '}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500" htmlFor="email">
-                      Email Address
-                    </label>
-                    <Input
-                      aria-describedby="email-error"
-                      aria-invalid={Boolean(errors.email)}
-                      autoComplete="email"
-                      className={cn(
-                        'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
-                        errors.email && 'border-[var(--danger)]',
-                      )}
-                      disabled={isSubmitting}
-                      id="email"
-                      name="email"
-                      onBlur={handleBlur}
-                      onChange={handleChange}
-                      placeholder="john@spendwise.com"
-                      type="email"
-                      value={values.email}
-                    />
-                    <p className={cn('min-h-[0.75rem] text-[10px] leading-4', errors.email ? 'text-[var(--danger)]' : 'text-transparent')} id="email-error" role="alert">
-                      {errors.email ?? ' '}
-                    </p>
-                  </div>
-
-                  {formError ? (
-                    <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3 text-[12px] text-[var(--danger)]">
-                      {formError}
-                    </div>
-                  ) : null}
-
-                  <Button
-                    className="mt-0.5 h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
-                    disabled={isSubmitting}
-                    size="lg"
-                    type="button"
-                    variant="secondary"
-                    onClick={handleContinue}
-                  >
-                    Continue
-                  </Button>
-
-                  <p className="text-center text-[12px] text-slate-500">
-                    Already have an account?{' '}
-                    <Link className="font-semibold text-brand" href="/login">
-                      Login
-                    </Link>
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500" htmlFor="password">
-                      Create Password
-                    </label>
-                    <div className="relative">
-                      <Input
-                        aria-describedby="password-error"
-                        aria-invalid={Boolean(errors.password)}
-                        autoComplete="new-password"
-                        className={cn(
-                          'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] pr-11 text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
-                          errors.password && 'border-[var(--danger)]',
-                        )}
-                        disabled={isSubmitting}
-                        id="password"
-                        name="password"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        placeholder="Create a secure password"
-                        type={showPassword ? 'text' : 'password'}
-                        value={values.password}
-                      />
-                      <button
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-slate-400 transition hover:text-slate-700"
-                        type="button"
-                        onClick={() => setShowPassword((currentValue) => !currentValue)}
-                      >
-                        {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                      </button>
-                    </div>
-                    <p className={cn('min-h-[0.75rem] text-[10px] leading-4', errors.password ? 'text-[var(--danger)]' : 'text-slate-400')} id="password-error" role="alert">
-                      {passwordHelperText}
-                    </p>
-                  </div>
-
-                  <div className="rounded-[18px] border border-[#ebe6df] bg-[#faf7f2] px-3.5 py-3">
-                    <ProgressBar
-                      helper={passwordStrength.label}
-                      label="Password strength"
-                      size="sm"
-                      status={passwordStrength.status}
-                      value={passwordStrength.progress}
-                    />
-                    <div className="mt-2.5 grid gap-x-4 gap-y-1.5 sm:grid-cols-2">
-                      {passwordStrength.checklist.map((item) => (
-                        <div
-                          key={item.label}
-                          className={cn(
-                            'flex items-center gap-1.5 text-[10.5px] leading-4',
-                            item.passed ? 'text-emerald-700' : 'text-slate-500',
-                          )}
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <label
+                          className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                          htmlFor="firstName"
                         >
-                          <CheckCircle2
-                            className={cn(
-                              'h-3.5 w-3.5 shrink-0',
-                              item.passed ? 'text-emerald-600' : 'text-slate-300',
-                            )}
-                          />
-                          <span>{item.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                          First Name
+                        </label>
+                        <Input
+                          aria-describedby="firstName-error"
+                          aria-invalid={Boolean(errors.firstName)}
+                          autoComplete="given-name"
+                          className={cn(
+                            'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
+                            errors.firstName && 'border-[var(--danger)]',
+                          )}
+                          disabled={isSubmitting}
+                          id="firstName"
+                          name="firstName"
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          placeholder="John"
+                          value={values.firstName}
+                        />
+                        <p
+                          className={cn(
+                            'min-h-[0.75rem] text-[10px] leading-4',
+                            errors.firstName ? 'text-[var(--danger)]' : 'text-transparent',
+                          )}
+                          id="firstName-error"
+                          role="alert"
+                        >
+                          {errors.firstName ?? ' '}
+                        </p>
+                      </div>
 
-                  {formError ? (
-                    <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3 text-[12px] text-[var(--danger)]">
-                      {formError}
+                      <div className="space-y-1">
+                        <label
+                          className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                          htmlFor="lastName"
+                        >
+                          Last Name
+                        </label>
+                        <Input
+                          aria-describedby="lastName-error"
+                          aria-invalid={Boolean(errors.lastName)}
+                          autoComplete="family-name"
+                          className={cn(
+                            'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
+                            errors.lastName && 'border-[var(--danger)]',
+                          )}
+                          disabled={isSubmitting}
+                          id="lastName"
+                          name="lastName"
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          placeholder="Doe"
+                          value={values.lastName}
+                        />
+                        <p
+                          className={cn(
+                            'min-h-[0.75rem] text-[10px] leading-4',
+                            errors.lastName ? 'text-[var(--danger)]' : 'text-transparent',
+                          )}
+                          id="lastName-error"
+                          role="alert"
+                        >
+                          {errors.lastName ?? ' '}
+                        </p>
+                      </div>
                     </div>
-                  ) : null}
 
-                  <div className="mt-1 grid grid-cols-2 gap-2.5">
-                    <Button className="h-10 rounded-full text-sm" disabled={isSubmitting} size="lg" type="button" variant="outline" onClick={() => setStep(1)}>
-                      Back
-                    </Button>
+                    <div className="space-y-1">
+                      <label
+                        className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                        htmlFor="email"
+                      >
+                        Email Address
+                      </label>
+                      <Input
+                        aria-describedby="email-error"
+                        aria-invalid={Boolean(errors.email)}
+                        autoComplete="email"
+                        className={cn(
+                          'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
+                          errors.email && 'border-[var(--danger)]',
+                        )}
+                        disabled={isSubmitting}
+                        id="email"
+                        name="email"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        placeholder="john@spendwise.com"
+                        type="email"
+                        value={values.email}
+                      />
+                      <p
+                        className={cn(
+                          'min-h-[0.75rem] text-[10px] leading-4',
+                          errors.email ? 'text-[var(--danger)]' : 'text-transparent',
+                        )}
+                        id="email-error"
+                        role="alert"
+                      >
+                        {errors.email ?? ' '}
+                      </p>
+                    </div>
+
+                    {formError ? (
+                      <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3 text-[12px] text-[var(--danger)]">
+                        {formError}
+                      </div>
+                    ) : null}
+
                     <Button
-                      className="h-11 rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                      className="mt-0.5 h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
                       disabled={isSubmitting}
                       size="lg"
-                      type="submit"
+                      type="button"
                       variant="secondary"
+                      onClick={handleContinue}
                     >
-                      {isSubmitting ? 'Creating...' : 'Sign Up'}
+                      Continue
                     </Button>
-                  </div>
+
+                    <p className="text-center text-[12px] text-slate-500">
+                      Already have an account?{' '}
+                      <Link className="font-semibold text-brand" href="/login">
+                        Login
+                      </Link>
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-1">
+                      <label
+                        className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                        htmlFor="password"
+                      >
+                        Create Password
+                      </label>
+                      <div className="relative">
+                        <Input
+                          aria-describedby="password-error"
+                          aria-invalid={Boolean(errors.password)}
+                          autoComplete="new-password"
+                          className={cn(
+                            'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] pr-11 text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
+                            errors.password && 'border-[var(--danger)]',
+                          )}
+                          disabled={isSubmitting}
+                          id="password"
+                          name="password"
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          placeholder="Create a secure password"
+                          type={showPassword ? 'text' : 'password'}
+                          value={values.password}
+                        />
+                        <button
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
+                          className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-slate-400 transition hover:text-slate-700"
+                          type="button"
+                          onClick={() => setShowPassword((currentValue) => !currentValue)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-3.5 w-3.5" />
+                          ) : (
+                            <Eye className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                      </div>
+                      <p
+                        className={cn(
+                          'min-h-[0.75rem] text-[10px] leading-4',
+                          errors.password ? 'text-[var(--danger)]' : 'text-slate-400',
+                        )}
+                        id="password-error"
+                        role="alert"
+                      >
+                        {passwordHelperText}
+                      </p>
+                    </div>
+
+                    <div className="rounded-[18px] border border-[#ebe6df] bg-[#faf7f2] px-3.5 py-3">
+                      <ProgressBar
+                        helper={passwordStrength.label}
+                        label="Password strength"
+                        size="sm"
+                        status={passwordStrength.status}
+                        value={passwordStrength.progress}
+                      />
+                      <div className="mt-2.5 grid gap-x-4 gap-y-1.5 sm:grid-cols-2">
+                        {passwordStrength.checklist.map((item) => (
+                          <div
+                            key={item.label}
+                            className={cn(
+                              'flex items-center gap-1.5 text-[10.5px] leading-4',
+                              item.passed ? 'text-emerald-700' : 'text-slate-500',
+                            )}
+                          >
+                            <CheckCircle2
+                              className={cn(
+                                'h-3.5 w-3.5 shrink-0',
+                                item.passed ? 'text-emerald-600' : 'text-slate-300',
+                              )}
+                            />
+                            <span>{item.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {formError ? (
+                      <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3 text-[12px] text-[var(--danger)]">
+                        {formError}
+                      </div>
+                    ) : null}
+
+                    <div className="mt-1 grid grid-cols-2 gap-2.5">
+                      <Button
+                        className="h-10 rounded-full text-sm"
+                        disabled={isSubmitting}
+                        size="lg"
+                        type="button"
+                        variant="outline"
+                        onClick={() => setStep(1)}
+                      >
+                        Back
+                      </Button>
+                      <Button
+                        className="h-11 rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                        disabled={isSubmitting}
+                        size="lg"
+                        type="submit"
+                        variant="secondary"
+                      >
+                        {isSubmitting ? 'Creating...' : 'Sign Up'}
+                      </Button>
+                    </div>
                   </>
                 )}
               </div>

@@ -4,7 +4,7 @@ import type { HydratedDocument } from 'mongoose';
 @Schema({
   collection: 'users',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class UserModel {
   @Prop({ required: true, trim: true })
@@ -12,6 +12,21 @@ export class UserModel {
 
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
   email!: string;
+
+  @Prop({ default: false })
+  emailVerified!: boolean;
+
+  @Prop()
+  emailVerifiedAt?: Date;
+
+  @Prop()
+  emailVerificationCodeHash?: string;
+
+  @Prop()
+  emailVerificationCodeExpiresAt?: Date;
+
+  @Prop()
+  emailVerificationSentAt?: Date;
 
   @Prop({ required: true })
   passwordHash!: string;

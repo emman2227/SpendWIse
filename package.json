@@ -17,10 +17,10 @@
   },
   "lint-staged": {
     "*.{js,cjs,mjs,ts,tsx,json,md}": [
-      "prettier --write"
+      "prettier --write --no-error-on-unmatched-pattern"
     ],
     "*.{ts,tsx}": [
-      "eslint --fix"
+      "node ./scripts/run-eslint-legacy.cjs --fix --no-error-on-unmatched-pattern"
     ]
   },
   "devDependencies": {
