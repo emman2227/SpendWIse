@@ -9,6 +9,7 @@ import {
   authPasswordNumberPattern,
   authPasswordSpecialCharacterPattern,
   authPasswordUppercasePattern,
+  authPhonePattern,
 } from '@spendwise/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, Eye, EyeOff, MailCheck, RefreshCw, ShieldCheck } from 'lucide-react';
@@ -26,12 +27,17 @@ import {
   resendVerificationCode,
   verifyEmailCode,
 } from '@/lib/auth/client';
-import { sanitizeEmailInput, sanitizeNameInput, sanitizePasswordInput } from '@/lib/auth/input';
+import {
+  sanitizeEmailInput,
+  sanitizeNameInput,
+  sanitizePasswordInput,
+  sanitizePhoneInput,
+} from '@/lib/auth/input';
 import { getPasswordStrength } from '@/lib/auth/password-strength';
 import { cn } from '@/lib/utils';
 
 type Step = 1 | 2 | 3;
-type Field = 'firstName' | 'lastName' | 'email' | 'password' | 'code';
+type Field = 'firstName' | 'lastName' | 'email' | 'phone' | 'password' | 'code';
 type Values = Record<Field, string>;
 type Errors = Partial<Record<Field, string>>;
 type Touched = Record<Field, boolean>;
@@ -40,6 +46,7 @@ const initialValues: Values = {
   firstName: '',
   lastName: '',
   email: '',
+  phone: '',
   password: '',
   code: '',
 };
@@ -48,12 +55,13 @@ const initialTouched: Touched = {
   firstName: false,
   lastName: false,
   email: false,
+  phone: false,
   password: false,
   code: false,
 };
 
 const stepFields: Record<Step, Field[]> = {
-  1: ['firstName', 'lastName', 'email'],
+  1: ['firstName', 'lastName', 'email', 'phone'],
   2: ['password'],
   3: ['code'],
 };
@@ -97,6 +105,11 @@ const validateField = (field: Field, values: Values) => {
       return authEmailPattern.test(values.email)
         ? ''
         : 'Use a valid email address without spaces or emoji.';
+    case 'phone':
+      if (!values.phone) return 'Please enter your phone number.';
+      return authPhonePattern.test(values.phone)
+        ? ''
+        : 'Use 10 to 15 digits, with an optional + at the start.';
     case 'password':
       return validatePassword(values.password);
     case 'code':
@@ -139,9 +152,11 @@ export default function RegisterPage() {
         ? sanitizeNameInput(event.target.value)
         : field === 'email'
           ? sanitizeEmailInput(event.target.value)
-          : field === 'code'
-            ? sanitizeCodeInput(event.target.value)
-            : sanitizePasswordInput(event.target.value);
+          : field === 'phone'
+            ? sanitizePhoneInput(event.target.value)
+            : field === 'code'
+              ? sanitizeCodeInput(event.target.value)
+              : sanitizePasswordInput(event.target.value);
     const nextValues = { ...values, [field]: nextValue };
 
     setValues(nextValues);
@@ -194,6 +209,7 @@ export default function RegisterPage() {
       const result = await registerWithCredentials({
         name: `${values.firstName} ${values.lastName}`,
         email: values.email,
+        phone: values.phone,
         password: values.password,
       });
 
@@ -304,9 +320,9 @@ export default function RegisterPage() {
         : '';
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#f4efe7_0%,#f7f2ea_46%,#efe6da_100%)] px-3 py-2 md:flex md:min-h-screen md:items-center md:px-4 md:py-3">
-      <div className="mx-auto grid w-full max-w-[1080px] overflow-hidden rounded-[24px] bg-white shadow-[0_22px_60px_rgba(18,35,47,0.12)] lg:grid-cols-[0.92fr,0.88fr]">
-        <section className="relative overflow-hidden bg-[linear-gradient(180deg,#d8e4dc_0%,#dbe8df_100%)] px-5 py-5 md:px-6">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#f4efe7_0%,#f7f2ea_46%,#efe6da_100%)] px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden">
+      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-white shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
+        <section className="relative overflow-hidden bg-[linear-gradient(180deg,#d8e4dc_0%,#dbe8df_100%)] px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -left-12 top-0 h-40 w-64 rounded-full bg-white/24 blur-md" />
             <div className="absolute right-[8%] top-[10%] h-52 w-52 rounded-full bg-[#f4ead9] opacity-90" />
@@ -316,7 +332,7 @@ export default function RegisterPage() {
             <div className="absolute right-[-10%] bottom-[-10%] h-48 w-56 rounded-[58%_42%_61%_39%/44%_55%_45%_56%] bg-white/28" />
           </div>
 
-          <div className="relative flex flex-col">
+          <div className="relative flex h-full flex-col">
             <Link
               href="/"
               className="text-lg font-extrabold tracking-[-0.04em] text-brand md:text-xl"
@@ -399,8 +415,8 @@ export default function RegisterPage() {
           </div>
         </section>
 
-        <section className="bg-white px-5 py-5 md:px-6">
-          <div className="mx-auto flex max-w-[390px] flex-col">
+        <section className="min-h-0 overflow-y-auto bg-white px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5">
+          <div className="mx-auto flex h-full max-w-[360px] flex-col">
             <div className="space-y-2">
               <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
                 {step === 1 ? 'Profile' : step === 2 ? 'Password' : 'Verification'}
@@ -410,14 +426,14 @@ export default function RegisterPage() {
               </h2>
               <p className="text-[13px] leading-5 text-slate-500">
                 {step === 1
-                  ? 'Enter your name and email first.'
+                  ? 'Enter your name, email, and phone number first.'
                   : step === 2
                     ? 'Create a strong password before we send your code.'
                     : 'Enter the verification code sent to your registered email.'}
               </p>
             </div>
 
-            <form className="mt-4" noValidate onSubmit={handleSubmit}>
+            <form className="mt-4 flex h-full flex-col" noValidate onSubmit={handleSubmit}>
               <div className="space-y-3">
                 {step === 1 ? (
                   <>
@@ -445,8 +461,8 @@ export default function RegisterPage() {
                         />
                         <p
                           className={cn(
-                            'min-h-[0.75rem] text-[10px] leading-4',
-                            errors.firstName ? 'text-[var(--danger)]' : 'text-transparent',
+                            'text-[10px] leading-4',
+                            errors.firstName ? 'min-h-[0.75rem] text-[var(--danger)]' : 'hidden',
                           )}
                         >
                           {errors.firstName ?? ' '}
@@ -475,8 +491,8 @@ export default function RegisterPage() {
                         />
                         <p
                           className={cn(
-                            'min-h-[0.75rem] text-[10px] leading-4',
-                            errors.lastName ? 'text-[var(--danger)]' : 'text-transparent',
+                            'text-[10px] leading-4',
+                            errors.lastName ? 'min-h-[0.75rem] text-[var(--danger)]' : 'hidden',
                           )}
                         >
                           {errors.lastName ?? ' '}
@@ -515,6 +531,38 @@ export default function RegisterPage() {
                         {errors.email ?? ' '}
                       </p>
                     </div>
+
+                    <div className="space-y-1">
+                      <label
+                        className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                        htmlFor="phone"
+                      >
+                        Phone Number
+                      </label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        value={values.phone}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        disabled={isSubmitting}
+                        placeholder="+639123456789"
+                        autoComplete="tel"
+                        className={cn(
+                          'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
+                          errors.phone && 'border-[var(--danger)]',
+                        )}
+                      />
+                      <p
+                        className={cn(
+                          'min-h-[0.75rem] text-[10px] leading-4',
+                          errors.phone ? 'text-[var(--danger)]' : 'text-transparent',
+                        )}
+                      >
+                        {errors.phone ?? ' '}
+                      </p>
+                    </div>
                   </>
                 ) : null}
 
@@ -528,6 +576,7 @@ export default function RegisterPage() {
                         {values.firstName} {values.lastName}
                       </p>
                       <p className="mt-1 text-[12px] text-slate-500">{values.email}</p>
+                      <p className="mt-1 text-[12px] text-slate-500">{values.phone}</p>
                     </div>
 
                     <div className="space-y-1">
@@ -668,7 +717,7 @@ export default function RegisterPage() {
                 ) : null}
               </div>
 
-              <div className="space-y-2.5 pt-4">
+              <div className="mt-auto space-y-2.5 pb-3 pt-4 md:pb-4">
                 {step === 1 ? (
                   <Button
                     className="h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"

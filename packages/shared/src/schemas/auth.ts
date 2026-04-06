@@ -4,10 +4,13 @@ export const AUTH_PASSWORD_MIN_LENGTH = 12;
 export const AUTH_PASSWORD_MAX_LENGTH = 72;
 export const AUTH_LOGIN_PASSWORD_MIN_LENGTH = 8;
 export const AUTH_EMAIL_VERIFICATION_CODE_LENGTH = 6;
+export const AUTH_PHONE_MIN_LENGTH = 10;
+export const AUTH_PHONE_MAX_LENGTH = 15;
 
 export const authNamePattern = /^[A-Za-z]+(?:['-][A-Za-z]+)*(?: [A-Za-z]+(?:['-][A-Za-z]+)*)*$/;
 export const authNameSegmentPattern = /^[A-Za-z]+(?:['-][A-Za-z]+)*$/;
 export const authEmailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+export const authPhonePattern = /^\+?[0-9]{10,15}$/;
 export const authPasswordAllowedPattern = /^[!-~]+$/;
 export const authPasswordUppercasePattern = /[A-Z]/;
 export const authPasswordLowercasePattern = /[a-z]/;
@@ -26,6 +29,15 @@ const passwordCharacterSchema = z
   .string()
   .min(1)
   .regex(authPasswordAllowedPattern, 'Password cannot include spaces or emoji.');
+
+const phoneSchema = z
+  .string()
+  .trim()
+  .min(1, 'Phone number is required.')
+  .regex(
+    authPhonePattern,
+    `Use a valid phone number with ${AUTH_PHONE_MIN_LENGTH}-${AUTH_PHONE_MAX_LENGTH} digits.`,
+  );
 
 const strongPasswordSchema = passwordCharacterSchema
   .min(
@@ -49,6 +61,7 @@ export const registerSchema = z.object({
     .max(80, 'Name must be at most 80 characters.')
     .regex(authNamePattern, 'Name can only use letters, spaces, apostrophes, and hyphens.'),
   email: emailSchema,
+  phone: phoneSchema,
   password: strongPasswordSchema,
 });
 

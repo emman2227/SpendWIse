@@ -25,7 +25,7 @@ export class AuthController {
 
   @Post('register')
   @UsePipes(new ZodValidationPipe(registerSchema))
-  register(@Body() body: { name: string; email: string; password: string }) {
+  register(@Body() body: { name: string; email: string; phone: string; password: string }) {
     return this.authService.register(body);
   }
 

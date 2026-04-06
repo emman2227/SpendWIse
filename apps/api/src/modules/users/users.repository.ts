@@ -9,7 +9,7 @@ import { type UserDocument, UserModel } from './user.schema';
 export class UsersRepository {
   constructor(@InjectModel(UserModel.name) private readonly userModel: Model<UserModel>) {}
 
-  create(input: { name: string; email: string; passwordHash: string }) {
+  create(input: { name: string; email: string; phone: string; passwordHash: string }) {
     return this.userModel.create(input);
   }
 
@@ -21,12 +21,16 @@ export class UsersRepository {
     return this.userModel.findById(id).exec();
   }
 
-  updatePendingRegistration(userId: string, input: { name: string; passwordHash: string }) {
+  updatePendingRegistration(
+    userId: string,
+    input: { name: string; phone: string; passwordHash: string },
+  ) {
     return this.userModel
       .findByIdAndUpdate(
         userId,
         {
           name: input.name,
+          phone: input.phone,
           passwordHash: input.passwordHash,
           emailVerified: false,
           $unset: {
@@ -121,6 +125,7 @@ export class UsersRepository {
       id: document.id,
       name: document.name,
       email: document.email,
+      phone: document.phone,
       emailVerified: document.emailVerified,
       createdAt: document.createdAt.toISOString(),
       updatedAt: document.updatedAt.toISOString(),

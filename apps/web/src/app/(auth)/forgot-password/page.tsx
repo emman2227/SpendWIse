@@ -298,9 +298,9 @@ export default function ForgotPasswordPage() {
         : '';
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#f4efe7_0%,#f7f2ea_46%,#efe6da_100%)] px-3 py-2 md:flex md:min-h-screen md:items-center md:px-4 md:py-3">
-      <div className="mx-auto grid w-full max-w-[1080px] overflow-hidden rounded-[24px] bg-white shadow-[0_22px_60px_rgba(18,35,47,0.12)] lg:grid-cols-[0.92fr,0.88fr]">
-        <section className="relative overflow-hidden bg-[linear-gradient(180deg,#d7e3dd_0%,#dce8e1_100%)] px-5 py-5 md:px-6">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#f4efe7_0%,#f7f2ea_46%,#efe6da_100%)] px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden">
+      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-white shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
+        <section className="relative overflow-hidden bg-[linear-gradient(180deg,#d7e3dd_0%,#dce8e1_100%)] px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -left-12 top-0 h-40 w-64 rounded-full bg-white/24 blur-md" />
             <div className="absolute right-[8%] top-[10%] h-52 w-52 rounded-full bg-[#f4ead9] opacity-90" />
@@ -310,7 +310,7 @@ export default function ForgotPasswordPage() {
             <div className="absolute right-[-10%] bottom-[-10%] h-48 w-56 rounded-[58%_42%_61%_39%/44%_55%_45%_56%] bg-white/28" />
           </div>
 
-          <div className="relative flex flex-col">
+          <div className="relative flex h-full flex-col">
             <Link
               href="/"
               className="text-lg font-extrabold tracking-[-0.04em] text-brand md:text-xl"
@@ -391,8 +391,8 @@ export default function ForgotPasswordPage() {
           </div>
         </section>
 
-        <section className="bg-white px-5 py-5 md:px-6">
-          <div className="mx-auto flex max-w-[390px] flex-col">
+        <section className="min-h-0 overflow-y-auto bg-white px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5">
+          <div className="mx-auto flex h-full max-w-[360px] flex-col">
             <div className="space-y-2">
               <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
                 {step === 1 ? 'Email' : step === 2 ? 'Code' : 'New password'}
@@ -409,7 +409,7 @@ export default function ForgotPasswordPage() {
               </p>
             </div>
 
-            <form className="mt-4" noValidate onSubmit={handleSubmit}>
+            <form className="mt-4 flex h-full flex-col" noValidate onSubmit={handleSubmit}>
               <div className="space-y-3">
                 {step === 1 ? (
                   <div className="space-y-1">
@@ -592,7 +592,7 @@ export default function ForgotPasswordPage() {
                 ) : null}
               </div>
 
-              <div className="space-y-2.5 pt-4">
+              <div className="mt-auto space-y-2.5 pt-4">
                 {step === 1 ? (
                   <Button
                     className="h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"

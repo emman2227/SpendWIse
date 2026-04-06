@@ -13,6 +13,9 @@ export class UserModel {
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
   email!: string;
 
+  @Prop({ required: true, trim: true })
+  phone!: string;
+
   @Prop({ default: false })
   emailVerified!: boolean;
 

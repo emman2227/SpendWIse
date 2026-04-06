@@ -61,10 +61,12 @@ export class AuthService {
   async register(input: {
     name: string;
     email: string;
+    phone: string;
     password: string;
   }): Promise<RegisterResult> {
     const normalizedEmail = input.email.trim().toLowerCase();
     const trimmedName = input.name.trim();
+    const normalizedPhone = input.phone.trim();
     const existing = await this.usersRepository.findByEmail(normalizedEmail);
     const passwordHash = await hash(input.password, 12);
 
@@ -77,6 +79,7 @@ export class AuthService {
 
       const updatedUser = await this.usersRepository.updatePendingRegistration(existing.id, {
         name: trimmedName,
+        phone: normalizedPhone,
         passwordHash,
       });
 
@@ -89,6 +92,7 @@ export class AuthService {
       user = await this.usersRepository.create({
         name: trimmedName,
         email: normalizedEmail,
+        phone: normalizedPhone,
         passwordHash,
       });
     }

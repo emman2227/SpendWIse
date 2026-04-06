@@ -13,6 +13,7 @@ export interface BaseEntity {
 export interface User extends BaseEntity {
   name: string;
   email: string;
+  phone?: string;
   emailVerified: boolean;
   passwordHash: string;
 }
@@ -21,6 +22,7 @@ export interface UserProfile {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   emailVerified: boolean;
   createdAt: string;
   updatedAt: string;

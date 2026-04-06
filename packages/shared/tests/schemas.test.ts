@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   AUTH_EMAIL_VERIFICATION_CODE_LENGTH,
   AUTH_PASSWORD_MIN_LENGTH,
+  AUTH_PHONE_MAX_LENGTH,
   createExpenseSchema,
   loginSchema,
   registerSchema,
@@ -38,6 +39,7 @@ describe('shared schemas', () => {
     const result = registerSchema.safeParse({
       name: 'Maya Tan',
       email: 'maya@spendwise.app',
+      phone: '+639123456789',
       password: 'Password1',
     });
 
@@ -48,6 +50,18 @@ describe('shared schemas', () => {
     const result = registerSchema.safeParse({
       name: 'Maya Tan',
       email: 'maya🙂@spendwise.app',
+      phone: '+639123456789',
+      password: `SecurePass1!${'a'.repeat(AUTH_PASSWORD_MIN_LENGTH - 12)}`,
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects invalid phone numbers on register', () => {
+    const result = registerSchema.safeParse({
+      name: 'Maya Tan',
+      email: 'maya@spendwise.app',
+      phone: `+${'1'.repeat(AUTH_PHONE_MAX_LENGTH + 1)}`,
       password: `SecurePass1!${'a'.repeat(AUTH_PASSWORD_MIN_LENGTH - 12)}`,
     });
 

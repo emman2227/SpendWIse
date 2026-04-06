@@ -149,8 +149,8 @@ function VerifyEmailPageContent() {
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f7f2ea_0%,#f4efe7_100%)] px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden">
-      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-white shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:grid-cols-[0.93fr,0.83fr]">
-        <section className="relative overflow-hidden bg-[#dbe6e0] px-5 py-4 md:px-5 md:py-5 lg:min-h-[460px]">
+      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-white shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
+        <section className="relative overflow-hidden bg-[#dbe6e0] px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -left-10 top-0 h-40 w-56 rounded-full bg-white/28 blur-sm" />
             <div className="absolute right-[8%] top-[11%] h-44 w-44 rounded-full bg-[#f2eadb] opacity-95" />
@@ -222,7 +222,7 @@ function VerifyEmailPageContent() {
           </div>
         </section>
 
-        <section className="bg-white px-5 py-4 md:px-5 md:py-5">
+        <section className="min-h-0 overflow-y-auto bg-white px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5">
           <div className="mx-auto flex h-full max-w-[360px] flex-col">
             <div className="space-y-2">
               <div className="inline-flex items-center rounded-full bg-brand/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">

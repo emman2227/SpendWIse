@@ -90,7 +90,12 @@ export const loginWithCredentials = (input: { email: string; password: string })
     body: JSON.stringify(input),
   });
 
-export const registerWithCredentials = (input: { name: string; email: string; password: string }) =>
+export const registerWithCredentials = (input: {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+}) =>
   request<RegisterResult>('/api/auth/register', {
     method: 'POST',
     body: JSON.stringify(input),
