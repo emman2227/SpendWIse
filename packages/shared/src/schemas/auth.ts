@@ -83,3 +83,30 @@ export const verifyEmailSchema = z.object({
 export const resendVerificationCodeSchema = z.object({
   email: emailSchema,
 });
+
+export const requestPasswordResetSchema = z.object({
+  email: emailSchema,
+});
+
+export const verifyPasswordResetCodeSchema = z.object({
+  email: emailSchema,
+  code: z
+    .string()
+    .trim()
+    .regex(
+      new RegExp(`^\\d{${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}}$`),
+      `Enter the ${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit verification code.`,
+    ),
+});
+
+export const resetPasswordWithCodeSchema = z.object({
+  email: emailSchema,
+  code: z
+    .string()
+    .trim()
+    .regex(
+      new RegExp(`^\\d{${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}}$`),
+      `Enter the ${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit verification code.`,
+    ),
+  password: strongPasswordSchema,
+});

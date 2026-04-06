@@ -38,6 +38,8 @@ const envSchema = z.object({
   SMTP_FROM_NAME: z.string().trim().default('SpendWise'),
   EMAIL_VERIFICATION_CODE_TTL_MINUTES: z.coerce.number().int().positive().default(10),
   EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(60),
+  PASSWORD_RESET_CODE_TTL_MINUTES: z.coerce.number().int().positive().default(10),
+  PASSWORD_RESET_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(60),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

@@ -110,7 +110,9 @@ export default function LoginPage() {
       ? `You were logged out after ${INACTIVITY_TIMEOUT_MINUTES} minutes of inactivity.`
       : authReason === 'expired'
         ? 'Your session expired. Sign in again to continue.'
-        : '';
+        : authReason === 'password-reset'
+          ? 'Your password was updated. Sign in with your new password.'
+          : '';
   const showVerificationLink = formError.toLowerCase().includes('verify your email');
 
   useEffect(() => {

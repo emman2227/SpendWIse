@@ -6,7 +6,10 @@ import {
   createExpenseSchema,
   loginSchema,
   registerSchema,
+  requestPasswordResetSchema,
+  resetPasswordWithCodeSchema,
   verifyEmailSchema,
+  verifyPasswordResetCodeSchema,
 } from '../src';
 
 describe('shared schemas', () => {
@@ -58,5 +61,28 @@ describe('shared schemas', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('accepts password reset payloads', () => {
+    expect(
+      requestPasswordResetSchema.safeParse({
+        email: 'maya@spendwise.app',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      verifyPasswordResetCodeSchema.safeParse({
+        email: 'maya@spendwise.app',
+        code: '1'.repeat(AUTH_EMAIL_VERIFICATION_CODE_LENGTH),
+      }).success,
+    ).toBe(true);
+
+    expect(
+      resetPasswordWithCodeSchema.safeParse({
+        email: 'maya@spendwise.app',
+        code: '1'.repeat(AUTH_EMAIL_VERIFICATION_CODE_LENGTH),
+        password: `SecurePass1!${'a'.repeat(AUTH_PASSWORD_MIN_LENGTH - 12)}`,
+      }).success,
+    ).toBe(true);
   });
 });

@@ -31,14 +31,10 @@ export class MailService {
       return 'log';
     }
 
-    const transporter = this.getTransporter();
-    const fromEmail = this.configService.get<string>('SMTP_FROM_EMAIL')?.trim() || smtpUser;
-    const fromName = this.configService.getOrThrow<string>('SMTP_FROM_NAME');
-
-    await transporter.sendMail({
-      from: `"${fromName}" <${fromEmail}>`,
+    await this.sendCodeEmail({
       to: input.to,
       subject: 'Your SpendWise verification code',
+      logLabel: 'Verification code',
       text: [
         `Hi ${input.name},`,
         '',
@@ -58,6 +54,50 @@ export class MailService {
           <p>If you did not create this account, you can ignore this email.</p>
         </div>
       `,
+      code: input.code,
+    });
+
+    return 'smtp';
+  }
+
+  async sendPasswordResetCode(
+    input: SendVerificationCodeInput,
+  ): Promise<VerificationDeliveryMethod> {
+    const smtpUser = this.configService.get<string>('SMTP_USER')?.trim();
+    const smtpPass = this.configService.get<string>('SMTP_PASS')?.trim();
+
+    if (!smtpUser || !smtpPass) {
+      this.logger.warn(
+        `SMTP credentials are not configured. Password reset code for ${input.to}: ${input.code}`,
+      );
+
+      return 'log';
+    }
+
+    await this.sendCodeEmail({
+      to: input.to,
+      subject: 'Your SpendWise password reset code',
+      logLabel: 'Password reset code',
+      text: [
+        `Hi ${input.name},`,
+        '',
+        `Your SpendWise password reset code is ${input.code}.`,
+        `It expires in ${input.expiresInMinutes} minutes.`,
+        '',
+        'If you did not request a password reset, you can ignore this email.',
+      ].join('\n'),
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #1f2937; line-height: 1.6;">
+          <p>Hi ${this.escapeHtml(input.name)},</p>
+          <p>Your SpendWise password reset code is:</p>
+          <p style="font-size: 28px; font-weight: 700; letter-spacing: 0.35em; margin: 16px 0;">
+            ${this.escapeHtml(input.code)}
+          </p>
+          <p>It expires in ${input.expiresInMinutes} minutes.</p>
+          <p>If you did not request a password reset, you can ignore this email.</p>
+        </div>
+      `,
+      code: input.code,
     });
 
     return 'smtp';
@@ -77,6 +117,28 @@ export class MailService {
     }
 
     return this.transporter;
+  }
+
+  private async sendCodeEmail(input: {
+    code: string;
+    html: string;
+    logLabel: string;
+    subject: string;
+    text: string;
+    to: string;
+  }) {
+    const transporter = this.getTransporter();
+    const smtpUser = this.configService.getOrThrow<string>('SMTP_USER');
+    const fromEmail = this.configService.get<string>('SMTP_FROM_EMAIL')?.trim() || smtpUser;
+    const fromName = this.configService.getOrThrow<string>('SMTP_FROM_NAME');
+
+    await transporter.sendMail({
+      from: `"${fromName}" <${fromEmail}>`,
+      to: input.to,
+      subject: input.subject,
+      text: input.text,
+      html: input.html,
+    });
   }
 
   private escapeHtml(value: string) {

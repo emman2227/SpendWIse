@@ -28,6 +28,15 @@ export class UserModel {
   @Prop()
   emailVerificationSentAt?: Date;
 
+  @Prop()
+  passwordResetCodeHash?: string;
+
+  @Prop()
+  passwordResetCodeExpiresAt?: Date;
+
+  @Prop()
+  passwordResetSentAt?: Date;
+
   @Prop({ required: true })
   passwordHash!: string;
 

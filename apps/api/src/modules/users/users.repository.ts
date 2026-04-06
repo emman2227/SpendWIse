@@ -56,6 +56,20 @@ export class UsersRepository {
       .exec();
   }
 
+  updatePasswordReset(userId: string, input: { codeHash: string; expiresAt: Date; sentAt: Date }) {
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          passwordResetCodeHash: input.codeHash,
+          passwordResetCodeExpiresAt: input.expiresAt,
+          passwordResetSentAt: input.sentAt,
+        },
+        { new: true },
+      )
+      .exec();
+  }
+
   markEmailVerified(userId: string) {
     return this.userModel
       .findByIdAndUpdate(
@@ -67,6 +81,24 @@ export class UsersRepository {
             emailVerificationCodeHash: 1,
             emailVerificationCodeExpiresAt: 1,
             emailVerificationSentAt: 1,
+          },
+        },
+        { new: true },
+      )
+      .exec();
+  }
+
+  updatePassword(userId: string, passwordHash: string) {
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          passwordHash,
+          $unset: {
+            refreshTokenHash: 1,
+            passwordResetCodeHash: 1,
+            passwordResetCodeExpiresAt: 1,
+            passwordResetSentAt: 1,
           },
         },
         { new: true },

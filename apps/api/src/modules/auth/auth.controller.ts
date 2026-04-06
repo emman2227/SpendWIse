@@ -3,8 +3,11 @@ import {
   loginSchema,
   refreshTokenSchema,
   registerSchema,
+  requestPasswordResetSchema,
   resendVerificationCodeSchema,
+  resetPasswordWithCodeSchema,
   verifyEmailSchema,
+  verifyPasswordResetCodeSchema,
 } from '@spendwise/shared';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -36,6 +39,24 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe(resendVerificationCodeSchema))
   resendVerificationCode(@Body() body: { email: string }) {
     return this.authService.resendVerificationCode(body);
+  }
+
+  @Post('request-password-reset')
+  @UsePipes(new ZodValidationPipe(requestPasswordResetSchema))
+  requestPasswordReset(@Body() body: { email: string }) {
+    return this.authService.requestPasswordReset(body);
+  }
+
+  @Post('verify-password-reset-code')
+  @UsePipes(new ZodValidationPipe(verifyPasswordResetCodeSchema))
+  verifyPasswordResetCode(@Body() body: { email: string; code: string }) {
+    return this.authService.verifyPasswordResetCode(body);
+  }
+
+  @Post('reset-password')
+  @UsePipes(new ZodValidationPipe(resetPasswordWithCodeSchema))
+  resetPassword(@Body() body: { email: string; code: string; password: string }) {
+    return this.authService.resetPassword(body);
   }
 
   @Post('login')

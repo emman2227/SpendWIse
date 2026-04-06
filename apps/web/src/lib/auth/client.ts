@@ -1,6 +1,12 @@
 'use client';
 
-import type { RegisterResult, UserProfile, VerificationDispatchResult } from '@spendwise/shared';
+import type {
+  CodeVerificationResult,
+  PasswordResetResult,
+  RegisterResult,
+  UserProfile,
+  VerificationDispatchResult,
+} from '@spendwise/shared';
 import { useQuery } from '@tanstack/react-query';
 
 export const authQueryKey = ['auth', 'current-user'] as const;
@@ -98,6 +104,24 @@ export const verifyEmailCode = (input: { email: string; code: string }) =>
 
 export const resendVerificationCode = (input: { email: string }) =>
   request<VerificationDispatchResult>('/api/auth/resend-verification-code', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+
+export const requestPasswordReset = (input: { email: string }) =>
+  request<VerificationDispatchResult>('/api/auth/request-password-reset', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+
+export const verifyPasswordResetCode = (input: { email: string; code: string }) =>
+  request<CodeVerificationResult>('/api/auth/verify-password-reset-code', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+
+export const resetPassword = (input: { email: string; code: string; password: string }) =>
+  request<PasswordResetResult>('/api/auth/reset-password', {
     method: 'POST',
     body: JSON.stringify(input),
   });

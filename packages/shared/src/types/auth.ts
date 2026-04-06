@@ -25,6 +25,15 @@ export interface VerificationDispatchResult {
   verificationDeliveryMethod: VerificationDeliveryMethod;
 }
 
+export interface CodeVerificationResult {
+  success: true;
+  email: string;
+}
+
+export interface PasswordResetResult {
+  success: true;
+}
+
 export interface JwtPayload {
   sub: string;
   email: string;

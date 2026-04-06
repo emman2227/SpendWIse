@@ -12,7 +12,9 @@ import type { JwtService } from '@nestjs/jwt';
 import type {
   AuthSession,
   AuthTokens,
+  CodeVerificationResult,
   JwtPayload,
+  PasswordResetResult,
   RegisterResult,
   VerificationDeliveryMethod,
   VerificationDispatchResult,
@@ -64,7 +66,6 @@ export class AuthService {
     const normalizedEmail = input.email.trim().toLowerCase();
     const trimmedName = input.name.trim();
     const existing = await this.usersRepository.findByEmail(normalizedEmail);
-
     const passwordHash = await hash(input.password, 12);
 
     let user: UserDocument;
@@ -101,20 +102,6 @@ export class AuthService {
     };
   }
 
-  async login(input: { email: string; password: string }): Promise<AuthSession> {
-    const user = await this.usersRepository.findByEmail(input.email.trim().toLowerCase());
-
-    if (!user || !(await compare(input.password, user.passwordHash))) {
-      throw new UnauthorizedException('Invalid email or password');
-    }
-
-    if (!user.emailVerified) {
-      throw new ForbiddenException('Verify your email before signing in.');
-    }
-
-    return this.createAuthenticatedSession(user.id, user.email);
-  }
-
   async verifyEmail(input: { email: string; code: string }): Promise<AuthSession> {
     const user = await this.usersRepository.findByEmail(input.email.trim().toLowerCase());
 
@@ -126,19 +113,7 @@ export class AuthService {
       throw new ConflictException('This email is already verified. Please sign in.');
     }
 
-    if (!user.emailVerificationCodeHash || !user.emailVerificationCodeExpiresAt) {
-      throw new BadRequestException('Request a new verification code to continue.');
-    }
-
-    if (user.emailVerificationCodeExpiresAt.getTime() < Date.now()) {
-      throw new BadRequestException('Your verification code has expired. Request a new one.');
-    }
-
-    const isValidCode = await compare(input.code.trim(), user.emailVerificationCodeHash);
-
-    if (!isValidCode) {
-      throw new BadRequestException('That verification code is incorrect.');
-    }
+    await this.assertEmailVerificationCode(user, input.code);
 
     const verifiedUser = await this.usersRepository.markEmailVerified(user.id);
 
@@ -171,6 +146,73 @@ export class AuthService {
     };
   }
 
+  async requestPasswordReset(input: { email: string }): Promise<VerificationDispatchResult> {
+    const user = await this.usersRepository.findByEmail(input.email.trim().toLowerCase());
+
+    if (!user || !user.emailVerified) {
+      throw new BadRequestException('No verified account was found for this email address.');
+    }
+
+    const verificationDeliveryMethod = await this.sendPasswordResetCode(user, {
+      enforceCooldown: true,
+    });
+
+    return {
+      success: true,
+      email: user.email,
+      verificationDeliveryMethod,
+    };
+  }
+
+  async verifyPasswordResetCode(input: {
+    email: string;
+    code: string;
+  }): Promise<CodeVerificationResult> {
+    const user = await this.getResettableUser(input.email);
+
+    await this.assertPasswordResetCode(user, input.code);
+
+    return {
+      success: true,
+      email: user.email,
+    };
+  }
+
+  async resetPassword(input: {
+    email: string;
+    code: string;
+    password: string;
+  }): Promise<PasswordResetResult> {
+    const user = await this.getResettableUser(input.email);
+
+    await this.assertPasswordResetCode(user, input.code);
+
+    const passwordHash = await hash(input.password, 12);
+    const updatedUser = await this.usersRepository.updatePassword(user.id, passwordHash);
+
+    if (!updatedUser) {
+      throw new UnauthorizedException('Unable to reset this password.');
+    }
+
+    return {
+      success: true,
+    };
+  }
+
+  async login(input: { email: string; password: string }): Promise<AuthSession> {
+    const user = await this.usersRepository.findByEmail(input.email.trim().toLowerCase());
+
+    if (!user || !(await compare(input.password, user.passwordHash))) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    if (!user.emailVerified) {
+      throw new ForbiddenException('Verify your email before signing in.');
+    }
+
+    return this.createAuthenticatedSession(user.id, user.email);
+  }
+
   async refresh(refreshToken: string) {
     const payload = await this.verifyRefreshToken(refreshToken);
     const user = await this.usersRepository.findById(payload.sub);
@@ -198,6 +240,16 @@ export class AuthService {
   async logout(userId: string) {
     await this.usersRepository.updateRefreshToken(userId, undefined);
     return { success: true };
+  }
+
+  private async getResettableUser(email: string) {
+    const user = await this.usersRepository.findByEmail(email.trim().toLowerCase());
+
+    if (!user || !user.emailVerified) {
+      throw new BadRequestException('No verified account was found for this email address.');
+    }
+
+    return user;
   }
 
   private async createAuthenticatedSession(userId: string, email: string): Promise<AuthSession> {
@@ -254,27 +306,50 @@ export class AuthService {
       });
   }
 
+  private async assertEmailVerificationCode(user: UserDocument, code: string) {
+    if (!user.emailVerificationCodeHash || !user.emailVerificationCodeExpiresAt) {
+      throw new BadRequestException('Request a new verification code to continue.');
+    }
+
+    if (user.emailVerificationCodeExpiresAt.getTime() < Date.now()) {
+      throw new BadRequestException('Your verification code has expired. Request a new one.');
+    }
+
+    const isValidCode = await compare(code.trim(), user.emailVerificationCodeHash);
+
+    if (!isValidCode) {
+      throw new BadRequestException('That verification code is incorrect.');
+    }
+  }
+
+  private async assertPasswordResetCode(user: UserDocument, code: string) {
+    if (!user.passwordResetCodeHash || !user.passwordResetCodeExpiresAt) {
+      throw new BadRequestException('Request a new password reset code to continue.');
+    }
+
+    if (user.passwordResetCodeExpiresAt.getTime() < Date.now()) {
+      throw new BadRequestException('Your password reset code has expired. Request a new one.');
+    }
+
+    const isValidCode = await compare(code.trim(), user.passwordResetCodeHash);
+
+    if (!isValidCode) {
+      throw new BadRequestException('That password reset code is incorrect.');
+    }
+  }
+
   private async sendEmailVerificationCode(
     user: UserDocument,
     options: { enforceCooldown?: boolean } = {},
   ): Promise<VerificationDeliveryMethod> {
     const sentAt = new Date();
-    const resendCooldownSeconds = this.configService.getOrThrow<number>(
-      'EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS',
+
+    this.assertCodeCooldown(
+      user.emailVerificationSentAt,
+      sentAt,
+      this.configService.getOrThrow<number>('EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS'),
+      options.enforceCooldown,
     );
-
-    if (options.enforceCooldown && user.emailVerificationSentAt) {
-      const nextAllowedAt = user.emailVerificationSentAt.getTime() + resendCooldownSeconds * 1000;
-
-      if (nextAllowedAt > sentAt.getTime()) {
-        const remainingSeconds = Math.max(1, Math.ceil((nextAllowedAt - sentAt.getTime()) / 1000));
-
-        throw new HttpException(
-          `Please wait ${remainingSeconds} seconds before requesting another code.`,
-          HttpStatus.TOO_MANY_REQUESTS,
-        );
-      }
-    }
 
     const expiresInMinutes = this.configService.getOrThrow<number>(
       'EMAIL_VERIFICATION_CODE_TTL_MINUTES',
@@ -295,5 +370,63 @@ export class AuthService {
       name: user.name,
       to: user.email,
     });
+  }
+
+  private async sendPasswordResetCode(
+    user: UserDocument,
+    options: { enforceCooldown?: boolean } = {},
+  ): Promise<VerificationDeliveryMethod> {
+    const sentAt = new Date();
+
+    this.assertCodeCooldown(
+      user.passwordResetSentAt,
+      sentAt,
+      this.configService.getOrThrow<number>('PASSWORD_RESET_RESEND_COOLDOWN_SECONDS'),
+      options.enforceCooldown,
+    );
+
+    const expiresInMinutes = this.configService.getOrThrow<number>(
+      'PASSWORD_RESET_CODE_TTL_MINUTES',
+    );
+    const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
+    const codeHash = await hash(code, 10);
+    const expiresAt = new Date(sentAt.getTime() + expiresInMinutes * 60 * 1000);
+
+    await this.usersRepository.updatePasswordReset(user.id, {
+      codeHash,
+      expiresAt,
+      sentAt,
+    });
+
+    return this.mailService.sendPasswordResetCode({
+      code,
+      expiresInMinutes,
+      name: user.name,
+      to: user.email,
+    });
+  }
+
+  private assertCodeCooldown(
+    previousSentAt: Date | undefined,
+    nextSentAt: Date,
+    cooldownSeconds: number,
+    enforceCooldown?: boolean,
+  ) {
+    if (!enforceCooldown || !previousSentAt) {
+      return;
+    }
+
+    const nextAllowedAt = previousSentAt.getTime() + cooldownSeconds * 1000;
+
+    if (nextAllowedAt <= nextSentAt.getTime()) {
+      return;
+    }
+
+    const remainingSeconds = Math.max(1, Math.ceil((nextAllowedAt - nextSentAt.getTime()) / 1000));
+
+    throw new HttpException(
+      `Please wait ${remainingSeconds} seconds before requesting another code.`,
+      HttpStatus.TOO_MANY_REQUESTS,
+    );
   }
 }
