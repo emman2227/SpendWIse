@@ -22,6 +22,7 @@ import type {
 import { compare, hash } from 'bcryptjs';
 import { randomInt } from 'crypto';
 
+import type { AuditLogService } from '../../common/services/audit-log.service';
 import type { MailService } from '../mail/mail.service';
 import type { UserDocument } from '../users/user.schema';
 import type { UsersRepository } from '../users/users.repository';
@@ -56,6 +57,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   async register(input: {
@@ -67,119 +69,224 @@ export class AuthService {
     const normalizedEmail = input.email.trim().toLowerCase();
     const trimmedName = input.name.trim();
     const normalizedPhone = input.phone.trim();
-    const existing = await this.usersRepository.findByEmail(normalizedEmail);
-    const passwordHash = await hash(input.password, 12);
 
-    let user: UserDocument;
+    try {
+      const existing = await this.usersRepository.findByEmail(normalizedEmail);
+      const passwordHash = await hash(input.password, 12);
 
-    if (existing) {
-      if (existing.emailVerified) {
-        throw new ConflictException('An account with this email already exists');
+      let user: UserDocument;
+
+      if (existing) {
+        if (existing.emailVerified) {
+          throw new ConflictException('An account with this email already exists');
+        }
+
+        const updatedUser = await this.usersRepository.updatePendingRegistration(existing.id, {
+          name: trimmedName,
+          phone: normalizedPhone,
+          passwordHash,
+        });
+
+        if (!updatedUser) {
+          throw new UnauthorizedException('Unable to continue registration for this account');
+        }
+
+        user = updatedUser;
+      } else {
+        user = await this.usersRepository.create({
+          name: trimmedName,
+          email: normalizedEmail,
+          phone: normalizedPhone,
+          passwordHash,
+        });
       }
 
-      const updatedUser = await this.usersRepository.updatePendingRegistration(existing.id, {
-        name: trimmedName,
-        phone: normalizedPhone,
-        passwordHash,
+      const verificationDeliveryMethod = await this.sendEmailVerificationCode(user);
+
+      this.auditLogService.record({
+        action: 'auth.register',
+        email: user.email,
+        metadata: {
+          verificationDeliveryMethod,
+        },
+        outcome: 'success',
+        userId: user.id,
       });
 
-      if (!updatedUser) {
-        throw new UnauthorizedException('Unable to continue registration for this account');
-      }
-
-      user = updatedUser;
-    } else {
-      user = await this.usersRepository.create({
-        name: trimmedName,
+      return {
+        user: this.usersRepository.toProfile(user),
+        requiresEmailVerification: true,
+        verificationDeliveryMethod,
+      };
+    } catch (error) {
+      this.auditLogService.record({
+        action: 'auth.register',
         email: normalizedEmail,
-        phone: normalizedPhone,
-        passwordHash,
+        metadata: this.getAuditFailureMetadata(error),
+        outcome: 'failure',
       });
+      throw error;
     }
-
-    const verificationDeliveryMethod = await this.sendEmailVerificationCode(user);
-
-    return {
-      user: this.usersRepository.toProfile(user),
-      requiresEmailVerification: true,
-      verificationDeliveryMethod,
-    };
   }
 
   async verifyEmail(input: { email: string; code: string }): Promise<AuthSession> {
-    const user = await this.usersRepository.findByEmail(input.email.trim().toLowerCase());
+    const normalizedEmail = input.email.trim().toLowerCase();
 
-    if (!user) {
-      throw new BadRequestException('This verification request is no longer valid.');
+    try {
+      const user = await this.usersRepository.findByEmail(normalizedEmail);
+
+      if (!user) {
+        throw new BadRequestException('This verification request is no longer valid.');
+      }
+
+      if (user.emailVerified) {
+        throw new ConflictException('This email is already verified. Please sign in.');
+      }
+
+      await this.assertEmailVerificationCode(user, input.code);
+
+      const verifiedUser = await this.usersRepository.markEmailVerified(user.id);
+
+      if (!verifiedUser) {
+        throw new UnauthorizedException('Unable to verify this account');
+      }
+
+      const session = await this.createAuthenticatedSession(verifiedUser.id, verifiedUser.email);
+
+      this.auditLogService.record({
+        action: 'auth.verify_email',
+        email: verifiedUser.email,
+        outcome: 'success',
+        userId: verifiedUser.id,
+      });
+
+      return session;
+    } catch (error) {
+      this.auditLogService.record({
+        action: 'auth.verify_email',
+        email: normalizedEmail,
+        metadata: this.getAuditFailureMetadata(error),
+        outcome: 'failure',
+      });
+      throw error;
     }
-
-    if (user.emailVerified) {
-      throw new ConflictException('This email is already verified. Please sign in.');
-    }
-
-    await this.assertEmailVerificationCode(user, input.code);
-
-    const verifiedUser = await this.usersRepository.markEmailVerified(user.id);
-
-    if (!verifiedUser) {
-      throw new UnauthorizedException('Unable to verify this account');
-    }
-
-    return this.createAuthenticatedSession(verifiedUser.id, verifiedUser.email);
   }
 
   async resendVerificationCode(input: { email: string }): Promise<VerificationDispatchResult> {
-    const user = await this.usersRepository.findByEmail(input.email.trim().toLowerCase());
+    const normalizedEmail = input.email.trim().toLowerCase();
 
-    if (!user) {
-      throw new BadRequestException('No account was found for this email address.');
+    try {
+      const user = await this.usersRepository.findByEmail(normalizedEmail);
+
+      if (!user) {
+        throw new BadRequestException('No account was found for this email address.');
+      }
+
+      if (user.emailVerified) {
+        throw new ConflictException('This email is already verified. Please sign in.');
+      }
+
+      const verificationDeliveryMethod = await this.sendEmailVerificationCode(user, {
+        enforceCooldown: true,
+      });
+
+      this.auditLogService.record({
+        action: 'auth.resend_verification_code',
+        email: user.email,
+        metadata: {
+          verificationDeliveryMethod,
+        },
+        outcome: 'success',
+        userId: user.id,
+      });
+
+      return {
+        success: true,
+        email: user.email,
+        verificationDeliveryMethod,
+      };
+    } catch (error) {
+      this.auditLogService.record({
+        action: 'auth.resend_verification_code',
+        email: normalizedEmail,
+        metadata: this.getAuditFailureMetadata(error),
+        outcome: 'failure',
+      });
+      throw error;
     }
-
-    if (user.emailVerified) {
-      throw new ConflictException('This email is already verified. Please sign in.');
-    }
-
-    const verificationDeliveryMethod = await this.sendEmailVerificationCode(user, {
-      enforceCooldown: true,
-    });
-
-    return {
-      success: true,
-      email: user.email,
-      verificationDeliveryMethod,
-    };
   }
 
   async requestPasswordReset(input: { email: string }): Promise<VerificationDispatchResult> {
-    const user = await this.usersRepository.findByEmail(input.email.trim().toLowerCase());
+    const normalizedEmail = input.email.trim().toLowerCase();
 
-    if (!user || !user.emailVerified) {
-      throw new BadRequestException('No verified account was found for this email address.');
+    try {
+      const user = await this.usersRepository.findByEmail(normalizedEmail);
+
+      if (!user || !user.emailVerified) {
+        throw new BadRequestException('No verified account was found for this email address.');
+      }
+
+      const verificationDeliveryMethod = await this.sendPasswordResetCode(user, {
+        enforceCooldown: true,
+      });
+
+      this.auditLogService.record({
+        action: 'auth.request_password_reset',
+        email: user.email,
+        metadata: {
+          verificationDeliveryMethod,
+        },
+        outcome: 'success',
+        userId: user.id,
+      });
+
+      return {
+        success: true,
+        email: user.email,
+        verificationDeliveryMethod,
+      };
+    } catch (error) {
+      this.auditLogService.record({
+        action: 'auth.request_password_reset',
+        email: normalizedEmail,
+        metadata: this.getAuditFailureMetadata(error),
+        outcome: 'failure',
+      });
+      throw error;
     }
-
-    const verificationDeliveryMethod = await this.sendPasswordResetCode(user, {
-      enforceCooldown: true,
-    });
-
-    return {
-      success: true,
-      email: user.email,
-      verificationDeliveryMethod,
-    };
   }
 
   async verifyPasswordResetCode(input: {
     email: string;
     code: string;
   }): Promise<CodeVerificationResult> {
-    const user = await this.getResettableUser(input.email);
+    const normalizedEmail = input.email.trim().toLowerCase();
 
-    await this.assertPasswordResetCode(user, input.code);
+    try {
+      const user = await this.getResettableUser(normalizedEmail);
 
-    return {
-      success: true,
-      email: user.email,
-    };
+      await this.assertPasswordResetCode(user, input.code);
+
+      this.auditLogService.record({
+        action: 'auth.verify_password_reset_code',
+        email: user.email,
+        outcome: 'success',
+        userId: user.id,
+      });
+
+      return {
+        success: true,
+        email: user.email,
+      };
+    } catch (error) {
+      this.auditLogService.record({
+        action: 'auth.verify_password_reset_code',
+        email: normalizedEmail,
+        metadata: this.getAuditFailureMetadata(error),
+        outcome: 'failure',
+      });
+      throw error;
+    }
   }
 
   async resetPassword(input: {
@@ -187,63 +294,136 @@ export class AuthService {
     code: string;
     password: string;
   }): Promise<PasswordResetResult> {
-    const user = await this.getResettableUser(input.email);
+    const normalizedEmail = input.email.trim().toLowerCase();
 
-    await this.assertPasswordResetCode(user, input.code);
+    try {
+      const user = await this.getResettableUser(normalizedEmail);
 
-    const passwordHash = await hash(input.password, 12);
-    const updatedUser = await this.usersRepository.updatePassword(user.id, passwordHash);
+      await this.assertPasswordResetCode(user, input.code);
 
-    if (!updatedUser) {
-      throw new UnauthorizedException('Unable to reset this password.');
+      const passwordHash = await hash(input.password, 12);
+      const updatedUser = await this.usersRepository.updatePassword(user.id, passwordHash);
+
+      if (!updatedUser) {
+        throw new UnauthorizedException('Unable to reset this password.');
+      }
+
+      this.auditLogService.record({
+        action: 'auth.reset_password',
+        email: updatedUser.email,
+        outcome: 'success',
+        userId: updatedUser.id,
+      });
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      this.auditLogService.record({
+        action: 'auth.reset_password',
+        email: normalizedEmail,
+        metadata: this.getAuditFailureMetadata(error),
+        outcome: 'failure',
+      });
+      throw error;
     }
-
-    return {
-      success: true,
-    };
   }
 
   async login(input: { email: string; password: string }): Promise<AuthSession> {
-    const user = await this.usersRepository.findByEmail(input.email.trim().toLowerCase());
+    const normalizedEmail = input.email.trim().toLowerCase();
 
-    if (!user || !(await compare(input.password, user.passwordHash))) {
-      throw new UnauthorizedException('Invalid email or password');
+    try {
+      const user = await this.usersRepository.findByEmail(normalizedEmail);
+
+      if (!user || !(await compare(input.password, user.passwordHash))) {
+        throw new UnauthorizedException('Invalid email or password');
+      }
+
+      if (!user.emailVerified) {
+        throw new ForbiddenException('Verify your email before signing in.');
+      }
+
+      const session = await this.createAuthenticatedSession(user.id, user.email);
+
+      this.auditLogService.record({
+        action: 'auth.login',
+        email: user.email,
+        outcome: 'success',
+        userId: user.id,
+      });
+
+      return session;
+    } catch (error) {
+      this.auditLogService.record({
+        action: 'auth.login',
+        email: normalizedEmail,
+        metadata: this.getAuditFailureMetadata(error),
+        outcome: 'failure',
+      });
+      throw error;
     }
-
-    if (!user.emailVerified) {
-      throw new ForbiddenException('Verify your email before signing in.');
-    }
-
-    return this.createAuthenticatedSession(user.id, user.email);
   }
 
   async refresh(refreshToken: string) {
-    const payload = await this.verifyRefreshToken(refreshToken);
-    const user = await this.usersRepository.findById(payload.sub);
+    try {
+      const payload = await this.verifyRefreshToken(refreshToken);
+      const user = await this.usersRepository.findById(payload.sub);
 
-    if (!user?.refreshTokenHash) {
-      throw new UnauthorizedException('Refresh session not found');
+      if (!user?.refreshTokenHash) {
+        throw new UnauthorizedException('Refresh session not found');
+      }
+
+      const isValidRefresh = await compare(refreshToken, user.refreshTokenHash);
+
+      if (!isValidRefresh) {
+        throw new UnauthorizedException('Refresh token is invalid');
+      }
+
+      const tokens = await this.issueTokens(user.id, user.email);
+      const refreshTokenHash = await hash(tokens.refreshToken, 10);
+      await this.usersRepository.updateRefreshToken(user.id, refreshTokenHash);
+
+      this.auditLogService.record({
+        action: 'auth.refresh',
+        email: user.email,
+        outcome: 'success',
+        userId: user.id,
+      });
+
+      return {
+        user: this.usersRepository.toProfile(user),
+        tokens,
+      };
+    } catch (error) {
+      this.auditLogService.record({
+        action: 'auth.refresh',
+        metadata: this.getAuditFailureMetadata(error),
+        outcome: 'failure',
+      });
+      throw error;
     }
-
-    const isValidRefresh = await compare(refreshToken, user.refreshTokenHash);
-
-    if (!isValidRefresh) {
-      throw new UnauthorizedException('Refresh token is invalid');
-    }
-
-    const tokens = await this.issueTokens(user.id, user.email);
-    const refreshTokenHash = await hash(tokens.refreshToken, 10);
-    await this.usersRepository.updateRefreshToken(user.id, refreshTokenHash);
-
-    return {
-      user: this.usersRepository.toProfile(user),
-      tokens,
-    };
   }
 
   async logout(userId: string) {
-    await this.usersRepository.updateRefreshToken(userId, undefined);
-    return { success: true };
+    try {
+      await this.usersRepository.updateRefreshToken(userId, undefined);
+
+      this.auditLogService.record({
+        action: 'auth.logout',
+        outcome: 'success',
+        userId,
+      });
+
+      return { success: true };
+    } catch (error) {
+      this.auditLogService.record({
+        action: 'auth.logout',
+        metadata: this.getAuditFailureMetadata(error),
+        outcome: 'failure',
+        userId,
+      });
+      throw error;
+    }
   }
 
   private async getResettableUser(email: string) {
@@ -432,5 +612,17 @@ export class AuthService {
       `Please wait ${remainingSeconds} seconds before requesting another code.`,
       HttpStatus.TOO_MANY_REQUESTS,
     );
+  }
+
+  private getAuditFailureMetadata(error: unknown) {
+    if (error instanceof HttpException) {
+      return {
+        statusCode: error.getStatus(),
+      };
+    }
+
+    return {
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    };
   }
 }

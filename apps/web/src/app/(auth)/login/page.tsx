@@ -105,6 +105,9 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [authReason, setAuthReason] = useState<string | null>(null);
+  const verifyEmailHref = values.email
+    ? `/verify-email?email=${encodeURIComponent(values.email)}`
+    : '/verify-email';
   const sessionMessage =
     authReason === 'inactive'
       ? `You were logged out after ${INACTIVITY_TIMEOUT_MINUTES} minutes of inactivity.`
@@ -113,7 +116,6 @@ export default function LoginPage() {
         : authReason === 'password-reset'
           ? 'Your password was updated. Sign in with your new password.'
           : '';
-  const showVerificationLink = formError.toLowerCase().includes('verify your email');
 
   useEffect(() => {
     setAuthReason(new URLSearchParams(window.location.search).get('reason'));
@@ -390,17 +392,13 @@ export default function LoginPage() {
                 </div>
               ) : null}
 
-              {showVerificationLink ? (
-                <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-slate-700">
-                  <Link
-                    className="font-semibold text-brand"
-                    href={`/verify-email?email=${encodeURIComponent(values.email)}`}
-                  >
-                    Enter your verification code
-                  </Link>{' '}
-                  to finish setting up this account.
-                </div>
-              ) : null}
+              <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-slate-700">
+                Need to finish setup?{' '}
+                <Link className="font-semibold text-brand" href={verifyEmailHref}>
+                  Enter your verification code
+                </Link>
+                .
+              </div>
 
               <Button
                 className="mt-0.5 h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"

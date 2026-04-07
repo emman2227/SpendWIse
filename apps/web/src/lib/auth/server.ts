@@ -29,9 +29,7 @@ class ApiRouteError extends Error {
 interface SafeParseSchema<TOutput> {
   safeParse: (
     input: unknown,
-  ) =>
-    | { success: true; data: TOutput }
-    | { success: false; error: { flatten: () => unknown } };
+  ) => { success: true; data: TOutput } | { success: false; error: { flatten: () => unknown } };
 }
 
 const parseJsonSafely = async (response: Response) => {
@@ -98,7 +96,12 @@ export const touchActivityCookie = (response: NextResponse, timestamp = Date.now
 
 export const setSessionCookies = (response: NextResponse, tokens: AuthTokens) => {
   setCookie(response, ACCESS_TOKEN_COOKIE, tokens.accessToken, Math.max(1, tokens.expiresIn));
-  setCookie(response, REFRESH_TOKEN_COOKIE, tokens.refreshToken, getRefreshTokenMaxAge(tokens.refreshToken));
+  setCookie(
+    response,
+    REFRESH_TOKEN_COOKIE,
+    tokens.refreshToken,
+    getRefreshTokenMaxAge(tokens.refreshToken),
+  );
   touchActivityCookie(response);
 };
 
@@ -108,7 +111,10 @@ export const clearSessionCookies = (response: NextResponse) => {
   clearCookie(response, SESSION_ACTIVITY_COOKIE, false);
 };
 
-export const parseRequestBody = async <TOutput>(request: Request, schema: SafeParseSchema<TOutput>) => {
+export const parseRequestBody = async <TOutput>(
+  request: Request,
+  schema: SafeParseSchema<TOutput>,
+) => {
   const payload = await request.json().catch(() => {
     throw new ApiRouteError('Request body must be valid JSON.', 400);
   });
@@ -212,7 +218,11 @@ export const revokeServerSession = async (input: {
 }) => {
   let accessToken = input.accessToken;
 
-  if ((!accessToken || isTokenExpired(accessToken)) && input.refreshToken && !isTokenExpired(input.refreshToken)) {
+  if (
+    (!accessToken || isTokenExpired(accessToken)) &&
+    input.refreshToken &&
+    !isTokenExpired(input.refreshToken)
+  ) {
     try {
       const session = await refreshSession(input.refreshToken);
       accessToken = session.tokens.accessToken;
@@ -241,8 +251,7 @@ export const createErrorResponse = (error: unknown) => {
   if (error instanceof ApiRouteError) {
     return NextResponse.json(
       {
-        message: error.message,
-        details: error.details,
+        message: getGenericErrorMessage(error.status),
       },
       {
         status: error.status,
@@ -251,10 +260,22 @@ export const createErrorResponse = (error: unknown) => {
   }
   return NextResponse.json(
     {
-      message: 'Unexpected error.',
+      message: getGenericErrorMessage(500),
     },
     {
       status: 500,
     },
   );
+};
+
+const getGenericErrorMessage = (status: number) => {
+  if (status === 429) {
+    return 'Please wait a moment and try again.';
+  }
+
+  if (status >= 500) {
+    return 'Something went wrong. Please try again shortly.';
+  }
+
+  return 'The request could not be completed.';
 };

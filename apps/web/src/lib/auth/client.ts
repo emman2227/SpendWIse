@@ -145,5 +145,4 @@ export const logoutSession = async () => {
   }
 };
 
-export const getAuthErrorMessage = (error: unknown, fallback: string) =>
-  error instanceof AuthClientError ? error.message : fallback;
+export const getAuthErrorMessage = (_error: unknown, fallback: string) => fallback;
