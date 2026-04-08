@@ -1,6 +1,8 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import type { MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { resolve } from 'path';
 
 import { validateEnv } from './common/config/env.schema';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
@@ -15,14 +17,15 @@ import { UsersModule } from './modules/users/users.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: [resolve(__dirname, '..', '.env'), resolve(__dirname, '..', '..', '..', '.env')],
       isGlobal: true,
-      validate: validateEnv
+      validate: validateEnv,
     }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        uri: configService.getOrThrow<string>('MONGODB_URI')
-      })
+        uri: configService.getOrThrow<string>('MONGODB_URI'),
+      }),
     }),
     HealthModule,
     UsersModule,
@@ -30,8 +33,8 @@ import { UsersModule } from './modules/users/users.module';
     CategoriesModule,
     ExpensesModule,
     BudgetsModule,
-    AnalyticsModule
-  ]
+    AnalyticsModule,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
