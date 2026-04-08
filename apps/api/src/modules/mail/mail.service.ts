@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import type { ConfigService } from '@nestjs/config';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type { VerificationDeliveryMethod } from '@spendwise/shared';
 import nodemailer, { type Transporter } from 'nodemailer';
 
@@ -15,7 +15,7 @@ export class MailService {
   private readonly logger = new Logger(MailService.name);
   private transporter?: Transporter;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(@Inject(ConfigService) private readonly configService: ConfigService) {}
 
   async sendVerificationCode(
     input: SendVerificationCodeInput,

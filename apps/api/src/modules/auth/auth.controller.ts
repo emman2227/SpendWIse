@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, Inject, Post, UseGuards, UsePipes } from '@nestjs/common';
 import {
   loginSchema,
   refreshTokenSchema,
@@ -14,14 +14,14 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { AuthUser } from '../../common/types/auth-user.interface';
-import type { AuthService } from './auth.service';
+import { AuthService } from './auth.service';
 
 @Controller({
   path: 'auth',
   version: '1',
 })
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(@Inject(AuthService) private readonly authService: AuthService) {}
 
   @Post('register')
   @UsePipes(new ZodValidationPipe(registerSchema))

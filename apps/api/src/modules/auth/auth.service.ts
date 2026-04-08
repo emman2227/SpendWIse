@@ -4,11 +4,12 @@ import {
   ForbiddenException,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import type { ConfigService } from '@nestjs/config';
-import type { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import type {
   AuthSession,
   AuthTokens,
@@ -22,10 +23,10 @@ import type {
 import { compare, hash } from 'bcryptjs';
 import { randomInt } from 'crypto';
 
-import type { AuditLogService } from '../../common/services/audit-log.service';
-import type { MailService } from '../mail/mail.service';
+import { AuditLogService } from '../../common/services/audit-log.service';
+import { MailService } from '../mail/mail.service';
 import type { UserDocument } from '../users/user.schema';
-import type { UsersRepository } from '../users/users.repository';
+import { UsersRepository } from '../users/users.repository';
 
 const ttlToSeconds = (value: string) => {
   const match = value.trim().match(/^(\d+)([smhd])?$/i);
@@ -53,10 +54,15 @@ const ttlToSeconds = (value: string) => {
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(UsersRepository)
     private readonly usersRepository: UsersRepository,
+    @Inject(JwtService)
     private readonly jwtService: JwtService,
+    @Inject(ConfigService)
     private readonly configService: ConfigService,
+    @Inject(MailService)
     private readonly mailService: MailService,
+    @Inject(AuditLogService)
     private readonly auditLogService: AuditLogService,
   ) {}
 
