@@ -30,8 +30,19 @@ export const MetricCard = ({
   className,
 }: MetricCardProps) => {
   return (
-    <article className={cn(toneClasses[tone], 'p-6', className)}>
-      <div className="flex items-start justify-between gap-4">
+    <article className={cn(toneClasses[tone], 'relative overflow-hidden p-6', className)}>
+      {Icon ? (
+        <div
+          className={cn(
+            'absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-2xl',
+            tone === 'ink' ? 'bg-white/10 text-white' : 'bg-white text-brand',
+          )}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
+      ) : null}
+
+      <div className={cn(Icon ? 'pr-16' : undefined)}>
         <div>
           <p
             className={cn(
@@ -50,16 +61,6 @@ export const MetricCard = ({
             {value}
           </p>
         </div>
-        {Icon ? (
-          <div
-            className={cn(
-              'flex h-11 w-11 items-center justify-center rounded-2xl',
-              tone === 'ink' ? 'bg-white/10 text-white' : 'bg-white text-brand',
-            )}
-          >
-            <Icon className="h-5 w-5" />
-          </div>
-        ) : null}
       </div>
       <div className="mt-4 flex items-center justify-between gap-3">
         <p className={cn('text-sm', tone === 'ink' ? 'text-white/70' : 'text-slate-500')}>

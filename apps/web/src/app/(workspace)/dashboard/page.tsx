@@ -122,11 +122,11 @@ export default function DashboardPage() {
       </section>
 
       <section className="space-y-6">
-        <SurfaceCard className="rounded-[32px] px-5 py-4 md:px-6 md:py-5">
-          <div className="flex items-center justify-between gap-3">
+        <SurfaceCard className="rounded-[32px] px-5 py-3 md:px-6 md:py-3.5">
+          <div className="flex items-center justify-between gap-2.5">
             <div>
               <p className="kicker">Budget progress</p>
-              <h2 className="mt-1.5 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
+              <h2 className="mt-1 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Limits that stay visible and motivating
               </h2>
             </div>
@@ -135,7 +135,7 @@ export default function DashboardPage() {
             </Button>
           </div>
 
-          <div className="mt-4 space-y-2.5">
+          <div className="mt-3 space-y-1.5">
             {budgets.map((budget) => {
               const progress = (budget.spent / budget.limit) * 100;
               const status =
@@ -148,7 +148,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={budget.id}
-                  className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-3.5"
+                  className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-2.5"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
@@ -171,7 +171,7 @@ export default function DashboardPage() {
                           : 'On track'}
                     </Badge>
                   </div>
-                  <div className="mt-3 space-y-2">
+                  <div className="mt-2 space-y-1">
                     <ProgressBar
                       helper={`${formatMoney(budget.spent)} of ${formatMoney(budget.limit)}`}
                       status={status}
@@ -189,11 +189,11 @@ export default function DashboardPage() {
           </div>
         </SurfaceCard>
 
-        <SurfaceCard className="rounded-[32px] px-5 py-4 md:px-6 md:py-5">
-          <div className="flex items-center justify-between gap-3">
+        <SurfaceCard className="rounded-[32px] px-5 py-3 md:px-6 md:py-3.5">
+          <div className="flex items-center justify-between gap-2.5">
             <div>
               <p className="kicker">AI insights</p>
-              <h2 className="mt-1.5 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
+              <h2 className="mt-1 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Helpful, concise, and explainable
               </h2>
             </div>
@@ -202,11 +202,11 @@ export default function DashboardPage() {
             </Button>
           </div>
 
-          <div className="mt-4 space-y-2.5">
+          <div className="mt-3 space-y-1.5">
             {insights.map((insight) => (
               <article
                 key={insight.id}
-                className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-3.5"
+                className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-2.5"
               >
                 <Badge
                   variant={
@@ -219,7 +219,7 @@ export default function DashboardPage() {
                 >
                   {insight.label}
                 </Badge>
-                <h3 className="mt-2.5 text-base font-semibold leading-snug text-ink">
+                <h3 className="mt-1.5 text-base font-semibold leading-snug text-ink">
                   {insight.title}
                 </h3>
                 <p className="mt-1 text-sm leading-6 text-slate-600">{insight.summary}</p>
@@ -230,22 +230,24 @@ export default function DashboardPage() {
       </section>
 
       <section>
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+        <SurfaceCard className="rounded-[32px] px-6 py-4 md:px-7 md:py-4">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="kicker">Recent transactions</p>
-              <h2 className="mt-3 text-2xl font-semibold text-ink">Latest activity at a glance</h2>
+              <h2 className="mt-2.5 text-2xl font-semibold text-ink">
+                Latest activity at a glance
+              </h2>
             </div>
             <Button asChild size="sm" variant="soft">
               <Link href="/transactions">View all</Link>
             </Button>
           </div>
 
-          <div className="mt-6 space-y-3">
+          <div className="mt-4 space-y-2">
             {transactions.slice(0, 4).map((transaction) => (
               <div
                 key={transaction.id}
-                className="flex items-center justify-between gap-4 rounded-[24px] border border-white/80 bg-white/80 px-5 py-4"
+                className="flex items-center justify-between gap-4 rounded-[24px] border border-white/80 bg-white/80 px-5 py-3"
               >
                 <div>
                   <p className="font-semibold text-ink">{transaction.merchant}</p>
