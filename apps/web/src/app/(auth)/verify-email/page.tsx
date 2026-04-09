@@ -132,7 +132,7 @@ function VerifyEmailPageContent() {
       setDeliveryHint(result.verificationDeliveryMethod);
       setNotice(
         result.verificationDeliveryMethod === 'log'
-          ? 'SMTP is not configured yet, so the fresh code was printed in the API terminal.'
+          ? 'Email delivery is unavailable right now, so the fresh code was printed in the API terminal.'
           : 'A fresh verification code is on the way to your inbox.',
       );
     } catch (error) {
@@ -144,7 +144,7 @@ function VerifyEmailPageContent() {
 
   const helperText =
     deliveryHint === 'log'
-      ? 'SMTP is not configured yet, so the verification code is being written to the API server terminal.'
+      ? 'Email delivery is unavailable right now, so the verification code is being written to the API server terminal.'
       : 'Check your inbox and spam folder for the latest verification code.';
 
   return (
@@ -313,7 +313,7 @@ function VerifyEmailPageContent() {
                 {deliveryHint === 'log' ? (
                   <div className="rounded-[18px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] leading-5 text-slate-700">
                     The app is in local log mode right now. Open the API terminal to see the latest
-                    verification code until SMTP is configured.
+                    verification code while email delivery is unavailable.
                   </div>
                 ) : null}
 

@@ -216,7 +216,7 @@ export default function RegisterPage() {
       setDeliveryHint(result.verificationDeliveryMethod);
       setNotice(
         result.verificationDeliveryMethod === 'log'
-          ? 'SMTP is not configured yet, so the verification code was printed in the API terminal.'
+          ? 'Email delivery is unavailable right now, so the verification code was printed in the API terminal.'
           : `We sent a verification code to ${result.user.email}.`,
       );
       setStep(3);
@@ -298,7 +298,7 @@ export default function RegisterPage() {
       setDeliveryHint(result.verificationDeliveryMethod);
       setNotice(
         result.verificationDeliveryMethod === 'log'
-          ? 'SMTP is not configured yet, so the fresh code was printed in the API terminal.'
+          ? 'Email delivery is unavailable right now, so the fresh code was printed in the API terminal.'
           : 'A fresh verification code is on the way to your inbox.',
       );
     } catch (error) {
@@ -315,7 +315,7 @@ export default function RegisterPage() {
       : step === 3
         ? errors.code ||
           (deliveryHint === 'log'
-            ? 'SMTP is not configured yet, so the code is being written to the API terminal.'
+            ? 'Email delivery is unavailable right now, so the code is being written to the API terminal.'
             : 'Check your inbox and spam folder for the latest verification code.')
         : '';
 
@@ -665,7 +665,7 @@ export default function RegisterPage() {
                       <p className="mt-1 text-sm font-semibold text-slate-700">{values.email}</p>
                       <p className="mt-1 text-[12px] text-slate-500">
                         {deliveryHint === 'log'
-                          ? 'SMTP is not configured yet, so the code is in the API terminal.'
+                          ? 'Email delivery is unavailable right now, so the code is in the API terminal.'
                           : 'A 6-digit code is waiting in this inbox.'}
                       </p>
                     </div>

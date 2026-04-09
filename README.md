@@ -52,7 +52,7 @@ Copy and fill these examples as needed:
 
 - `.env.example`
 
-If you want email verification to send through Gmail SMTP, also set these in your root `.env`:
+If you want email verification to send through Gmail or Google Workspace, set these in your root `.env`:
 
 ```bash
 SMTP_HOST=smtp.gmail.com
@@ -60,11 +60,15 @@ SMTP_PORT=465
 SMTP_SECURE=true
 SMTP_USER=yourgmail@gmail.com
 SMTP_PASS=your-16-character-app-password
+# Optional OAuth2 alternative for Gmail / Google Workspace
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=
+GOOGLE_OAUTH_REFRESH_TOKEN=
 SMTP_FROM_EMAIL=yourgmail@gmail.com
 SMTP_FROM_NAME=SpendWise
 ```
 
-Google SMTP requires a Gmail or Google Workspace account with 2-Step Verification enabled plus an App Password. If SMTP is not configured yet, SpendWise falls back to logging the verification code in the API terminal during local development.
+For password-based SMTP, Gmail requires 2-Step Verification plus an App Password. For Google Workspace accounts, OAuth2 is often the safer option because Google has been tightening username/password SMTP access. If mail auth is not configured, SpendWise falls back to logging the verification code in the API terminal during local development.
 
 ### 3. Run the apps
 

@@ -171,7 +171,7 @@ export default function ForgotPasswordPage() {
       setDeliveryHint(result.verificationDeliveryMethod);
       setNotice(
         result.verificationDeliveryMethod === 'log'
-          ? 'SMTP is not configured yet, so the reset code was printed in the API terminal.'
+          ? 'Email delivery is unavailable right now, so the reset code was printed in the API terminal.'
           : `We sent a password reset code to ${result.email}.`,
       );
       setStep(2);
@@ -274,7 +274,7 @@ export default function ForgotPasswordPage() {
       setDeliveryHint(result.verificationDeliveryMethod);
       setNotice(
         result.verificationDeliveryMethod === 'log'
-          ? 'SMTP is not configured yet, so the fresh reset code was printed in the API terminal.'
+          ? 'Email delivery is unavailable right now, so the fresh reset code was printed in the API terminal.'
           : 'A fresh reset code is on the way to your inbox.',
       );
     } catch (error) {
@@ -290,7 +290,7 @@ export default function ForgotPasswordPage() {
     step === 2
       ? errors.code ||
         (deliveryHint === 'log'
-          ? 'SMTP is not configured yet, so the reset code is being written to the API terminal.'
+          ? 'Email delivery is unavailable right now, so the reset code is being written to the API terminal.'
           : 'Check your inbox and spam folder for the latest reset code.')
       : step === 3
         ? errors.password ||
@@ -454,7 +454,7 @@ export default function ForgotPasswordPage() {
                       <p className="mt-1 text-sm font-semibold text-slate-700">{values.email}</p>
                       <p className="mt-1 text-[12px] text-slate-500">
                         {deliveryHint === 'log'
-                          ? 'SMTP is not configured yet, so the code is in the API terminal.'
+                          ? 'Email delivery is unavailable right now, so the code is in the API terminal.'
                           : 'A 6-digit reset code is waiting in this inbox.'}
                       </p>
                     </div>
