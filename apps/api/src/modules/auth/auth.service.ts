@@ -15,6 +15,7 @@ import type {
   AuthTokens,
   CodeVerificationResult,
   JwtPayload,
+  PasswordChangeResult,
   PasswordResetResult,
   RegisterResult,
   VerificationDeliveryMethod,
@@ -335,6 +336,95 @@ export class AuthService {
     }
   }
 
+  async requestPasswordChangeOtp(
+    userId: string,
+    input: { currentPassword: string },
+  ): Promise<VerificationDispatchResult> {
+    try {
+      const user = await this.getPasswordChangeUser(userId);
+
+      if (!(await compare(input.currentPassword, user.passwordHash))) {
+        throw new UnauthorizedException('Your current password is incorrect.');
+      }
+
+      const verificationDeliveryMethod = await this.sendPasswordChangeCode(user, {
+        enforceCooldown: true,
+      });
+
+      this.auditLogService.record({
+        action: 'auth.request_password_change_otp',
+        email: user.email,
+        metadata: {
+          verificationDeliveryMethod,
+        },
+        outcome: 'success',
+        userId: user.id,
+      });
+
+      return {
+        success: true,
+        email: user.email,
+        verificationDeliveryMethod,
+      };
+    } catch (error) {
+      this.auditLogService.record({
+        action: 'auth.request_password_change_otp',
+        metadata: this.getAuditFailureMetadata(error),
+        outcome: 'failure',
+        userId,
+      });
+      throw error;
+    }
+  }
+
+  async changePassword(
+    userId: string,
+    input: { currentPassword: string; code: string; password: string },
+  ): Promise<PasswordChangeResult> {
+    try {
+      const user = await this.getPasswordChangeUser(userId);
+
+      if (!(await compare(input.currentPassword, user.passwordHash))) {
+        throw new UnauthorizedException('Your current password is incorrect.');
+      }
+
+      if (await compare(input.password, user.passwordHash)) {
+        throw new BadRequestException(
+          'Choose a new password that is different from your current password.',
+        );
+      }
+
+      await this.assertPasswordChangeCode(user, input.code);
+
+      const passwordHash = await hash(input.password, 12);
+      const updatedUser = await this.usersRepository.updatePassword(user.id, passwordHash);
+
+      if (!updatedUser) {
+        throw new UnauthorizedException('Unable to update this password.');
+      }
+
+      this.auditLogService.record({
+        action: 'auth.change_password',
+        email: updatedUser.email,
+        outcome: 'success',
+        userId: updatedUser.id,
+      });
+
+      return {
+        success: true,
+        requiresReauthentication: true,
+      };
+    } catch (error) {
+      this.auditLogService.record({
+        action: 'auth.change_password',
+        metadata: this.getAuditFailureMetadata(error),
+        outcome: 'failure',
+        userId,
+      });
+      throw error;
+    }
+  }
+
   async login(input: { email: string; password: string }): Promise<AuthSession> {
     const normalizedEmail = input.email.trim().toLowerCase();
 
@@ -442,6 +532,16 @@ export class AuthService {
     return user;
   }
 
+  private async getPasswordChangeUser(userId: string) {
+    const user = await this.usersRepository.findById(userId);
+
+    if (!user || !user.emailVerified) {
+      throw new UnauthorizedException('Authentication required.');
+    }
+
+    return user;
+  }
+
   private async createAuthenticatedSession(userId: string, email: string): Promise<AuthSession> {
     const user = await this.usersRepository.findById(userId);
 
@@ -528,6 +628,22 @@ export class AuthService {
     }
   }
 
+  private async assertPasswordChangeCode(user: UserDocument, code: string) {
+    if (!user.passwordChangeCodeHash || !user.passwordChangeCodeExpiresAt) {
+      throw new BadRequestException('Request a new password change code to continue.');
+    }
+
+    if (user.passwordChangeCodeExpiresAt.getTime() < Date.now()) {
+      throw new BadRequestException('Your password change code has expired. Request a new one.');
+    }
+
+    const isValidCode = await compare(code.trim(), user.passwordChangeCodeHash);
+
+    if (!isValidCode) {
+      throw new BadRequestException('That password change code is incorrect.');
+    }
+  }
+
   private async sendEmailVerificationCode(
     user: UserDocument,
     options: { enforceCooldown?: boolean } = {},
@@ -589,6 +705,40 @@ export class AuthService {
     });
 
     return this.mailService.sendPasswordResetCode({
+      code,
+      expiresInMinutes,
+      name: user.name,
+      to: user.email,
+    });
+  }
+
+  private async sendPasswordChangeCode(
+    user: UserDocument,
+    options: { enforceCooldown?: boolean } = {},
+  ): Promise<VerificationDeliveryMethod> {
+    const sentAt = new Date();
+
+    this.assertCodeCooldown(
+      user.passwordChangeSentAt,
+      sentAt,
+      this.configService.getOrThrow<number>('PASSWORD_RESET_RESEND_COOLDOWN_SECONDS'),
+      options.enforceCooldown,
+    );
+
+    const expiresInMinutes = this.configService.getOrThrow<number>(
+      'PASSWORD_RESET_CODE_TTL_MINUTES',
+    );
+    const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
+    const codeHash = await hash(code, 10);
+    const expiresAt = new Date(sentAt.getTime() + expiresInMinutes * 60 * 1000);
+
+    await this.usersRepository.updatePasswordChange(user.id, {
+      codeHash,
+      expiresAt,
+      sentAt,
+    });
+
+    return this.mailService.sendPasswordChangeCode({
       code,
       expiresInMinutes,
       name: user.name,

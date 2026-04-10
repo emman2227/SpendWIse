@@ -40,6 +40,15 @@ export class UserModel {
   @Prop()
   passwordResetSentAt?: Date;
 
+  @Prop()
+  passwordChangeCodeHash?: string;
+
+  @Prop()
+  passwordChangeCodeExpiresAt?: Date;
+
+  @Prop()
+  passwordChangeSentAt?: Date;
+
   @Prop({ required: true })
   passwordHash!: string;
 

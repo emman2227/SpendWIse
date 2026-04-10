@@ -95,6 +95,45 @@ export class MailService {
     });
   }
 
+  async sendPasswordChangeCode(
+    input: SendVerificationCodeInput,
+  ): Promise<VerificationDeliveryMethod> {
+    if (!this.hasConfiguredMailAuth()) {
+      return this.logCodeFallback({
+        code: input.code,
+        label: 'Password change code',
+        reason: 'Mail credentials are not configured.',
+        to: input.to,
+      });
+    }
+
+    return this.sendCodeEmailWithFallback({
+      to: input.to,
+      subject: 'Your SpendWise password change code',
+      logLabel: 'Password change code',
+      text: [
+        `Hi ${input.name},`,
+        '',
+        `Your SpendWise password change code is ${input.code}.`,
+        `It expires in ${input.expiresInMinutes} minutes.`,
+        '',
+        'If you did not request this change, keep your current password and review your account security.',
+      ].join('\n'),
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #1f2937; line-height: 1.6;">
+          <p>Hi ${this.escapeHtml(input.name)},</p>
+          <p>Your SpendWise password change code is:</p>
+          <p style="font-size: 28px; font-weight: 700; letter-spacing: 0.35em; margin: 16px 0;">
+            ${this.escapeHtml(input.code)}
+          </p>
+          <p>It expires in ${input.expiresInMinutes} minutes.</p>
+          <p>If you did not request this change, keep your current password and review your account security.</p>
+        </div>
+      `,
+      code: input.code,
+    });
+  }
+
   private getTransporter() {
     if (!this.transporter) {
       const smtpUser = this.configService.getOrThrow<string>('SMTP_USER').trim();

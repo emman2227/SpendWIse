@@ -2,6 +2,7 @@
 
 import type {
   CodeVerificationResult,
+  PasswordChangeResult,
   PasswordResetResult,
   RegisterResult,
   UserProfile,
@@ -127,6 +128,22 @@ export const verifyPasswordResetCode = (input: { email: string; code: string }) 
 
 export const resetPassword = (input: { email: string; code: string; password: string }) =>
   request<PasswordResetResult>('/api/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+
+export const requestPasswordChangeOtp = (input: { currentPassword: string }) =>
+  request<VerificationDispatchResult>('/api/auth/request-password-change-otp', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+
+export const changePasswordWithOtp = (input: {
+  currentPassword: string;
+  code: string;
+  password: string;
+}) =>
+  request<PasswordChangeResult>('/api/auth/change-password', {
     method: 'POST',
     body: JSON.stringify(input),
   });

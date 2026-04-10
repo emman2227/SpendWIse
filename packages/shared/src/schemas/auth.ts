@@ -112,6 +112,43 @@ export const verifyPasswordResetCodeSchema = z.object({
     ),
 });
 
+export const requestPasswordChangeOtpSchema = z.object({
+  currentPassword: passwordCharacterSchema
+    .min(
+      AUTH_LOGIN_PASSWORD_MIN_LENGTH,
+      `Password must be at least ${AUTH_LOGIN_PASSWORD_MIN_LENGTH} characters.`,
+    )
+    .max(
+      AUTH_PASSWORD_MAX_LENGTH,
+      `Password must be at most ${AUTH_PASSWORD_MAX_LENGTH} characters.`,
+    ),
+});
+
+export const changePasswordWithOtpSchema = z
+  .object({
+    currentPassword: passwordCharacterSchema
+      .min(
+        AUTH_LOGIN_PASSWORD_MIN_LENGTH,
+        `Password must be at least ${AUTH_LOGIN_PASSWORD_MIN_LENGTH} characters.`,
+      )
+      .max(
+        AUTH_PASSWORD_MAX_LENGTH,
+        `Password must be at most ${AUTH_PASSWORD_MAX_LENGTH} characters.`,
+      ),
+    code: z
+      .string()
+      .trim()
+      .regex(
+        new RegExp(`^\\d{${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}}$`),
+        `Enter the ${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit verification code.`,
+      ),
+    password: strongPasswordSchema,
+  })
+  .refine((value) => value.password !== value.currentPassword, {
+    message: 'Choose a new password that is different from your current password.',
+    path: ['password'],
+  });
+
 export const resetPasswordWithCodeSchema = z.object({
   email: emailSchema,
   code: z

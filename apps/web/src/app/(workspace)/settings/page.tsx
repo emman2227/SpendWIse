@@ -1,34 +1,71 @@
 'use client';
 
+import {
+  AUTH_EMAIL_VERIFICATION_CODE_LENGTH,
+  AUTH_PASSWORD_MIN_LENGTH,
+  authPasswordLowercasePattern,
+  authPasswordNumberPattern,
+  authPasswordSpecialCharacterPattern,
+  authPasswordUppercasePattern,
+  type UserProfile,
+} from '@spendwise/shared';
+import { useQueryClient } from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
 import {
   BellRing,
+  CheckCircle2,
   Clock3,
   Download,
   EyeOff,
   Globe2,
   Lock,
+  MailCheck,
   Palette,
+  RefreshCw,
   Shield,
   SlidersHorizontal,
   Smartphone,
   UserRound,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
+import { ProgressBar } from '@/components/ui/progress-bar';
 import { SurfaceCard } from '@/components/ui/surface-card';
+import {
+  authQueryKey,
+  changePasswordWithOtp,
+  requestPasswordChangeOtp,
+  useCurrentUserQuery,
+} from '@/lib/auth/client';
+import { sanitizePasswordInput } from '@/lib/auth/input';
+import { getPasswordStrength } from '@/lib/auth/password-strength';
 import { cn } from '@/lib/utils';
 
 type SettingsTabId = 'account' | 'security' | 'notifications' | 'preferences' | 'privacy';
+type DeliveryHint = 'smtp' | 'log';
+type SecurityField = 'currentPassword' | 'newPassword' | 'confirmPassword' | 'code';
 
 interface SettingsTab {
   id: SettingsTabId;
   label: string;
   description: string;
   icon: LucideIcon;
+}
+
+interface SecurityValues {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+  code: string;
+}
+
+interface SecurityNotice {
+  tone: 'info' | 'success';
+  message: string;
 }
 
 const settingsTabs: SettingsTab[] = [
@@ -63,6 +100,105 @@ const settingsTabs: SettingsTab[] = [
     icon: Lock,
   },
 ];
+
+const initialSecurityValues: SecurityValues = {
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+  code: '',
+};
+
+const sanitizeCodeInput = (value: string) =>
+  value.replace(/\D/g, '').slice(0, AUTH_EMAIL_VERIFICATION_CODE_LENGTH);
+
+const resolveErrorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error && error.message ? error.message : fallback;
+
+const maskEmail = (email?: string) => {
+  if (!email) {
+    return 'your registered email';
+  }
+
+  const [localPart, domain] = email.split('@');
+
+  if (!localPart || !domain) {
+    return email;
+  }
+
+  if (localPart.length <= 2) {
+    return `${localPart[0] ?? ''}***@${domain}`;
+  }
+
+  return `${localPart.slice(0, 2)}***${localPart.slice(-1)}@${domain}`;
+};
+
+const validateNewPassword = (password: string) => {
+  if (!password) {
+    return 'Please create a new password.';
+  }
+
+  if (password.length < AUTH_PASSWORD_MIN_LENGTH) {
+    return `Password must be at least ${AUTH_PASSWORD_MIN_LENGTH} characters.`;
+  }
+
+  if (!authPasswordUppercasePattern.test(password)) {
+    return 'Password must include an uppercase letter.';
+  }
+
+  if (!authPasswordLowercasePattern.test(password)) {
+    return 'Password must include a lowercase letter.';
+  }
+
+  if (!authPasswordNumberPattern.test(password)) {
+    return 'Password must include a number.';
+  }
+
+  if (!authPasswordSpecialCharacterPattern.test(password)) {
+    return 'Password must include a special character.';
+  }
+
+  return '';
+};
+
+const validateSecurityField = (
+  field: SecurityField,
+  values: SecurityValues,
+  codeRequested: boolean,
+) => {
+  switch (field) {
+    case 'currentPassword':
+      return values.currentPassword ? '' : 'Please enter your current password.';
+    case 'newPassword':
+      if (values.newPassword === values.currentPassword && values.newPassword) {
+        return 'Choose a new password that is different from your current password.';
+      }
+      return validateNewPassword(values.newPassword);
+    case 'confirmPassword':
+      if (!values.confirmPassword) {
+        return 'Please confirm your new password.';
+      }
+      return values.confirmPassword === values.newPassword ? '' : 'Passwords do not match.';
+    case 'code':
+      if (!codeRequested) {
+        return '';
+      }
+      if (!values.code) {
+        return 'Enter the verification code we sent to your email.';
+      }
+      return values.code.length === AUTH_EMAIL_VERIFICATION_CODE_LENGTH
+        ? ''
+        : `Enter the ${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit verification code.`;
+    default:
+      return '';
+  }
+};
+
+const getSecurityErrors = (values: SecurityValues, codeRequested: boolean) => ({
+  currentPassword: validateSecurityField('currentPassword', values, codeRequested),
+  newPassword: validateSecurityField('newPassword', values, codeRequested),
+  confirmPassword: validateSecurityField('confirmPassword', values, codeRequested),
+  code: validateSecurityField('code', values, codeRequested),
+});
 
 function ToggleRow({
   label,
@@ -125,7 +261,7 @@ function DetailCard({
   );
 }
 
-function AccountPanel() {
+function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
   return (
     <div className="grid gap-6 xl:grid-cols-[1.15fr,0.85fr]">
       <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
@@ -141,8 +277,8 @@ function AccountPanel() {
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {[
-            { label: 'Display name', value: 'Shekinah Santos' },
-            { label: 'Email address', value: 'shekinah@spendwise.app' },
+            { label: 'Display name', value: user?.name ?? 'Loading...' },
+            { label: 'Email address', value: user?.email ?? 'Loading...' },
             { label: 'Default landing page', value: 'Dashboard overview' },
             { label: 'Budget role', value: 'Primary household owner' },
           ].map(({ label, value }) => (
@@ -188,19 +324,137 @@ function AccountPanel() {
   );
 }
 
-function SecurityPanel() {
+function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [values, setValues] = useState<SecurityValues>(initialSecurityValues);
+  const [errors, setErrors] = useState<Partial<Record<SecurityField, string>>>({});
+  const [notice, setNotice] = useState<SecurityNotice | null>(null);
+  const [formError, setFormError] = useState('');
+  const [deliveryHint, setDeliveryHint] = useState<DeliveryHint>('smtp');
+  const [codeRequested, setCodeRequested] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isResendingCode, setIsResendingCode] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const passwordStrength = getPasswordStrength(values.newPassword);
+  const maskedEmail = maskEmail(user?.email);
+
+  const setFieldValue = (field: SecurityField, value: string) => {
+    const sanitizedValue =
+      field === 'code' ? sanitizeCodeInput(value) : sanitizePasswordInput(value);
+    const nextValues = { ...values, [field]: sanitizedValue };
+
+    setValues(nextValues);
+    setFormError('');
+    setNotice(null);
+    setErrors((currentErrors) => ({
+      ...currentErrors,
+      [field]: validateSecurityField(field, nextValues, codeRequested),
+      ...(field === 'newPassword'
+        ? {
+            confirmPassword: validateSecurityField('confirmPassword', nextValues, codeRequested),
+          }
+        : null),
+    }));
+  };
+
+  const clearFlow = () => {
+    setValues(initialSecurityValues);
+    setErrors({});
+    setNotice(null);
+    setFormError('');
+    setCodeRequested(false);
+    setDeliveryHint('smtp');
+  };
+
+  const runValidation = (needsCode: boolean) => {
+    const nextErrors = getSecurityErrors(values, needsCode);
+
+    setErrors(nextErrors);
+
+    return !Object.values(nextErrors).some(Boolean);
+  };
+
+  const requestOtp = async (isResend = false) => {
+    if (!runValidation(false)) {
+      return;
+    }
+
+    setFormError('');
+    setNotice(null);
+
+    if (isResend) {
+      setIsResendingCode(true);
+    } else {
+      setIsSendingCode(true);
+    }
+
+    try {
+      const result = await requestPasswordChangeOtp({
+        currentPassword: values.currentPassword,
+      });
+
+      setDeliveryHint(result.verificationDeliveryMethod);
+      setCodeRequested(true);
+      setNotice({
+        tone: 'success',
+        message:
+          result.verificationDeliveryMethod === 'log'
+            ? 'Email delivery is unavailable right now, so the password change code was printed in the API terminal.'
+            : `A verification code was sent to ${maskedEmail}.`,
+      });
+    } catch (error) {
+      setFormError(resolveErrorMessage(error, 'Unable to send a password change code right now.'));
+    } finally {
+      if (isResend) {
+        setIsResendingCode(false);
+      } else {
+        setIsSendingCode(false);
+      }
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!runValidation(true)) {
+      return;
+    }
+
+    setFormError('');
+    setNotice(null);
+    setIsUpdatingPassword(true);
+
+    try {
+      await changePasswordWithOtp({
+        currentPassword: values.currentPassword,
+        code: values.code,
+        password: values.newPassword,
+      });
+      queryClient.setQueryData(authQueryKey, null);
+      router.replace('/login?reason=password-changed');
+    } catch (error) {
+      setFormError(resolveErrorMessage(error, 'Unable to update your password right now.'));
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
   return (
     <div className="grid gap-6 xl:grid-cols-[1.15fr,0.85fr]">
       <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-            <Shield className="h-5 w-5" />
+        <div className="flex items-start gap-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-brand/10 text-brand">
+            <Shield className="h-7 w-7" />
           </div>
           <div>
             <p className="kicker">Security</p>
-            <h2 className="mt-2 text-2xl font-semibold text-ink">
+            <h2 className="mt-2 text-2xl font-semibold text-ink md:text-[2.1rem]">
               Password and sign-in protection
             </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+              Confirm your current password first, then we&apos;ll send a one-time code to{' '}
+              <span className="font-semibold text-ink">{maskedEmail}</span> before the change is
+              saved.
+            </p>
           </div>
         </div>
 
@@ -210,41 +464,211 @@ function SecurityPanel() {
               Current password
             </label>
             <Input
+              autoComplete="current-password"
+              className={cn(
+                'h-14 rounded-[24px] bg-white/90',
+                errors.currentPassword && 'border-danger focus:border-danger',
+              )}
               id="current-password"
+              onChange={(event) => setFieldValue('currentPassword', event.target.value)}
               placeholder="Enter your current password"
               type="password"
+              value={values.currentPassword}
             />
+            {errors.currentPassword ? (
+              <p className="text-sm text-danger">{errors.currentPassword}</p>
+            ) : null}
           </div>
+
           <div className="space-y-2">
             <label className="text-sm font-semibold text-ink" htmlFor="new-password">
               New password
             </label>
-            <Input id="new-password" placeholder="Create a stronger password" type="password" />
+            <Input
+              autoComplete="new-password"
+              className={cn(
+                'h-14 rounded-[24px] bg-white/90',
+                errors.newPassword && 'border-danger focus:border-danger',
+              )}
+              id="new-password"
+              onChange={(event) => setFieldValue('newPassword', event.target.value)}
+              placeholder="Create a stronger password"
+              type="password"
+              value={values.newPassword}
+            />
+            {errors.newPassword ? (
+              <p className="text-sm text-danger">{errors.newPassword}</p>
+            ) : null}
           </div>
+
           <div className="space-y-2">
             <label className="text-sm font-semibold text-ink" htmlFor="confirm-password">
               Confirm new password
             </label>
-            <Input id="confirm-password" placeholder="Re-enter the new password" type="password" />
+            <Input
+              autoComplete="new-password"
+              className={cn(
+                'h-14 rounded-[24px] bg-white/90',
+                errors.confirmPassword && 'border-danger focus:border-danger',
+              )}
+              id="confirm-password"
+              onChange={(event) => setFieldValue('confirmPassword', event.target.value)}
+              placeholder="Re-enter the new password"
+              type="password"
+              value={values.confirmPassword}
+            />
+            {errors.confirmPassword ? (
+              <p className="text-sm text-danger">{errors.confirmPassword}</p>
+            ) : null}
           </div>
         </div>
 
+        <div className="mt-6 rounded-[24px] border border-white/80 bg-white/80 px-5 py-5">
+          <ProgressBar
+            helper={passwordStrength.label}
+            label="Password strength"
+            status={passwordStrength.status}
+            value={passwordStrength.progress}
+          />
+          <div className="mt-4 grid gap-x-4 gap-y-2 sm:grid-cols-2">
+            {passwordStrength.checklist.map((item) => (
+              <div
+                key={item.label}
+                className={cn(
+                  'flex items-center gap-2 text-sm',
+                  item.passed ? 'text-emerald-700' : 'text-slate-500',
+                )}
+              >
+                <CheckCircle2
+                  className={cn(
+                    'h-4 w-4 shrink-0',
+                    item.passed ? 'text-emerald-600' : 'text-slate-300',
+                  )}
+                />
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {codeRequested ? (
+          <div className="mt-6 rounded-[26px] border border-brand/15 bg-[linear-gradient(135deg,rgba(214,235,231,0.78),rgba(255,255,255,0.92))] px-5 py-5">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="flex items-start gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/90 text-brand shadow-soft">
+                  <MailCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-ink">
+                    Enter your email verification code
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    {deliveryHint === 'log'
+                      ? 'SMTP is unavailable right now, so the code was written to the API terminal for local development.'
+                      : `We sent a ${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit code to ${maskedEmail}.`}
+                  </p>
+                </div>
+              </div>
+              <Button
+                className="shrink-0"
+                disabled={isResendingCode || isUpdatingPassword}
+                onClick={() => requestOtp(true)}
+                size="sm"
+                type="button"
+                variant="soft"
+              >
+                <RefreshCw className={cn('h-4 w-4', isResendingCode && 'animate-spin')} />
+                {isResendingCode ? 'Sending...' : 'Resend code'}
+              </Button>
+            </div>
+
+            <div className="mt-5 space-y-2">
+              <label className="text-sm font-semibold text-ink" htmlFor="password-change-code">
+                Verification code
+              </label>
+              <Input
+                autoComplete="one-time-code"
+                className={cn(
+                  'h-14 rounded-[24px] bg-white/95 text-center font-mono text-lg tracking-[0.42em]',
+                  errors.code && 'border-danger focus:border-danger',
+                )}
+                id="password-change-code"
+                inputMode="numeric"
+                maxLength={AUTH_EMAIL_VERIFICATION_CODE_LENGTH}
+                onChange={(event) => setFieldValue('code', event.target.value)}
+                placeholder={'0'.repeat(AUTH_EMAIL_VERIFICATION_CODE_LENGTH)}
+                type="text"
+                value={values.code}
+              />
+              {errors.code ? <p className="text-sm text-danger">{errors.code}</p> : null}
+            </div>
+          </div>
+        ) : null}
+
+        {formError ? (
+          <div className="mt-6 rounded-[20px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
+            {formError}
+          </div>
+        ) : null}
+
+        {notice ? (
+          <div
+            className={cn(
+              'mt-6 rounded-[20px] px-4 py-3 text-sm',
+              notice.tone === 'success'
+                ? 'border border-brand/15 bg-brand/10 text-slate-700'
+                : 'border border-white/70 bg-white/80 text-slate-700',
+            )}
+          >
+            {notice.message}
+          </div>
+        ) : null}
+
         <div className="mt-6 flex flex-wrap gap-3">
-          <Button variant="secondary">Update password</Button>
-          <Button variant="soft">Cancel</Button>
+          {codeRequested ? (
+            <>
+              <Button
+                disabled={isUpdatingPassword || isSendingCode || !user?.email}
+                onClick={handleChangePassword}
+                variant="secondary"
+              >
+                {isUpdatingPassword ? 'Updating...' : 'Verify code and update'}
+              </Button>
+              <Button
+                disabled={isUpdatingPassword || isSendingCode || isResendingCode}
+                onClick={clearFlow}
+                variant="soft"
+              >
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                disabled={isSendingCode || !user?.email}
+                onClick={() => requestOtp(false)}
+                variant="secondary"
+              >
+                {isSendingCode ? 'Sending code...' : 'Send verification code'}
+              </Button>
+              <Button disabled={isSendingCode} onClick={clearFlow} variant="soft">
+                Clear
+              </Button>
+            </>
+          )}
         </div>
       </SurfaceCard>
 
       <div className="space-y-6">
         <DetailCard
           actionLabel="Manage sessions"
-          description="Three active devices are signed in. Review them regularly and revoke anything unfamiliar."
+          description="Password updates sign you out on this device and force other sessions to refresh before they can continue."
           icon={Smartphone}
           title="Device sessions"
         />
         <DetailCard
           actionLabel="Set up recovery"
-          description="Add backup steps before enabling two-step verification so lockouts stay low-stress."
+          description="Keep recovery methods current so legitimate lockouts stay low-stress and fast to resolve."
           icon={Lock}
           title="Recovery methods"
         />
@@ -444,16 +868,22 @@ function PrivacyPanel() {
   );
 }
 
-const tabPanels: Record<SettingsTabId, JSX.Element> = {
-  account: <AccountPanel />,
-  security: <SecurityPanel />,
-  notifications: <NotificationsPanel />,
-  preferences: <PreferencesPanel />,
-  privacy: <PrivacyPanel />,
-};
-
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTabId>('security');
+  const { data: user } = useCurrentUserQuery();
+
+  const activePanel =
+    activeTab === 'account' ? (
+      <AccountPanel user={user} />
+    ) : activeTab === 'security' ? (
+      <SecurityPanel user={user} />
+    ) : activeTab === 'notifications' ? (
+      <NotificationsPanel />
+    ) : activeTab === 'preferences' ? (
+      <PreferencesPanel />
+    ) : (
+      <PrivacyPanel />
+    );
 
   return (
     <div className="space-y-6">
@@ -508,7 +938,7 @@ export default function SettingsPage() {
           </div>
         </SurfaceCard>
 
-        {tabPanels[activeTab]}
+        {activePanel}
       </section>
     </div>
   );

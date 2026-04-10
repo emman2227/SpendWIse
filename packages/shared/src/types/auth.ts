@@ -34,6 +34,11 @@ export interface PasswordResetResult {
   success: true;
 }
 
+export interface PasswordChangeResult {
+  success: true;
+  requiresReauthentication: true;
+}
+
 export interface JwtPayload {
   sub: string;
   email: string;

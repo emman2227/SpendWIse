@@ -74,6 +74,20 @@ export class UsersRepository {
       .exec();
   }
 
+  updatePasswordChange(userId: string, input: { codeHash: string; expiresAt: Date; sentAt: Date }) {
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          passwordChangeCodeHash: input.codeHash,
+          passwordChangeCodeExpiresAt: input.expiresAt,
+          passwordChangeSentAt: input.sentAt,
+        },
+        { new: true },
+      )
+      .exec();
+  }
+
   markEmailVerified(userId: string) {
     return this.userModel
       .findByIdAndUpdate(
@@ -103,6 +117,9 @@ export class UsersRepository {
             passwordResetCodeHash: 1,
             passwordResetCodeExpiresAt: 1,
             passwordResetSentAt: 1,
+            passwordChangeCodeHash: 1,
+            passwordChangeCodeExpiresAt: 1,
+            passwordChangeSentAt: 1,
           },
         },
         { new: true },

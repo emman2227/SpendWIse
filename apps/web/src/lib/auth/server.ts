@@ -247,11 +247,11 @@ export const revokeServerSession = async (input: {
   }
 };
 
-export const createErrorResponse = (error: unknown) => {
+export const createErrorResponse = (error: unknown, options: { exposeMessage?: boolean } = {}) => {
   if (error instanceof ApiRouteError) {
     return NextResponse.json(
       {
-        message: getGenericErrorMessage(error.status),
+        message: options.exposeMessage ? error.message : getGenericErrorMessage(error.status),
       },
       {
         status: error.status,

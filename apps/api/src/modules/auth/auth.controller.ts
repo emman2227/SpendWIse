@@ -1,8 +1,10 @@
 import { Body, Controller, Inject, Post, UseGuards, UsePipes } from '@nestjs/common';
 import {
+  changePasswordWithOtpSchema,
   loginSchema,
   refreshTokenSchema,
   registerSchema,
+  requestPasswordChangeOtpSchema,
   requestPasswordResetSchema,
   resendVerificationCodeSchema,
   resetPasswordWithCodeSchema,
@@ -57,6 +59,25 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe(resetPasswordWithCodeSchema))
   resetPassword(@Body() body: { email: string; code: string; password: string }) {
     return this.authService.resetPassword(body);
+  }
+
+  @Post('request-password-change-otp')
+  @UseGuards(JwtAuthGuard)
+  requestPasswordChangeOtp(
+    @CurrentUser() user: AuthUser,
+    @Body(new ZodValidationPipe(requestPasswordChangeOtpSchema)) body: { currentPassword: string },
+  ) {
+    return this.authService.requestPasswordChangeOtp(user.userId, body);
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  changePassword(
+    @CurrentUser() user: AuthUser,
+    @Body(new ZodValidationPipe(changePasswordWithOtpSchema))
+    body: { currentPassword: string; code: string; password: string },
+  ) {
+    return this.authService.changePassword(user.userId, body);
   }
 
   @Post('login')
