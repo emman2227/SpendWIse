@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
@@ -459,20 +458,9 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        actions={
-          <>
-            <Button variant="soft">Export data</Button>
-            <Button variant="secondary">Save changes</Button>
-          </>
-        }
+        className="px-6 py-5 md:px-7 md:py-6"
         description="Manage your application preferences with clear sections for account details, security, notifications, workspace behavior, and privacy."
         eyebrow="Settings"
-        meta={
-          <>
-            <Badge variant="neutral">Tabbed settings flow</Badge>
-            <Badge variant="info">Card-based content layout</Badge>
-          </>
-        }
         title="Settings"
       />
 
