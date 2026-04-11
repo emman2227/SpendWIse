@@ -122,20 +122,24 @@ export default function DashboardPage() {
       </section>
 
       <section className="space-y-6">
-        <SurfaceCard className="rounded-[32px] px-5 py-3 md:px-6 md:py-3.5">
-          <div className="flex items-center justify-between gap-2.5">
+        <SurfaceCard className="rounded-[28px] px-4 py-4 md:px-5 md:py-5">
+          <div className="flex flex-col gap-3 border-b border-line/80 pb-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="kicker">Budget progress</p>
-              <h2 className="mt-1 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Limits that stay visible and motivating
+              <p className="kicker">Budget pressure</p>
+              <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
+                Limits that stay readable and actionable
               </h2>
+              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+                The riskiest budgets surface first, and each row keeps the status, pacing, and
+                remaining amount close together.
+              </p>
             </div>
-            <Button asChild size="sm" variant="soft">
-              <Link href="/budgets">Set budget</Link>
+            <Button asChild variant="soft">
+              <Link href="/budgets">Open budgets</Link>
             </Button>
           </div>
 
-          <div className="mt-3 space-y-1.5">
+          <div className="mt-5 space-y-2.5">
             {budgets.map((budget) => {
               const progress = (budget.spent / budget.limit) * 100;
               const status =
@@ -146,120 +150,169 @@ export default function DashboardPage() {
                     : 'safe';
 
               return (
-                <div
+                <article
                   key={budget.id}
-                  className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-2.5"
+                  className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-ink">{budget.name}</p>
-                      <p className="mt-0.5 text-sm text-slate-500">{budget.cadence} budget</p>
+                  <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(220px,0.95fr),minmax(260px,1.15fr)] lg:items-center lg:gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-[15px] font-semibold text-ink">{budget.name}</p>
+                        <Badge
+                          variant={
+                            budget.status === 'danger'
+                              ? 'danger'
+                              : budget.status === 'warning'
+                                ? 'warning'
+                                : 'success'
+                          }
+                        >
+                          {budget.status === 'danger'
+                            ? 'Exceeded'
+                            : budget.status === 'warning'
+                              ? 'Near limit'
+                              : 'On track'}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-500">{budget.cadence} budget</p>
                     </div>
-                    <Badge
-                      variant={
-                        budget.status === 'danger'
-                          ? 'danger'
-                          : budget.status === 'warning'
-                            ? 'warning'
-                            : 'success'
-                      }
-                    >
-                      {budget.status === 'danger'
-                        ? 'Exceeded'
-                        : budget.status === 'warning'
-                          ? 'Near limit'
-                          : 'On track'}
-                    </Badge>
+
+                    <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-3">
+                      <ProgressBar
+                        helper={`${formatMoney(budget.spent)} of ${formatMoney(budget.limit)}`}
+                        size="sm"
+                        status={status}
+                        value={progress}
+                      />
+                    </div>
                   </div>
-                  <div className="mt-2 space-y-1">
-                    <ProgressBar
-                      helper={`${formatMoney(budget.spent)} of ${formatMoney(budget.limit)}`}
-                      status={status}
-                      value={progress}
-                    />
-                    <p className="text-sm text-slate-500">
-                      {budget.remaining >= 0
-                        ? `${formatMoney(budget.remaining)} remaining`
-                        : `${formatMoney(Math.abs(budget.remaining))} over budget`}
-                    </p>
+
+                  <div className="mt-3 flex flex-col gap-2.5 border-t border-line/70 pt-3 sm:grid sm:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:justify-between">
+                    <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:gap-2.5">
+                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                          Remaining
+                        </p>
+                        <p className="mt-1 text-sm font-medium text-ink">
+                          {budget.remaining >= 0
+                            ? formatMoney(budget.remaining)
+                            : `-${formatMoney(Math.abs(budget.remaining))}`}
+                        </p>
+                      </div>
+                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                          Pace
+                        </p>
+                        <p className="mt-1 text-sm font-medium text-ink">
+                          {budget.status === 'danger'
+                            ? 'Above plan'
+                            : budget.status === 'warning'
+                              ? 'Watch closely'
+                              : 'Healthy'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 lg:justify-end">
+                      <Button asChild size="sm" variant="soft">
+                        <Link href="/budgets">Adjust</Link>
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
         </SurfaceCard>
+      </section>
 
-        <SurfaceCard className="rounded-[32px] px-5 py-3 md:px-6 md:py-3.5">
-          <div className="flex items-center justify-between gap-2.5">
+      <section className="grid gap-6 xl:grid-cols-2">
+        <SurfaceCard className="rounded-[30px] px-4 py-4 md:px-5 md:py-5">
+          <div className="flex flex-col gap-3 border-b border-line/80 pb-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="kicker">AI insights</p>
-              <h2 className="mt-1 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
+              <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Helpful, concise, and explainable
               </h2>
+              <p className="mt-1.5 text-sm leading-6 text-slate-500">
+                Short, high-signal summaries that help users understand what changed and why it
+                matters.
+              </p>
             </div>
             <Button asChild size="sm" variant="soft">
               <Link href="/insights">View insights</Link>
             </Button>
           </div>
 
-          <div className="mt-3 space-y-1.5">
+          <div className="mt-5 grid gap-2.5">
             {insights.map((insight) => (
               <article
                 key={insight.id}
-                className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-2.5"
+                className="rounded-[22px] border border-white/80 bg-white/88 px-4 py-3"
               >
-                <Badge
-                  variant={
-                    insight.tone === 'success'
-                      ? 'success'
-                      : insight.tone === 'warning'
-                        ? 'warning'
-                        : 'info'
-                  }
-                >
-                  {insight.label}
-                </Badge>
-                <h3 className="mt-1.5 text-base font-semibold leading-snug text-ink">
+                <div className="flex items-start justify-between gap-3">
+                  <Badge
+                    variant={
+                      insight.tone === 'success'
+                        ? 'success'
+                        : insight.tone === 'warning'
+                          ? 'warning'
+                          : 'info'
+                    }
+                  >
+                    {insight.label}
+                  </Badge>
+                  <ArrowUpRight className="h-4 w-4 shrink-0 text-slate-300" />
+                </div>
+                <h3 className="mt-2 text-base font-semibold leading-snug text-ink">
                   {insight.title}
                 </h3>
-                <p className="mt-1 text-sm leading-6 text-slate-600">{insight.summary}</p>
+                <p className="mt-1.5 text-sm leading-6 text-slate-600">{insight.summary}</p>
               </article>
             ))}
           </div>
         </SurfaceCard>
-      </section>
 
-      <section>
-        <SurfaceCard className="rounded-[32px] px-6 py-4 md:px-7 md:py-4">
-          <div className="flex items-center justify-between gap-4">
+        <SurfaceCard className="rounded-[30px] px-4 py-4 md:px-5 md:py-5">
+          <div className="flex flex-col gap-3 border-b border-line/80 pb-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="kicker">Recent transactions</p>
-              <h2 className="mt-2.5 text-2xl font-semibold text-ink">
+              <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Latest activity at a glance
               </h2>
+              <p className="mt-1.5 text-sm leading-6 text-slate-500">
+                Compact transaction boxes keep merchant, amount, and payment method easy to scan.
+              </p>
             </div>
             <Button asChild size="sm" variant="soft">
               <Link href="/transactions">View all</Link>
             </Button>
           </div>
 
-          <div className="mt-4 space-y-2">
+          <div className="mt-5 grid gap-2.5">
             {transactions.slice(0, 4).map((transaction) => (
-              <div
+              <article
                 key={transaction.id}
-                className="flex items-center justify-between gap-4 rounded-[24px] border border-white/80 bg-white/80 px-5 py-3"
+                className="rounded-[22px] border border-white/80 bg-white/88 px-4 py-3"
               >
-                <div>
-                  <p className="font-semibold text-ink">{transaction.merchant}</p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {transaction.category} / {formatShortDate(transaction.date)}
-                  </p>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold text-ink">{transaction.merchant}</p>
+                      <Badge variant={transaction.alert ? 'warning' : 'neutral'}>
+                        {transaction.category}
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {formatShortDate(transaction.date)} / {transaction.paymentMethod}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-ink">{formatMoney(transaction.amount)}</p>
+                    <p className="mt-1 text-sm text-slate-500">{transaction.note}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold text-ink">{formatMoney(transaction.amount)}</p>
-                  <p className="mt-1 text-sm text-slate-500">{transaction.paymentMethod}</p>
-                </div>
-              </div>
+              </article>
             ))}
           </div>
         </SurfaceCard>
