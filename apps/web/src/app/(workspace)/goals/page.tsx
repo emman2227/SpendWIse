@@ -90,18 +90,20 @@ export default function GoalsPage() {
               </Button>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
               <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                   Leading goal
                 </p>
-                <p className="mt-2 text-lg font-semibold text-ink">{leadingGoal.title}</p>
+                <p className="mt-2 text-lg font-semibold leading-tight text-ink">
+                  {leadingGoal.title}
+                </p>
               </div>
               <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                   Momentum
                 </p>
-                <p className="mt-2 text-lg font-semibold text-ink">
+                <p className="mt-2 text-lg font-semibold leading-tight text-ink">
                   {Math.round((totalSaved / totalTarget) * 100)}% of combined target funded
                 </p>
               </div>
@@ -109,7 +111,7 @@ export default function GoalsPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                   Best next move
                 </p>
-                <p className="mt-2 text-lg font-semibold text-ink">
+                <p className="mt-2 text-lg font-semibold leading-tight text-ink">
                   Review cutbacks tied to your active goals
                 </p>
               </div>
@@ -117,7 +119,7 @@ export default function GoalsPage() {
           </div>
         </SurfaceCard>
 
-        <section className="grid gap-6 xl:grid-cols-[1.08fr,0.92fr]">
+        <section className="grid gap-6 xl:grid-cols-[1fr,1fr]">
           <SurfaceCard className="rounded-[28px] px-4 py-4 md:px-5 md:py-5">
             <div className="flex flex-col gap-3 border-b border-line/80 pb-4 md:flex-row md:items-end md:justify-between">
               <div>
@@ -172,8 +174,8 @@ export default function GoalsPage() {
                       </div>
                     </div>
 
-                    <div className="mt-3 flex flex-col gap-2.5 border-t border-line/70 pt-3 sm:grid sm:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:justify-between">
-                      <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:gap-2.5">
+                    <div className="mt-3 border-t border-line/70 pt-3">
+                      <div className="grid gap-2.5 lg:grid-cols-[132px,minmax(0,1fr),auto] lg:items-start">
                         <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
                             Completion
@@ -186,23 +188,25 @@ export default function GoalsPage() {
                           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
                             Encouragement
                           </p>
-                          <p className="mt-1 text-sm font-medium text-ink">{goal.helper}</p>
+                          <p className="mt-1 text-sm font-medium leading-6 text-ink">
+                            {goal.helper}
+                          </p>
                         </div>
-                      </div>
 
-                      <div className="flex flex-wrap gap-2 lg:justify-end">
-                        <button
-                          className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
-                          type="button"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
-                          type="button"
-                        >
-                          Add funds
-                        </button>
+                        <div className="flex flex-wrap gap-2 lg:justify-end">
+                          <button
+                            className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
+                            type="button"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
+                            type="button"
+                          >
+                            Add funds
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </article>
