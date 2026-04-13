@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-
 import type { Budget } from '@spendwise/shared';
+import type { Model } from 'mongoose';
 
-import { BudgetModel, type BudgetDocument } from './budget.schema';
+import { type BudgetDocument, BudgetModel } from './budget.schema';
 
 @Injectable()
 export class BudgetsRepository {
@@ -26,12 +25,12 @@ export class BudgetsRepository {
           userId: input.userId,
           categoryId: input.categoryId,
           month: input.month,
-          year: input.year
+          year: input.year,
         },
         input,
         {
           upsert: true,
-          new: true
+          new: true,
         },
       )
       .exec();
@@ -39,6 +38,10 @@ export class BudgetsRepository {
 
   findByMonth(userId: string, month: number, year: number) {
     return this.budgetModel.find({ userId, month, year }).sort({ categoryId: 1 }).exec();
+  }
+
+  countByCategoryId(userId: string, categoryId: string) {
+    return this.budgetModel.countDocuments({ userId, categoryId }).exec();
   }
 
   toDomain(document: BudgetDocument): Budget {
@@ -50,7 +53,7 @@ export class BudgetsRepository {
       month: document.month,
       year: document.year,
       createdAt: document.createdAt.toISOString(),
-      updatedAt: document.updatedAt.toISOString()
+      updatedAt: document.updatedAt.toISOString(),
     };
   }
 }

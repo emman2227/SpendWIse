@@ -1,10 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-
 import type { Expense } from '@spendwise/shared';
+import type { Model } from 'mongoose';
 
-import { ExpenseModel, type ExpenseDocument } from './expense.schema';
+import { type ExpenseDocument, ExpenseModel } from './expense.schema';
 
 @Injectable()
 export class ExpensesRepository {
@@ -24,7 +23,7 @@ export class ExpensesRepository {
   }) {
     return this.expenseModel.create({
       ...input,
-      date: new Date(input.date)
+      date: new Date(input.date),
     });
   }
 
@@ -45,7 +44,7 @@ export class ExpensesRepository {
         { _id: id, userId },
         {
           ...input,
-          ...(input.date ? { date: new Date(input.date) } : {})
+          ...(input.date ? { date: new Date(input.date) } : {}),
         },
         { new: true },
       )
@@ -68,10 +67,11 @@ export class ExpensesRepository {
     return expense;
   }
 
-  findByUser(
-    userId: string,
-    filters: { categoryId?: string; month?: number; year?: number } = {},
-  ) {
+  countByCategoryId(userId: string, categoryId: string) {
+    return this.expenseModel.countDocuments({ userId, categoryId }).exec();
+  }
+
+  findByUser(userId: string, filters: { categoryId?: string; month?: number; year?: number } = {}) {
     const query: Record<string, unknown> = { userId };
 
     if (filters.categoryId) {
@@ -100,16 +100,16 @@ export class ExpensesRepository {
           userId,
           date: {
             $gte: start,
-            $lt: end
-          }
-        }
+            $lt: end,
+          },
+        },
       },
       {
         $group: {
           _id: '$categoryId',
-          total: { $sum: '$amount' }
-        }
-      }
+          total: { $sum: '$amount' },
+        },
+      },
     ]);
 
     return new Map(result.map((entry) => [entry._id, entry.total]));
@@ -126,7 +126,7 @@ export class ExpensesRepository {
       date: document.date.toISOString(),
       notes: document.notes,
       createdAt: document.createdAt.toISOString(),
-      updatedAt: document.updatedAt.toISOString()
+      updatedAt: document.updatedAt.toISOString(),
     };
   }
 }

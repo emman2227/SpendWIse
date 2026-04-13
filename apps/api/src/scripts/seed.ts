@@ -7,22 +7,33 @@ const run = async () => {
   await mongoose.connect(mongoUri);
 
   const categoryCollection = mongoose.connection.collection('categories');
-  const existingCount = await categoryCollection.countDocuments({
-    isSystemDefined: true
-  });
+  const now = new Date();
+  const result = await categoryCollection.bulkWrite(
+    defaultCategorySeeds.map((category) => ({
+      updateOne: {
+        filter: {
+          name: category.name,
+          isSystemDefined: true,
+        },
+        update: {
+          $setOnInsert: {
+            ...category,
+            isSystemDefined: true,
+            createdAt: now,
+            updatedAt: now,
+          },
+        },
+        upsert: true,
+      },
+    })),
+  );
 
-  if (existingCount === 0) {
-    await categoryCollection.insertMany(
-      defaultCategorySeeds.map((category) => ({
-        ...category,
-        isSystemDefined: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })),
+  if (result.upsertedCount > 0) {
+    console.log(
+      `Seeded ${result.upsertedCount} default categor${result.upsertedCount === 1 ? 'y' : 'ies'}`,
     );
-    console.log('Seeded default categories');
   } else {
-    console.log('Default categories already exist');
+    console.log('Default categories already up to date');
   }
 
   await mongoose.disconnect();

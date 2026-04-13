@@ -8,13 +8,20 @@ export const DEFAULT_CATEGORIES = [
   'Utilities',
   'Housing',
   'Health',
+  'Personal Care',
   'Education',
   'Entertainment',
   'Shopping',
   'Savings',
-  'Other'
+  'Other',
 ] as const;
 
-export const PAYMENT_METHODS = ['cash', 'credit_card', 'debit_card', 'bank_transfer', 'e_wallet'] as const;
+export const PAYMENT_METHODS = [
+  'cash',
+  'credit_card',
+  'debit_card',
+  'bank_transfer',
+  'e_wallet',
+] as const;
 export const INSIGHT_TYPES = ['summary', 'anomaly', 'trend', 'recommendation'] as const;
 export const FORECAST_PERIODS = ['weekly', 'monthly', 'quarterly'] as const;

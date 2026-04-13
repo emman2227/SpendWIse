@@ -1,4 +1,4 @@
-import { type Category, createCategorySchema } from '@spendwise/shared';
+import { type Category, updateCategorySchema } from '@spendwise/shared';
 import { type NextRequest, NextResponse } from 'next/server';
 
 import {
@@ -11,7 +11,10 @@ import {
   resolveAccessToken,
 } from '@/lib/auth/server';
 
-export async function GET(request: NextRequest) {
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ categoryId: string }> },
+) {
   try {
     const session = await getCurrentUserFromRequest(request);
 
@@ -25,19 +28,26 @@ export async function GET(request: NextRequest) {
       return createAuthenticationRequiredResponse();
     }
 
-    const categories = await fetchBackend<Category[]>('/categories', {
+    const { categoryId } = await context.params;
+    const body = await parseRequestBody(request, updateCategorySchema);
+    const category = await fetchBackend<Category>(`/categories/${categoryId}`, {
+      method: 'PATCH',
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+      body: JSON.stringify(body),
     });
 
-    return applySessionToResponse(NextResponse.json({ data: categories }), session);
+    return applySessionToResponse(NextResponse.json({ data: category }), session);
   } catch (error) {
     return createErrorResponse(error, { exposeMessage: true });
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ categoryId: string }> },
+) {
   try {
     const session = await getCurrentUserFromRequest(request);
 
@@ -51,13 +61,12 @@ export async function POST(request: NextRequest) {
       return createAuthenticationRequiredResponse();
     }
 
-    const body = await parseRequestBody(request, createCategorySchema);
-    const category = await fetchBackend<Category>('/categories', {
-      method: 'POST',
+    const { categoryId } = await context.params;
+    const category = await fetchBackend<Category>(`/categories/${categoryId}`, {
+      method: 'DELETE',
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify(body),
     });
 
     return applySessionToResponse(NextResponse.json({ data: category }), session);
