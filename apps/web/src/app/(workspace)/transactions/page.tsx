@@ -60,28 +60,28 @@ export default function TransactionsPage() {
               </Button>
             </>
           }
-          description="The transaction screen now centers the three jobs users actually have: find a charge fast, understand what needs attention, and add a new expense without losing context."
-          eyebrow="Expense tracking"
+          description="Search, review, and add faster."
+          eyebrow="Transactions"
           meta={
             <>
-              <Badge variant="info">Quick capture focused</Badge>
-              <Badge variant="neutral">Horizontal transaction rows</Badge>
+              <Badge variant="info">Quick add</Badge>
+              <Badge variant="neutral">Clean rows</Badge>
             </>
           }
-          title="Track spending with less searching and less guesswork."
+          title="Track spending fast."
         />
 
         <section className="grid gap-4 xl:grid-cols-3">
           <MetricCard
             delta={`${transactions.length} entries`}
-            helper="Visible transactions in this view"
+            helper="In view"
             icon={ReceiptText}
             label="Visible spend"
             value={formatMoney(totalVisible)}
           />
           <MetricCard
             delta={recurringCount ? `${recurringCount} matched` : 'All clear'}
-            helper="Charges likely to repeat next cycle"
+            helper="Repeats"
             icon={CreditCard}
             label="Recurring detected"
             tone="mint"
@@ -136,14 +136,9 @@ export default function TransactionsPage() {
             <div className="rounded-[28px] border border-brand/10 bg-[linear-gradient(140deg,rgba(15,123,113,0.08),rgba(255,255,255,0.92))] px-5 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="max-w-3xl">
-                  <p className="kicker">What this view tells you</p>
-                  <h2 className="mt-2 text-xl font-semibold text-ink">
-                    The most important transaction work is already surfaced.
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
-                    Review the flagged charge, search faster, and open quick add without losing your
-                    place in the list.
-                  </p>
+                  <p className="kicker">Overview</p>
+                  <h2 className="mt-2 text-xl font-semibold text-ink">Key tasks are up front.</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">Search, review, add.</p>
                 </div>
                 <Sparkles className="mt-1 h-5 w-5 shrink-0 text-brand" />
               </div>
@@ -151,7 +146,7 @@ export default function TransactionsPage() {
               <div className="mt-4 grid gap-3 md:grid-cols-3">
                 <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Ready to review
+                    Review
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">
                     {flaggedCount} flagged charge{flaggedCount === 1 ? '' : 's'}
@@ -159,19 +154,15 @@ export default function TransactionsPage() {
                 </div>
                 <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Quick capture
+                    Add
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">
-                    Add expense opens in a modal
-                  </p>
+                  <p className="mt-2 text-lg font-semibold text-ink">In modal</p>
                 </div>
                 <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    List behavior
+                    Layout
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">
-                    Compact rows, faster scanning
-                  </p>
+                  <p className="mt-2 text-lg font-semibold text-ink">By day</p>
                 </div>
               </div>
             </div>
@@ -183,17 +174,16 @@ export default function TransactionsPage() {
             <div>
               <p className="kicker">Transaction list</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Scan the latest activity in one horizontal pass
+                Latest activity
               </h2>
               <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
-                The rows now mirror the compact dashboard card rhythm so amounts, dates, and actions
-                stay aligned.
+                Amounts, dates, and actions align.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Badge variant="neutral">Newest first</Badge>
-              <Badge variant="info">Grouped by day</Badge>
+              <Badge variant="neutral">Newest</Badge>
+              <Badge variant="info">By day</Badge>
               <Button onClick={() => setIsQuickAddOpen(true)} variant="secondary">
                 Add expense
               </Button>
@@ -287,10 +277,10 @@ export default function TransactionsPage() {
                                 </p>
                                 <p className="mt-1 text-sm text-slate-500">
                                   {transaction.alert
-                                    ? 'Review recommended'
+                                    ? 'Review'
                                     : transaction.recurring
-                                      ? 'Looks like a scheduled charge'
-                                      : 'Normal activity'}
+                                      ? 'Repeat'
+                                      : 'Normal'}
                                 </p>
                               </div>
 
@@ -328,9 +318,9 @@ export default function TransactionsPage() {
           <EmptyState
             action={<Button variant="soft">Create a smart filter</Button>}
             className="mt-5 rounded-[24px] px-5 py-6"
-            description="The empty state is still available, but it now sits after the higher-value tasks instead of competing with them."
+            description="Everything is sorted."
             icon={Search}
-            title="No uncategorized expenses right now"
+            title="No uncategorized items"
           />
         </SurfaceCard>
       </div>
@@ -344,14 +334,9 @@ export default function TransactionsPage() {
           <div className="panel-surface-strong max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[32px] px-5 py-5 md:px-7 md:py-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="kicker">Quick add</p>
-                <h2 className="mt-3 text-2xl font-semibold text-ink">
-                  Capture an expense without leaving the page
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Keep the form short, keep the defaults obvious, and return to the list right after
-                  saving.
-                </p>
+                <p className="kicker">Add</p>
+                <h2 className="mt-3 text-2xl font-semibold text-ink">Quick add</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Quick entry.</p>
               </div>
               <button
                 aria-label="Close add expense modal"

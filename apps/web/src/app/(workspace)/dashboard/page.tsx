@@ -35,15 +35,15 @@ export default function DashboardPage() {
             </Button>
           </>
         }
-        description="The dashboard is the product hub: high-signal metrics, budget pacing, recent activity, and AI insight summaries in one scannable layout."
+        description="Your key numbers in one view."
         eyebrow="Dashboard"
         meta={
           <>
-            <Badge variant="info">AI monitoring active</Badge>
-            <Badge variant="neutral">Updated 10 minutes ago</Badge>
+            <Badge variant="info">AI active</Badge>
+            <Badge variant="neutral">Updated 10m</Badge>
           </>
         }
-        title="See how your money behaves, not just where it went."
+        title="See what needs attention."
       />
 
       <section className="grid gap-4 xl:grid-cols-4">
@@ -75,13 +75,11 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="kicker">Spending overview</p>
-              <h2 className="mt-3 text-2xl font-semibold text-ink">
-                Monthly spending versus budget
-              </h2>
+              <h2 className="mt-3 text-2xl font-semibold text-ink">Spending vs budget</h2>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="neutral">6-month view</Badge>
-              <Badge variant="info">Forecast overlay</Badge>
+              <Badge variant="neutral">6 months</Badge>
+              <Badge variant="info">Forecast</Badge>
             </div>
           </div>
           <div className="mt-6">
@@ -93,7 +91,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="kicker">Category mix</p>
-              <h2 className="mt-3 text-2xl font-semibold text-ink">Where money is concentrating</h2>
+              <h2 className="mt-3 text-2xl font-semibold text-ink">Category mix</h2>
             </div>
             <ArrowUpRight className="h-5 w-5 text-brand" />
           </div>
@@ -127,11 +125,10 @@ export default function DashboardPage() {
             <div>
               <p className="kicker">Budget pressure</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Limits that stay readable and actionable
+                Budget pressure
               </h2>
               <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
-                The riskiest budgets surface first, and each row keeps the status, pacing, and
-                remaining amount close together.
+                Risk first, details close.
               </p>
             </div>
             <Button asChild variant="soft">
@@ -191,7 +188,7 @@ export default function DashboardPage() {
                     <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:gap-2.5">
                       <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                          Remaining
+                          Left
                         </p>
                         <p className="mt-1 text-sm font-medium text-ink">
                           {budget.remaining >= 0
@@ -205,10 +202,10 @@ export default function DashboardPage() {
                         </p>
                         <p className="mt-1 text-sm font-medium text-ink">
                           {budget.status === 'danger'
-                            ? 'Above plan'
+                            ? 'High'
                             : budget.status === 'warning'
-                              ? 'Watch closely'
-                              : 'Healthy'}
+                              ? 'Watch'
+                              : 'Good'}
                         </p>
                       </div>
                     </div>
@@ -232,12 +229,9 @@ export default function DashboardPage() {
             <div>
               <p className="kicker">AI insights</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Helpful, concise, and explainable
+                What changed
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">
-                Short, high-signal summaries that help users understand what changed and why it
-                matters.
-              </p>
+              <p className="mt-1.5 text-sm leading-6 text-slate-500">Short, useful summaries.</p>
             </div>
             <Button asChild size="sm" variant="soft">
               <Link href="/insights">View insights</Link>
@@ -278,11 +272,9 @@ export default function DashboardPage() {
             <div>
               <p className="kicker">Recent transactions</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Latest activity at a glance
+                Recent activity
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">
-                Compact transaction boxes keep merchant, amount, and payment method easy to scan.
-              </p>
+              <p className="mt-1.5 text-sm leading-6 text-slate-500">Latest charges, trimmed.</p>
             </div>
             <Button asChild size="sm" variant="soft">
               <Link href="/transactions">View all</Link>

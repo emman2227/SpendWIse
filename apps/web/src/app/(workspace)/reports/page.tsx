@@ -31,36 +31,36 @@ export default function ReportsPage() {
             <Button variant="secondary">Export PDF</Button>
           </>
         }
-        description="Reports now focus on quicker comparison, clearer export actions, and a more compact monthly story users can review without wading through oversized panels."
-        eyebrow="Reports and analytics"
+        description="Compare, review, and export."
+        eyebrow="Reports"
         meta={
           <>
-            <Badge variant="neutral">Date range controls</Badge>
-            <Badge variant="info">Print-friendly summary</Badge>
+            <Badge variant="neutral">Date filters</Badge>
+            <Badge variant="info">Print ready</Badge>
           </>
         }
-        title="Review spending performance and export a clean monthly story."
+        title="See the monthly story fast."
       />
 
       <section className="grid gap-4 xl:grid-cols-3">
         <MetricCard
-          delta="Current period"
-          helper="Tracked across the visible report categories"
+          delta="Current"
+          helper="This period"
           icon={TrendingUp}
           label="Period spend"
           value={formatMoney(totalCurrent)}
         />
         <MetricCard
-          delta="Previous period"
-          helper="Used for category comparison"
+          delta="Previous"
+          helper="Last period"
           icon={FileText}
           label="Comparison baseline"
           tone="mint"
           value={formatMoney(totalPrevious)}
         />
         <MetricCard
-          delta="Largest category"
-          helper={`${topMover.label} leads the current period`}
+          delta="Top"
+          helper={topMover.label}
           icon={CalendarRange}
           label="Top mover"
           value={topMover.label}
@@ -75,7 +75,7 @@ export default function ReportsPage() {
                 <CalendarRange className="mr-2 inline h-4 w-4" />
                 Mar 1 - Mar 31, 2026
               </button>
-              {['All categories', 'All accounts', 'Monthly view'].map((item) => (
+              {['All categories', 'All accounts', 'Monthly'].map((item) => (
                 <button
                   key={item}
                   className="rounded-[20px] border border-line bg-white px-4 py-3 text-sm font-medium text-slate-600 transition hover:border-brand/30 hover:text-ink"
@@ -93,7 +93,7 @@ export default function ReportsPage() {
               </Button>
               <Button variant="soft">
                 <Download className="h-4 w-4" />
-                Download
+                Export
               </Button>
             </div>
           </div>
@@ -103,37 +103,36 @@ export default function ReportsPage() {
               <div className="max-w-3xl">
                 <p className="kicker">Report snapshot</p>
                 <h2 className="mt-2 text-xl font-semibold text-ink">
-                  The clearest reports tell the monthly story in one glance.
+                  The story should be clear fast.
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Filters, comparisons, budget performance, and printable summary cues now sit
-                  closer together so the report feels easier to use and easier to export.
+                  Filters, charts, exports stay close.
                 </p>
               </div>
               <Button size="sm" variant="secondary">
                 <SlidersHorizontal className="h-4 w-4" />
-                Refine view
+                Filters
               </Button>
             </div>
 
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Report mode
+                  Mode
                 </p>
-                <p className="mt-2 text-lg font-semibold text-ink">Monthly comparison</p>
+                <p className="mt-2 text-lg font-semibold text-ink">Monthly</p>
               </div>
               <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Export state
+                  Export
                 </p>
-                <p className="mt-2 text-lg font-semibold text-ink">Ready for print and PDF</p>
+                <p className="mt-2 text-lg font-semibold text-ink">Print + PDF</p>
               </div>
               <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Review priority
+                  Focus
                 </p>
-                <p className="mt-2 text-lg font-semibold text-ink">Compare category shifts first</p>
+                <p className="mt-2 text-lg font-semibold text-ink">Compare shifts</p>
               </div>
             </div>
           </div>
@@ -146,11 +145,10 @@ export default function ReportsPage() {
             <div>
               <p className="kicker">Category comparison</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Current period versus previous period
+                Current vs previous
               </h2>
               <p className="mt-1.5 text-sm leading-6 text-slate-500">
-                A tighter comparison card makes changes easier to scan without turning the chart
-                area into the whole page.
+                Compare category shifts fast.
               </p>
             </div>
             <Badge variant="info">Current vs previous</Badge>
@@ -166,12 +164,9 @@ export default function ReportsPage() {
             <div>
               <p className="kicker">Trend analysis</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Monthly trajectory at a glance
+                Monthly trend
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">
-                The trend view stays visible, but with a tighter shell so it complements the rest of
-                the report instead of overpowering it.
-              </p>
+              <p className="mt-1.5 text-sm leading-6 text-slate-500">Trend stays close.</p>
             </div>
             <Badge variant="neutral">Budget overlay</Badge>
           </div>
@@ -188,14 +183,13 @@ export default function ReportsPage() {
             <div>
               <p className="kicker">Budget performance</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Budget pacing inside the reporting view
+                Budget performance
               </h2>
               <p className="mt-1.5 text-sm leading-6 text-slate-500">
-                These rows keep budget consumption readable without forcing users to leave the
-                report.
+                Budget use inside the report.
               </p>
             </div>
-            <Button variant="soft">View budget details</Button>
+            <Button variant="soft">Budgets</Button>
           </div>
 
           <div className="mt-5 space-y-2.5">
@@ -247,7 +241,7 @@ export default function ReportsPage() {
                   <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:gap-2.5">
                     <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                        Remaining
+                        Left
                       </p>
                       <p className="mt-1 text-sm font-medium text-ink">
                         {budget.remaining >= 0
@@ -261,10 +255,10 @@ export default function ReportsPage() {
                       </p>
                       <p className="mt-1 text-sm font-medium text-ink">
                         {budget.status === 'danger'
-                          ? 'Above plan'
+                          ? 'High'
                           : budget.status === 'warning'
-                            ? 'Watch closely'
-                            : 'Healthy'}
+                            ? 'Watch'
+                            : 'Good'}
                       </p>
                     </div>
                   </div>
@@ -279,14 +273,11 @@ export default function ReportsPage() {
             <div>
               <p className="kicker">Printable summary</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                A cleaner export-ready monthly story
+                Export-ready summary
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">
-                The summary stays presentation-ready while fitting more naturally inside the report
-                page.
-              </p>
+              <p className="mt-1.5 text-sm leading-6 text-slate-500">Clean and ready to share.</p>
             </div>
-            <Badge variant="info">Ready for PDF export</Badge>
+            <Badge variant="info">PDF ready</Badge>
           </div>
 
           <div className="mt-5 rounded-[26px] border border-white/80 bg-white px-4 py-4 shadow-sm md:px-5 md:py-5">
@@ -301,9 +292,9 @@ export default function ReportsPage() {
 
             <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-3">
               {[
-                ['Total spent', formatMoney(4380)],
-                ['Remaining budget', formatMoney(1420)],
-                ['Savings trend', '18%'],
+                ['Spent', formatMoney(4380)],
+                ['Left', formatMoney(1420)],
+                ['Savings', '18%'],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-[20px] bg-sage/30 px-3.5 py-4 md:px-4">
                   <p className="text-sm leading-6 text-slate-500">{label}</p>
@@ -315,10 +306,9 @@ export default function ReportsPage() {
             </div>
 
             <div className="mt-5 rounded-[22px] border border-white/80 bg-slate-50 px-4 py-5 md:px-5">
-              <p className="font-semibold text-ink">Executive summary</p>
+              <p className="font-semibold text-ink">Summary</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Dining stabilized, shopping exceeded plan because of workspace setup purchases, and
-                forecasts suggest April should remain manageable if transport spend moderates.
+                Dining eased. Shopping ran high. April still looks manageable.
               </p>
             </div>
           </div>

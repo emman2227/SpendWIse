@@ -55,42 +55,42 @@ export default function CategoriesPage() {
         <PageHeader
           actions={
             <>
-              <Button variant="soft">View linked budgets</Button>
+              <Button variant="soft">Linked budgets</Button>
               <Button onClick={() => setIsAddCategoryOpen(true)} variant="secondary">
                 Add category
               </Button>
             </>
           }
-          description="The categories workspace now focuses on fast recognition, cleaner category management, and easier updates without splitting attention across competing cards."
+          description="Keep categories clear and easy to scan."
           eyebrow="Categories"
           meta={
             <>
-              <Badge variant="neutral">Default + custom categories</Badge>
-              <Badge variant="info">Icons, colors, and spend stay aligned</Badge>
+              <Badge variant="neutral">Default + custom</Badge>
+              <Badge variant="info">Icons + colors</Badge>
             </>
           }
-          title="Organize spending into clear groups users can scan instantly."
+          title="Organize spending fast."
         />
 
         <section className="grid gap-4 xl:grid-cols-3">
           <MetricCard
             delta={`${categories.length} active`}
-            helper="Categories currently available"
+            helper="Available"
             icon={Tag}
             label="Category library"
             value={categories.length.toString()}
           />
           <MetricCard
-            delta="Top category"
-            helper={`${highestSpendCategory.name} leads this month`}
+            delta="Top"
+            helper={highestSpendCategory.name}
             icon={SwatchBook}
             label="Tracked spend"
             tone="mint"
             value={formatMoney(totalCategorySpend)}
           />
           <MetricCard
-            delta="Ready to extend"
-            helper="Defaults already cover the common cases"
+            delta="Ready"
+            helper="Defaults cover most use"
             icon={Plus}
             label="Custom categories"
             value="0"
@@ -102,7 +102,7 @@ export default function CategoriesPage() {
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr),auto]">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <Input className="pl-11" placeholder="Search category name, use, or description" />
+                <Input className="pl-11" placeholder="Search categories" />
               </div>
               <Button onClick={() => setIsAddCategoryOpen(true)} variant="secondary">
                 <Plus className="h-4 w-4" />
@@ -111,21 +111,19 @@ export default function CategoriesPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {['All', 'Default', 'Custom', 'Linked to budget', 'Needs review'].map(
-                (item, index) => (
-                  <button
-                    key={item}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      index === 0
-                        ? 'bg-brand text-white shadow-sm'
-                        : 'border border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink'
-                    }`}
-                    type="button"
-                  >
-                    {item}
-                  </button>
-                ),
-              )}
+              {['All', 'Default', 'Custom', 'Linked', 'Review'].map((item, index) => (
+                <button
+                  key={item}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                    index === 0
+                      ? 'bg-brand text-white shadow-sm'
+                      : 'border border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink'
+                  }`}
+                  type="button"
+                >
+                  {item}
+                </button>
+              ))}
             </div>
 
             <div className="rounded-[28px] border border-brand/10 bg-[linear-gradient(140deg,rgba(15,123,113,0.08),rgba(255,255,255,0.92))] px-5 py-5">
@@ -133,12 +131,9 @@ export default function CategoriesPage() {
                 <div className="max-w-3xl">
                   <p className="kicker">Category snapshot</p>
                   <h2 className="mt-2 text-xl font-semibold text-ink">
-                    The most used categories should be the easiest to recognize.
+                    Recognition should be instant.
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
-                    Keep labels, icons, colors, and monthly totals visible together so users can
-                    trust category choices at a glance.
-                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">Name, icon, color, spend.</p>
                 </div>
                 <SwatchBook className="mt-1 h-5 w-5 shrink-0 text-brand" />
               </div>
@@ -146,21 +141,21 @@ export default function CategoriesPage() {
               <div className="mt-4 grid gap-3 md:grid-cols-3">
                 <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Highest spend
+                    Top
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">{highestSpendCategory.name}</p>
                 </div>
                 <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Library behavior
+                    Layout
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">Compact rows, faster review</p>
+                  <p className="mt-2 text-lg font-semibold text-ink">Compact rows</p>
                 </div>
                 <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Add flow
+                    Add
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">Create category in modal</p>
+                  <p className="mt-2 text-lg font-semibold text-ink">In modal</p>
                 </div>
               </div>
             </div>
@@ -172,17 +167,16 @@ export default function CategoriesPage() {
             <div>
               <p className="kicker">Category list</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Review categories in one compact, readable pass
+                Review categories fast
               </h2>
               <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
-                Each row keeps the icon, label, description, color, and monthly spend aligned so the
-                library feels easier to manage.
+                Name, color, spend, actions.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Badge variant="neutral">Icon + color mapping</Badge>
-              <Badge variant="info">Horizontal rows</Badge>
+              <Badge variant="neutral">Mapped</Badge>
+              <Badge variant="info">Rows</Badge>
               <Button onClick={() => setIsAddCategoryOpen(true)} variant="secondary">
                 Add category
               </Button>
@@ -222,7 +216,7 @@ export default function CategoriesPage() {
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                          Monthly spend
+                          Spend
                         </p>
                         <p className="mt-1 text-sm font-medium text-ink">
                           {formatMoney(category.spend)}
@@ -272,15 +266,13 @@ export default function CategoriesPage() {
             <div className="rounded-[24px] border border-brand/15 bg-brand/5 px-4 py-4">
               <p className="font-semibold text-ink">Keep names calm and specific</p>
               <p className="mt-1.5 text-sm leading-6 text-slate-600">
-                Prefer labels like Food, Transport, and Bills over vague buckets that make analytics
-                harder to trust.
+                Prefer names like Food or Bills.
               </p>
             </div>
             <div className="rounded-[24px] border border-slate-200/80 bg-white/75 px-4 py-4">
-              <p className="font-semibold text-ink">Color should support recognition</p>
+              <p className="font-semibold text-ink">Color should help</p>
               <p className="mt-1.5 text-sm leading-6 text-slate-600">
-                The icon chip and color token stay attached to each row so users can spot categories
-                faster across reports and budgets.
+                Keep color tied to each row.
               </p>
             </div>
           </div>
@@ -288,7 +280,7 @@ export default function CategoriesPage() {
           <EmptyState
             action={<Button variant="soft">Create first custom category</Button>}
             className="mt-5 rounded-[24px] px-5 py-6"
-            description="Custom categories help when defaults are not enough, but the base library already keeps spending organized."
+            description="Defaults already work well."
             icon={Search}
             title="No custom categories yet"
           />
@@ -305,13 +297,8 @@ export default function CategoriesPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="kicker">Add category</p>
-                <h2 className="mt-3 text-2xl font-semibold text-ink">
-                  Create a category without leaving the library
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Keep category setup lightweight so users can add a label, choose a color, and go
-                  straight back to review.
-                </p>
+                <h2 className="mt-3 text-2xl font-semibold text-ink">Create category</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Create and return.</p>
               </div>
               <button
                 aria-label="Close add category modal"
@@ -325,17 +312,17 @@ export default function CategoriesPage() {
 
             <form className="mt-6 space-y-4">
               <label className="space-y-2 text-sm font-medium text-ink">
-                <span>Category name</span>
+                <span>Name</span>
                 <Input placeholder="Dining out" />
               </label>
 
               <label className="space-y-2 text-sm font-medium text-ink">
-                <span>Short description</span>
-                <Input placeholder="Meals, cafes, and takeout" />
+                <span>Note</span>
+                <Input placeholder="Meals, cafes" />
               </label>
 
               <div className="space-y-2">
-                <span className="text-sm font-medium text-ink">Color token</span>
+                <span className="text-sm font-medium text-ink">Color</span>
                 <div className="flex flex-wrap gap-3">
                   {colorTokens.map((token, index) => (
                     <button
@@ -359,7 +346,7 @@ export default function CategoriesPage() {
 
               <div className="flex flex-wrap gap-3">
                 <Button type="button" variant="secondary">
-                  Create category
+                  Save
                 </Button>
                 <Button onClick={() => setIsAddCategoryOpen(false)} type="button" variant="soft">
                   Cancel

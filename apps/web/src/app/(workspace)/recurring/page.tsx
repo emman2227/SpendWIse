@@ -18,32 +18,32 @@ export default function RecurringPage() {
       <PageHeader
         actions={
           <>
-            <Button variant="soft">Detect recurring</Button>
-            <Button variant="secondary">Mark transaction recurring</Button>
+            <Button variant="soft">Detect</Button>
+            <Button variant="secondary">New rule</Button>
           </>
         }
-        description="Recurring payments deserve one place where users can review fixed costs, upcoming charges, and billing cadence without digging through transactions."
-        eyebrow="Recurring expenses"
+        description="Review fixed charges in one place."
+        eyebrow="Recurring"
         meta={
           <>
-            <Badge variant="neutral">Calendar-friendly cues</Badge>
-            <Badge variant="info">Monthly obligation summary</Badge>
+            <Badge variant="neutral">Calendar cues</Badge>
+            <Badge variant="info">Monthly total</Badge>
           </>
         }
-        title="Track subscriptions, bills, and repeated spending in one calm view."
+        title="Track recurring spend."
       />
 
       <section className="grid gap-4 xl:grid-cols-3">
         <MetricCard
-          delta="Monthly total"
-          helper="Combined recurring charges this cycle"
+          delta="This cycle"
+          helper="Recurring total"
           icon={Wallet}
           label="Recurring spend"
           value={formatMoney(recurringTotal)}
         />
         <MetricCard
           delta={`${renewingCount} renewing`}
-          helper="Payments currently active and repeating"
+          helper="Active now"
           icon={Repeat2}
           tone="mint"
           label="Active renewals"
@@ -51,7 +51,7 @@ export default function RecurringPage() {
         />
         <MetricCard
           delta={`${upcomingCount} upcoming`}
-          helper="Charges already visible on the near-term calendar"
+          helper="Soon"
           icon={CalendarClock}
           label="Upcoming charges"
           value={upcomingCount.toString()}
@@ -63,42 +63,34 @@ export default function RecurringPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-3xl">
               <p className="kicker">Recurring snapshot</p>
-              <h2 className="mt-2 text-xl font-semibold text-ink">
-                Fixed costs are easiest to manage when the next charge is obvious.
-              </h2>
+              <h2 className="mt-2 text-xl font-semibold text-ink">Fixed costs, up front.</h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">
-                This view keeps total recurring spend, charge timing, and status cues close together
-                so users can spot renewals and paused items without scanning noisy transaction
-                lists.
+                See total, timing, and status.
               </p>
             </div>
-            <Button variant="secondary">Add recurring rule</Button>
+            <Button variant="secondary">New rule</Button>
           </div>
 
           <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
             <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                Next focus
+                Focus
+              </p>
+              <p className="mt-2 text-lg font-semibold leading-tight text-ink">Check next dates</p>
+            </div>
+            <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Use
               </p>
               <p className="mt-2 text-lg font-semibold leading-tight text-ink">
-                Review the next charge dates first
+                Split true repeats
               </p>
             </div>
             <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                Strongest use
+                Next
               </p>
-              <p className="mt-2 text-lg font-semibold leading-tight text-ink">
-                Separate true subscriptions from one-time noise
-              </p>
-            </div>
-            <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                Best next move
-              </p>
-              <p className="mt-2 text-lg font-semibold leading-tight text-ink">
-                Pause anything no longer worth renewing
-              </p>
+              <p className="mt-2 text-lg font-semibold leading-tight text-ink">Pause extras</p>
             </div>
           </div>
         </div>
@@ -110,12 +102,9 @@ export default function RecurringPage() {
             <div>
               <p className="kicker">Upcoming charges</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                The next recurring payments in one compact list
+                Next charges
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">
-                Keep the soonest charges visible so users can anticipate renewals without needing a
-                separate calendar screen.
-              </p>
+              <p className="mt-1.5 text-sm leading-6 text-slate-500">See what hits soon.</p>
             </div>
             <CalendarClock className="h-5 w-5 text-brand" />
           </div>
@@ -170,14 +159,13 @@ export default function RecurringPage() {
             <div>
               <p className="kicker">Recurring payments list</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Fixed monthly obligations at a glance
+                Fixed charges at a glance
               </h2>
               <p className="mt-1.5 text-sm leading-6 text-slate-500">
-                Each row keeps the payment name, cadence, next charge, and method readable without
-                forcing labels to collide at tighter widths.
+                Name, date, method, actions.
               </p>
             </div>
-            <Button variant="soft">Review all renewals</Button>
+            <Button variant="soft">View all</Button>
           </div>
 
           <div className="mt-5 space-y-2.5">
@@ -230,7 +218,7 @@ export default function RecurringPage() {
                     </div>
                     <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                        Payment method
+                        Method
                       </p>
                       <div className="mt-1 flex items-center gap-2">
                         <CreditCard className="h-4 w-4 text-slate-400" />

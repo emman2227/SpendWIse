@@ -48,41 +48,41 @@ export default function BudgetsPage() {
         <PageHeader
           actions={
             <>
-              <Button variant="soft">View alerts</Button>
+              <Button variant="soft">Alerts</Button>
               <Button onClick={() => setIsCreateBudgetOpen(true)} variant="secondary">
                 Create budget
               </Button>
             </>
           }
-          description="The budgets workspace is redesigned to answer the questions users actually have: what is safe, what is close to slipping, and what should be adjusted next."
+          description="See what is safe, close, or over."
           eyebrow="Budgets"
           meta={
             <>
-              <Badge variant="success">On-track and at-risk states</Badge>
-              <Badge variant="neutral">Cleaner review flow</Badge>
+              <Badge variant="success">Safe + at risk</Badge>
+              <Badge variant="neutral">Fast review</Badge>
             </>
           }
-          title="Stay ahead of spending pressure with clearer budget pacing."
+          title="Keep budgets on track."
         />
 
         <section className="grid gap-4 xl:grid-cols-3">
           <MetricCard
             delta={`+${remainingBudgetMetric.delta}%`}
-            helper="Still available this month"
+            helper="Now"
             icon={Target}
             label="Remaining budget"
             value={formatMoney(remainingBudgetMetric.value)}
           />
           <MetricCard
-            delta={`${atRiskCount} need attention`}
-            helper={`${safeCount} categories are currently on track`}
+            delta={`${atRiskCount} at risk`}
+            helper={`${safeCount} safe`}
             icon={ShieldAlert}
             label="Categories at risk"
             value={atRiskCount.toString()}
           />
           <MetricCard
             delta="+4%"
-            helper="Projected savings lift"
+            helper="Month-end"
             icon={TrendingUp}
             label="End-of-month outlook"
             tone="mint"
@@ -94,14 +94,9 @@ export default function BudgetsPage() {
           <div className="space-y-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-3xl">
-                <p className="kicker">Budget snapshot</p>
-                <h2 className="mt-2 text-xl font-semibold text-ink">
-                  Your budget health is strongest when the next action is obvious.
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  This view keeps totals, risk, and pacing in one place so users can review budgets
-                  quickly without jumping between cards.
-                </p>
+                <p className="kicker">Overview</p>
+                <h2 className="mt-2 text-xl font-semibold text-ink">Budget health at a glance.</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Totals, risk, next step.</p>
               </div>
               <Button onClick={() => setIsCreateBudgetOpen(true)} size="sm" variant="secondary">
                 <Plus className="h-4 w-4" />
@@ -112,22 +107,22 @@ export default function BudgetsPage() {
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Total budgeted
+                  Budgeted
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-ink">{formatMoney(totalBudgeted)}</p>
               </div>
               <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Total spent
+                  Spent
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-ink">{formatMoney(totalSpent)}</p>
               </div>
               <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Next priority
+                  Next
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-ink">
-                  {atRiskCount ? 'Review at-risk budgets' : 'All budgets are steady'}
+                  {atRiskCount ? 'Review risk' : 'All steady'}
                 </p>
               </div>
             </div>
@@ -139,17 +134,16 @@ export default function BudgetsPage() {
             <div>
               <p className="kicker">Budget list</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Review every budget in one calm, compact pass
+                Review budgets fast
               </h2>
               <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
-                Each row keeps the category name, progress, remaining amount, and state aligned so
-                the user can judge budget health in seconds.
+                Status, progress, and left stay together.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Badge variant="neutral">Monthly pacing</Badge>
-              <Badge variant="info">Horizontal rows</Badge>
+              <Badge variant="neutral">Monthly</Badge>
+              <Badge variant="info">Rows</Badge>
               <Button onClick={() => setIsCreateBudgetOpen(true)} variant="secondary">
                 Create budget
               </Button>
@@ -220,7 +214,7 @@ export default function BudgetsPage() {
                     <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:items-center lg:gap-2.5">
                       <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                          Remaining
+                          Left
                         </p>
                         <p className="mt-1 text-sm font-medium text-ink">
                           {budget.remaining >= 0
@@ -234,10 +228,10 @@ export default function BudgetsPage() {
                         </p>
                         <p className="mt-1 text-sm font-medium text-ink">
                           {budget.status === 'danger'
-                            ? 'Above plan'
+                            ? 'High'
                             : budget.status === 'warning'
-                              ? 'Watch closely'
-                              : 'Healthy'}
+                              ? 'Watch'
+                              : 'Good'}
                         </p>
                       </div>
                     </div>
@@ -273,10 +267,9 @@ export default function BudgetsPage() {
               <div className="flex items-start gap-3">
                 <CircleAlert className="mt-0.5 h-5 w-5 text-warning" />
                 <div>
-                  <p className="font-semibold text-ink">Near-limit reminder</p>
+                  <p className="font-semibold text-ink">Near limit</p>
                   <p className="mt-1.5 text-sm leading-6 text-slate-600">
-                    Food and dining has only {formatMoney(120)} left this month, so it should stay
-                    visible in review.
+                    Food has {formatMoney(120)} left.
                   </p>
                 </div>
               </div>
@@ -285,10 +278,9 @@ export default function BudgetsPage() {
               <div className="flex items-start gap-3">
                 <ShieldAlert className="mt-0.5 h-5 w-5 text-danger" />
                 <div>
-                  <p className="font-semibold text-ink">Over-budget alert</p>
+                  <p className="font-semibold text-ink">Over budget</p>
                   <p className="mt-1.5 text-sm leading-6 text-slate-600">
-                    Shopping is already {formatMoney(90)} over plan and should be the first category
-                    to adjust.
+                    Shopping is {formatMoney(90)} over.
                   </p>
                 </div>
               </div>
@@ -306,14 +298,9 @@ export default function BudgetsPage() {
           <div className="panel-surface-strong max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[32px] px-5 py-5 md:px-7 md:py-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="kicker">Create budget</p>
-                <h2 className="mt-3 text-2xl font-semibold text-ink">
-                  Add a budget without losing your place
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Keep setup lightweight so users can create or adjust a limit and go straight back
-                  to review.
-                </p>
+                <p className="kicker">New budget</p>
+                <h2 className="mt-3 text-2xl font-semibold text-ink">Create budget</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Set it and return.</p>
               </div>
               <button
                 aria-label="Close create budget modal"
@@ -339,13 +326,13 @@ export default function BudgetsPage() {
 
             <form className="mt-6 space-y-4">
               <label className="space-y-2 text-sm font-medium text-ink">
-                <span>Budget name or category</span>
-                <Input placeholder="Food and dining" />
+                <span>Name</span>
+                <Input placeholder="Food" />
               </label>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-2 text-sm font-medium text-ink">
-                  <span>Limit amount</span>
+                  <span>Limit</span>
                   <Input placeholder="$600" />
                 </label>
                 <label className="space-y-2 text-sm font-medium text-ink">
@@ -356,18 +343,18 @@ export default function BudgetsPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-2 text-sm font-medium text-ink">
-                  <span>Starts on</span>
+                  <span>Start</span>
                   <Input placeholder="Apr 1, 2026" />
                 </label>
                 <label className="space-y-2 text-sm font-medium text-ink">
-                  <span>Alert threshold</span>
+                  <span>Alert</span>
                   <Input placeholder="80%" />
                 </label>
               </div>
 
               <div className="flex flex-wrap gap-3">
                 <Button type="button" variant="secondary">
-                  Save budget
+                  Save
                 </Button>
                 <Button onClick={() => setIsCreateBudgetOpen(false)} type="button" variant="soft">
                   Cancel
