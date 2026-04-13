@@ -91,39 +91,68 @@ export default function BudgetsPage() {
         </section>
 
         <SurfaceCard className="overflow-hidden rounded-[34px] px-5 py-5 md:px-6 md:py-6">
-          <div className="space-y-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-3xl">
-                <p className="kicker">Overview</p>
-                <h2 className="mt-2 text-xl font-semibold text-ink">Budget health at a glance.</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">Totals, risk, next step.</p>
+          <div className="space-y-4">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr),auto]">
+              <div className="relative">
+                <Input className="pl-4" placeholder="Search budgets" />
               </div>
-              <Button onClick={() => setIsCreateBudgetOpen(true)} size="sm" variant="secondary">
+              <Button onClick={() => setIsCreateBudgetOpen(true)} variant="secondary">
                 <Plus className="h-4 w-4" />
                 Add budget
               </Button>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Budgeted
-                </p>
-                <p className="mt-2 text-2xl font-semibold text-ink">{formatMoney(totalBudgeted)}</p>
+            <div className="flex flex-wrap gap-2">
+              {['All', 'Safe', 'Watch', 'Over'].map((item, index) => (
+                <button
+                  key={item}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                    index === 0
+                      ? 'bg-brand text-white shadow-sm'
+                      : 'border border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink'
+                  }`}
+                  type="button"
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+
+            <div className="rounded-[28px] border border-brand/10 bg-[linear-gradient(140deg,rgba(15,123,113,0.08),rgba(255,255,255,0.92))] px-5 py-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="max-w-3xl">
+                  <p className="kicker">Overview</p>
+                  <h2 className="mt-2 text-xl font-semibold text-ink">
+                    Budget health at a glance.
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">Totals, risk, next step.</p>
+                </div>
+                <Target className="mt-1 h-5 w-5 shrink-0 text-brand" />
               </div>
-              <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Spent
-                </p>
-                <p className="mt-2 text-2xl font-semibold text-ink">{formatMoney(totalSpent)}</p>
-              </div>
-              <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Next
-                </p>
-                <p className="mt-2 text-2xl font-semibold text-ink">
-                  {atRiskCount ? 'Review risk' : 'All steady'}
-                </p>
+
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    Budgeted
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-ink">
+                    {formatMoney(totalBudgeted)}
+                  </p>
+                </div>
+                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    Spent
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-ink">{formatMoney(totalSpent)}</p>
+                </div>
+                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    Next
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-ink">
+                    {atRiskCount ? 'Review risk' : 'All steady'}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

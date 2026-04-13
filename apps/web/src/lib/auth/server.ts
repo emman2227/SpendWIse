@@ -111,6 +111,37 @@ export const clearSessionCookies = (response: NextResponse) => {
   clearCookie(response, SESSION_ACTIVITY_COOKIE, false);
 };
 
+export const createAuthenticationRequiredResponse = () => {
+  const response = NextResponse.json(
+    {
+      message: 'Authentication required.',
+    },
+    {
+      status: 401,
+    },
+  );
+
+  clearSessionCookies(response);
+
+  return response;
+};
+
+export const resolveAccessToken = (request: NextRequest, session: { tokens?: AuthTokens } | null) =>
+  session?.tokens?.accessToken ?? request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+
+export const applySessionToResponse = (
+  response: NextResponse,
+  session: { tokens?: AuthTokens },
+) => {
+  if (session.tokens) {
+    setSessionCookies(response, session.tokens);
+  } else {
+    touchActivityCookie(response);
+  }
+
+  return response;
+};
+
 export const parseRequestBody = async <TOutput>(
   request: Request,
   schema: SafeParseSchema<TOutput>,

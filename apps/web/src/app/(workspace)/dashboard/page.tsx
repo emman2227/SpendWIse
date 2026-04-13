@@ -22,6 +22,10 @@ import { formatDelta, formatMoney } from '@/lib/formatters';
 const metricIcons = [Wallet, Target, ReceiptText, PiggyBank];
 
 export default function DashboardPage() {
+  const topCategory = categoryShare.reduce((leader, category) =>
+    category.amount > leader.amount ? category : leader,
+  );
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -71,27 +75,53 @@ export default function DashboardPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.2fr,0.8fr]">
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+        <SurfaceCard className="rounded-[32px] px-5 py-5 md:px-6 md:py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="kicker">Spending overview</p>
-              <h2 className="mt-3 text-2xl font-semibold text-ink">Spending vs budget</h2>
+              <h2 className="mt-2 text-xl font-semibold text-ink">Spending vs budget</h2>
             </div>
             <div className="flex flex-wrap gap-2">
               <Badge variant="neutral">6 months</Badge>
               <Badge variant="info">Forecast</Badge>
             </div>
           </div>
-          <div className="mt-6">
+          <div className="mt-5">
             <SpendingOverviewChart data={spendingTrend} />
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <div className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Spend
+              </p>
+              <p className="mt-2 text-lg font-semibold text-ink">
+                {formatMoney(summaryMetrics[0]?.value ?? 0)}
+              </p>
+            </div>
+            <div className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Left
+              </p>
+              <p className="mt-2 text-lg font-semibold text-ink">
+                {formatMoney(summaryMetrics[1]?.value ?? 0)}
+              </p>
+            </div>
+            <div className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Txns
+              </p>
+              <p className="mt-2 text-lg font-semibold text-ink">
+                {summaryMetrics[2]?.value?.toString() ?? transactions.length.toString()}
+              </p>
+            </div>
           </div>
         </SurfaceCard>
 
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+        <SurfaceCard className="rounded-[32px] px-5 py-5 md:px-6 md:py-6">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="kicker">Category mix</p>
-              <h2 className="mt-3 text-2xl font-semibold text-ink">Category mix</h2>
+              <h2 className="mt-2 text-xl font-semibold text-ink">Category mix</h2>
             </div>
             <ArrowUpRight className="h-5 w-5 text-brand" />
           </div>
@@ -100,7 +130,22 @@ export default function DashboardPage() {
             <CategoryShareChart data={categoryShare} />
           </div>
 
-          <div className="mt-3 space-y-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Top
+              </p>
+              <p className="mt-2 text-lg font-semibold text-ink">{topCategory.name}</p>
+            </div>
+            <div className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Share
+              </p>
+              <p className="mt-2 text-lg font-semibold text-ink">{topCategory.share}%</p>
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-2.5">
             {categoryShare.slice(0, 4).map((category) => (
               <div key={category.name} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-3">
