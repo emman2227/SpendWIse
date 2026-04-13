@@ -1,14 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 
-import type { BudgetsRepository } from '../budgets/budgets.repository';
-import type { ExpensesRepository } from '../expenses/expenses.repository';
-import type { CategoriesRepository } from './categories.repository';
+import { BudgetsRepository } from '../budgets/budgets.repository';
+import { ExpensesRepository } from '../expenses/expenses.repository';
+import { CategoriesRepository } from './categories.repository';
 
 @Injectable()
 export class CategoriesService {
   constructor(
+    @Inject(CategoriesRepository)
     private readonly categoriesRepository: CategoriesRepository,
+    @Inject(ExpensesRepository)
     private readonly expensesRepository: ExpensesRepository,
+    @Inject(BudgetsRepository)
     private readonly budgetsRepository: BudgetsRepository,
   ) {}
 

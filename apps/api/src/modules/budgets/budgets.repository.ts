@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Budget } from '@spendwise/shared';
 import type { Model } from 'mongoose';
@@ -42,6 +42,16 @@ export class BudgetsRepository {
 
   countByCategoryId(userId: string, categoryId: string) {
     return this.budgetModel.countDocuments({ userId, categoryId }).exec();
+  }
+
+  async delete(id: string, userId: string) {
+    const budget = await this.budgetModel.findOneAndDelete({ _id: id, userId }).exec();
+
+    if (!budget) {
+      throw new NotFoundException('Budget not found');
+    }
+
+    return budget;
   }
 
   toDomain(document: BudgetDocument): Budget {

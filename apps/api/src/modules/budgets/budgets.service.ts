@@ -1,12 +1,12 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { z } from 'zod';
 
-import { ExpensesService } from '../expenses/expenses.service';
-import { BudgetsRepository } from './budgets.repository';
+import type { ExpensesService } from '../expenses/expenses.service';
+import type { BudgetsRepository } from './budgets.repository';
 
 export const budgetSummaryQuerySchema = z.object({
   month: z.coerce.number().int().min(1).max(12),
-  year: z.coerce.number().int().min(2000).max(3000)
+  year: z.coerce.number().int().min(2000).max(3000),
 });
 
 @Injectable()
@@ -27,7 +27,7 @@ export class BudgetsService {
   ) {
     const budget = await this.budgetsRepository.upsert({
       userId,
-      ...input
+      ...input,
     });
 
     if (!budget) {
@@ -42,10 +42,15 @@ export class BudgetsService {
     return budgets.map((budget) => this.budgetsRepository.toDomain(budget));
   }
 
+  async delete(userId: string, budgetId: string) {
+    const budget = await this.budgetsRepository.delete(budgetId, userId);
+    return this.budgetsRepository.toDomain(budget);
+  }
+
   async getSummary(userId: string, month: number, year: number) {
     const [budgets, spendByCategory] = await Promise.all([
       this.list(userId, month, year),
-      this.expensesService.getMonthlyCategoryTotals(userId, month, year)
+      this.expensesService.getMonthlyCategoryTotals(userId, month, year),
     ]);
 
     return {
@@ -57,9 +62,9 @@ export class BudgetsService {
           ...budget,
           spent,
           remaining: budget.limitAmount - spent,
-          isOverBudget: spent > budget.limitAmount
+          isOverBudget: spent > budget.limitAmount,
         };
-      })
+      }),
     };
   }
 }
