@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Post,
   Query,
@@ -15,8 +16,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { AuthUser } from '../../common/types/auth-user.interface';
-import type { BudgetsService} from './budgets.service';
-import {budgetSummaryQuerySchema } from './budgets.service';
+import { BudgetsService, budgetSummaryQuerySchema } from './budgets.service';
 
 @Controller({
   path: 'budgets',
@@ -24,7 +24,7 @@ import {budgetSummaryQuerySchema } from './budgets.service';
 })
 @UseGuards(JwtAuthGuard)
 export class BudgetsController {
-  constructor(private readonly budgetsService: BudgetsService) {}
+  constructor(@Inject(BudgetsService) private readonly budgetsService: BudgetsService) {}
 
   @Post()
   @UsePipes(new ZodValidationPipe(createBudgetSchema))

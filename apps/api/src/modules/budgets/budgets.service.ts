@@ -1,8 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { z } from 'zod';
 
-import type { ExpensesService } from '../expenses/expenses.service';
-import type { BudgetsRepository } from './budgets.repository';
+import { ExpensesService } from '../expenses/expenses.service';
+import { BudgetsRepository } from './budgets.repository';
 
 export const budgetSummaryQuerySchema = z.object({
   month: z.coerce.number().int().min(1).max(12),
@@ -12,7 +12,9 @@ export const budgetSummaryQuerySchema = z.object({
 @Injectable()
 export class BudgetsService {
   constructor(
+    @Inject(BudgetsRepository)
     private readonly budgetsRepository: BudgetsRepository,
+    @Inject(ExpensesService)
     private readonly expensesService: ExpensesService,
   ) {}
 

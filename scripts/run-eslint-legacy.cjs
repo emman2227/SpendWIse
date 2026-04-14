@@ -12,7 +12,10 @@ const eslintBin = path.join(
 );
 
 const result = spawnSync(process.execPath, [eslintBin, ...process.argv.slice(2)], {
-  env: process.env,
+  env: {
+    ...process.env,
+    NODE_NO_WARNINGS: '1',
+  },
   stdio: 'inherit',
 });
 

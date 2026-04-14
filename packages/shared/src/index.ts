@@ -5,6 +5,7 @@ export * from './schemas/category';
 export * from './schemas/common';
 export * from './schemas/expense';
 export * from './schemas/forecast';
+export * from './schemas/goal';
 export * from './schemas/insight';
 export * from './schemas/user';
 export * from './types/api';

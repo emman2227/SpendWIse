@@ -57,6 +57,15 @@ export interface Budget extends BaseEntity {
   year: number;
 }
 
+export interface Goal extends BaseEntity {
+  userId: string;
+  title: string;
+  targetAmount: number;
+  currentAmount: number;
+  targetDate: string;
+  notes?: string;
+}
+
 export interface Insight extends BaseEntity {
   userId: string;
   type: InsightType;
