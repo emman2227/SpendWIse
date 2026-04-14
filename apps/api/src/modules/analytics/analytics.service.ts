@@ -1,11 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-
+import { AnalyticsService as AiAnalyticsService, createAnalyticsProvider } from '@spendwise/ai';
 import type { Insight } from '@spendwise/shared';
-import {
-  AnalyticsService as AiAnalyticsService,
-  createAnalyticsProvider
-} from '@spendwise/ai';
 
 import { BudgetsService } from '../budgets/budgets.service';
 import { ExpensesService } from '../expenses/expenses.service';
@@ -16,9 +12,13 @@ export class AnalyticsService {
   private readonly analyticsEngine: AiAnalyticsService;
 
   constructor(
+    @Inject(ExpensesService)
     private readonly expensesService: ExpensesService,
+    @Inject(BudgetsService)
     private readonly budgetsService: BudgetsService,
+    @Inject(AnalyticsRepository)
     private readonly analyticsRepository: AnalyticsRepository,
+    @Inject(ConfigService)
     configService: ConfigService,
   ) {
     const provider = createAnalyticsProvider(configService.get<string>('AI_PROVIDER'));
@@ -29,7 +29,7 @@ export class AnalyticsService {
     const expenses = await this.expensesService.list(userId, {});
     const [insights, forecast] = await Promise.all([
       this.analyticsEngine.buildInsights(userId, expenses),
-      this.analyticsEngine.forecast(userId, expenses, 'monthly')
+      this.analyticsEngine.forecast(userId, expenses, 'monthly'),
     ]);
 
     const timestamp = new Date().toISOString();
@@ -40,25 +40,22 @@ export class AnalyticsService {
       title: insight.title,
       message: insight.message,
       createdAt: timestamp,
-      updatedAt: timestamp
+      updatedAt: timestamp,
     }));
 
-    const savedInsights = await this.analyticsRepository.replaceInsights(
-      userId,
-      insightPayload,
-    );
+    const savedInsights = await this.analyticsRepository.replaceInsights(userId, insightPayload);
 
     const savedForecast = await this.analyticsRepository.saveForecast({
       userId,
       period: forecast.period,
       predictedAmount: forecast.predictedAmount,
       confidence: forecast.confidence,
-      generatedAt: new Date(forecast.generatedAt)
+      generatedAt: new Date(forecast.generatedAt),
     });
 
     return {
       insights: savedInsights,
-      forecast: savedForecast
+      forecast: savedForecast,
     };
   }
 
@@ -71,7 +68,7 @@ export class AnalyticsService {
       this.expensesService.list(userId, { month, year }),
       this.budgetsService.getSummary(userId, month, year),
       this.analyticsRepository.getLatestInsights(userId),
-      this.analyticsRepository.getLatestForecast(userId, 'monthly')
+      this.analyticsRepository.getLatestForecast(userId, 'monthly'),
     ]);
 
     const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -82,19 +79,19 @@ export class AnalyticsService {
       }, {}),
     ).map(([categoryId, amount]) => ({
       categoryId,
-      amount
+      amount,
     }));
 
     return {
       totals: {
         totalExpenses,
-        transactionCount: expenses.length
+        transactionCount: expenses.length,
       },
       budgetSummary,
       recentTransactions: expenses.slice(0, 5),
       categoryBreakdown,
       insights,
-      forecast
+      forecast,
     };
   }
 }
