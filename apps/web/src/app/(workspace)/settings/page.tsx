@@ -14,7 +14,6 @@ import type { LucideIcon } from 'lucide-react';
 import {
   BellRing,
   CheckCircle2,
-  Clock3,
   Download,
   EyeOff,
   Globe2,
@@ -28,7 +27,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +42,15 @@ import {
 } from '@/lib/auth/client';
 import { sanitizePasswordInput } from '@/lib/auth/input';
 import { getPasswordStrength } from '@/lib/auth/password-strength';
+import {
+  defaultNotificationPreferences,
+  type NotificationPreferenceKey,
+  notificationPreferenceOptions,
+  type NotificationPreferences,
+  notificationPreferencesChangedEvent,
+  notificationPreferencesStorageKey,
+  parseNotificationPreferences,
+} from '@/lib/notifications/preferences';
 import { cn } from '@/lib/utils';
 
 type SettingsTabId = 'account' | 'security' | 'notifications' | 'preferences' | 'privacy';
@@ -100,6 +108,9 @@ const settingsTabs: SettingsTab[] = [
     icon: Lock,
   },
 ];
+
+const isSettingsTabId = (value: string | null): value is SettingsTabId =>
+  Boolean(value && settingsTabs.some((tab) => tab.id === value));
 
 const initialSecurityValues: SecurityValues = {
   currentPassword: '',
@@ -678,54 +689,154 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
 }
 
 function NotificationsPanel() {
+  const [preferences, setPreferences] = useState<NotificationPreferences>(
+    defaultNotificationPreferences,
+  );
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    setPreferences(
+      parseNotificationPreferences(window.localStorage.getItem(notificationPreferencesStorageKey)),
+    );
+  }, []);
+
+  const persistPreferences = (nextPreferences: NotificationPreferences, nextMessage: string) => {
+    setPreferences(nextPreferences);
+    setMessage(nextMessage);
+    window.localStorage.setItem(notificationPreferencesStorageKey, JSON.stringify(nextPreferences));
+    window.dispatchEvent(new Event(notificationPreferencesChangedEvent));
+  };
+
+  const setPreference = (key: NotificationPreferenceKey, enabled: boolean) => {
+    persistPreferences(
+      {
+        ...preferences,
+        [key]: enabled,
+      },
+      `${enabled ? 'Enabled' : 'Paused'} ${notificationPreferenceOptions.find((item) => item.key === key)?.label.toLowerCase()}.`,
+    );
+  };
+
+  const setAllPreferences = (enabled: boolean) => {
+    persistPreferences(
+      Object.fromEntries(
+        notificationPreferenceOptions.map((option) => [option.key, enabled]),
+      ) as NotificationPreferences,
+      enabled ? 'All notification channels enabled.' : 'All notification channels paused.',
+    );
+  };
+
+  const resetPreferences = () => {
+    persistPreferences(defaultNotificationPreferences, 'Notification settings reset to default.');
+  };
+
+  const activeChannelCount = notificationPreferenceOptions.filter(
+    (option) => preferences[option.key],
+  ).length;
+  const allChannelsEnabled = activeChannelCount === notificationPreferenceOptions.length;
+  const allChannelsPaused = activeChannelCount === 0;
+
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.15fr,0.85fr]">
-      <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-            <BellRing className="h-5 w-5" />
+    <SurfaceCard className="overflow-hidden rounded-[32px] px-0 py-0">
+      <div className="border-b border-line/80 px-6 py-6 md:px-7">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+                <BellRing className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="kicker">Notifications</p>
+                <h2 className="mt-2 text-2xl font-semibold text-ink">Choose what reaches you</h2>
+              </div>
+            </div>
+            <p className="mt-4 text-sm leading-7 text-slate-600">
+              These controls affect the notification bell in the header. Keep only the reminders you
+              want active.
+            </p>
           </div>
-          <div>
-            <p className="kicker">Notifications</p>
-            <h2 className="mt-2 text-2xl font-semibold text-ink">
-              Alerts that help without overwhelming
-            </h2>
+
+          <div className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-4 shadow-sm">
+            <p className="text-sm font-medium text-slate-500">Active channels</p>
+            <p className="mt-2 text-3xl font-semibold text-ink">
+              {activeChannelCount}/{notificationPreferenceOptions.length}
+            </p>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-brand">
+              {allChannelsPaused ? 'Paused' : 'Live'}
+            </p>
           </div>
         </div>
 
-        <div className="mt-6 space-y-4">
-          <ToggleRow
-            description="Receive a heads-up before important budgets drift off track."
-            enabled
-            label="Budget threshold alerts"
-          />
-          <ToggleRow
-            description="Get short reminders when recurring bills or subscriptions are about to land."
-            enabled
-            label="Recurring payment reminders"
-          />
-          <ToggleRow
-            description="See lightweight nudges when projections show a tighter month ahead."
-            label="Forecast watch notifications"
-          />
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button
+            disabled={allChannelsEnabled}
+            onClick={() => setAllPreferences(true)}
+            size="sm"
+            variant="secondary"
+          >
+            Enable all
+          </Button>
+          <Button
+            disabled={allChannelsPaused}
+            onClick={() => setAllPreferences(false)}
+            size="sm"
+            variant="soft"
+          >
+            Pause all
+          </Button>
+          <Button onClick={resetPreferences} size="sm" variant="outline">
+            Reset defaults
+          </Button>
         </div>
-      </SurfaceCard>
 
-      <div className="space-y-6">
-        <DetailCard
-          actionLabel="Edit quiet hours"
-          description="Pause non-urgent reminders from 9:00 PM to 7:00 AM so the app stays respectful."
-          icon={Clock3}
-          title="Quiet hours"
-        />
-        <DetailCard
-          actionLabel="Manage digests"
-          description="Bundle lower-priority updates into a daily summary instead of sending them one by one."
-          icon={BellRing}
-          title="Daily digest"
-        />
+        {message ? (
+          <div className="mt-4 rounded-[18px] border border-brand/15 bg-brand/10 px-4 py-3 text-sm text-slate-700">
+            {message}
+          </div>
+        ) : null}
       </div>
-    </div>
+
+      <div className="grid gap-3 px-5 py-5 md:grid-cols-2 md:px-6 md:py-6">
+        {notificationPreferenceOptions.map((option) => {
+          const enabled = preferences[option.key];
+
+          return (
+            <button
+              aria-pressed={enabled}
+              className={cn(
+                'flex min-h-[118px] items-start justify-between gap-4 rounded-[24px] border px-5 py-5 text-left transition',
+                enabled
+                  ? 'border-brand/20 bg-brand/5 shadow-sm'
+                  : 'border-line bg-white/80 hover:border-brand/20',
+              )}
+              key={option.key}
+              onClick={() => setPreference(option.key, !enabled)}
+              type="button"
+            >
+              <span className="min-w-0">
+                <span className="font-semibold text-ink">{option.label}</span>
+                <span className="mt-2 block text-sm leading-6 text-slate-500">
+                  {option.description}
+                </span>
+              </span>
+              <span
+                className={cn(
+                  'flex h-7 w-12 shrink-0 items-center rounded-full p-1 transition-colors',
+                  enabled ? 'bg-brand' : 'bg-slate-300',
+                )}
+              >
+                <span
+                  className={cn(
+                    'h-5 w-5 rounded-full bg-white transition-transform',
+                    enabled ? 'translate-x-5' : 'translate-x-0',
+                  )}
+                />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </SurfaceCard>
   );
 }
 
@@ -871,6 +982,14 @@ function PrivacyPanel() {
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTabId>('security');
   const { data: user } = useCurrentUserQuery();
+
+  useEffect(() => {
+    const requestedTab = new URLSearchParams(window.location.search).get('tab');
+
+    if (isSettingsTabId(requestedTab)) {
+      setActiveTab(requestedTab);
+    }
+  }, []);
 
   const activePanel =
     activeTab === 'account' ? (

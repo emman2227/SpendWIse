@@ -1,7 +1,7 @@
 'use client';
 
 import { useIsFetching, useQueryClient } from '@tanstack/react-query';
-import { Bell, CreditCard, LifeBuoy, LogOut, Plus, Search, Sparkles } from 'lucide-react';
+import { CreditCard, LifeBuoy, LogOut, Plus, Search, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { type ReactNode, useState } from 'react';
@@ -15,6 +15,7 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { LoadingIndicatorBar } from '../ui/loading-indicator-bar';
+import { HeaderNotificationModal } from './notification-modal';
 
 interface WorkspaceShellProps {
   children: ReactNode;
@@ -56,7 +57,7 @@ const desktopNavigationSections = [
     items: [
       ...primaryNavigation.filter((item) => ['/recurring', '/goals'].includes(item.href)),
       ...secondaryNavigation.filter((item) =>
-        ['/anomalies', '/notifications', '/profile', '/settings', '/help'].includes(item.href),
+        ['/anomalies', '/profile', '/settings', '/help'].includes(item.href),
       ),
     ],
   },
@@ -213,11 +214,7 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
                     Add expense
                   </Link>
                 </Button>
-                <Button asChild size="icon" variant="soft">
-                  <Link aria-label="Notifications" href="/notifications">
-                    <Bell className="h-4 w-4" />
-                  </Link>
-                </Button>
+                <HeaderNotificationModal />
                 <Button asChild size="icon" variant="soft">
                   <Link aria-label="Help and support" href="/help">
                     <LifeBuoy className="h-4 w-4" />

@@ -1,6 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
 import {
-  Bell,
   BookOpen,
   ChartColumnIncreasing,
   CircleHelp,
@@ -94,13 +93,6 @@ export const secondaryNavigation: NavigationItem[] = [
     icon: ShieldAlert,
   },
   {
-    href: '/notifications',
-    label: 'Notifications',
-    shortLabel: 'Inbox',
-    description: 'Updates and reminders',
-    icon: Bell,
-  },
-  {
     href: '/categories',
     label: 'Categories',
     shortLabel: 'Tags',
@@ -135,7 +127,7 @@ export const mobileNavigation = [
   primaryNavigation[1],
   primaryNavigation[2],
   primaryNavigation[3],
-  secondaryNavigation[1],
+  secondaryNavigation.find((item) => item.href === '/settings'),
 ].filter((item): item is NavigationItem => Boolean(item));
 
 export const quickLinks = [
