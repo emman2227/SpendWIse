@@ -13,6 +13,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { ProgressBar } from '@/components/ui/progress-bar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import {
   dashboardAnalyticsQueryKey,
@@ -380,8 +381,19 @@ export default function DashboardPage() {
           </div>
 
           {isLoading ? (
-            <div className="mt-5 rounded-[24px] border border-line bg-white/80 px-5 py-10 text-center text-sm text-slate-500">
-              Loading dashboard history...
+            <div className="mt-5 space-y-4">
+              <Skeleton className="h-[260px] w-full rounded-[24px]" />
+              <div className="grid gap-3 md:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3"
+                  >
+                    <Skeleton className="h-3 w-16 rounded-full" />
+                    <Skeleton className="mt-3 h-6 w-24 rounded-full" />
+                  </div>
+                ))}
+              </div>
             </div>
           ) : spendingTrend.length > 0 ? (
             <>

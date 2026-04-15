@@ -30,7 +30,9 @@ export const MetricCard = ({
   className,
 }: MetricCardProps) => {
   return (
-    <article className={cn(toneClasses[tone], 'relative overflow-hidden p-6', className)}>
+    <article
+      className={cn(toneClasses[tone], 'module-card-enter relative overflow-hidden p-6', className)}
+    >
       {Icon ? (
         <div
           className={cn(

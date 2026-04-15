@@ -22,7 +22,7 @@ export const PageHeader = ({
   return (
     <header
       className={cn(
-        'flex flex-col gap-6 rounded-[32px] border border-white/70 bg-white/70 px-6 py-6 shadow-soft backdrop-blur-xl md:px-8 md:py-7',
+        'module-card-enter flex flex-col gap-6 rounded-[32px] border border-white/70 bg-white/70 px-6 py-6 shadow-soft backdrop-blur-xl md:px-8 md:py-7',
         className,
       )}
     >

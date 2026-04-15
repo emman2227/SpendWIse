@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { ProgressBar } from '@/components/ui/progress-bar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { Textarea } from '@/components/ui/textarea';
 import { formatMoney } from '@/lib/formatters';
@@ -735,8 +736,27 @@ export default function GoalsPage() {
             ) : null}
 
             {goalsQuery.isLoading ? (
-              <div className="mt-5 rounded-[24px] border border-line bg-white/80 px-5 py-8 text-center text-sm text-slate-500">
-                Loading goals...
+              <div className="mt-5 space-y-3">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                  >
+                    <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(240px,0.95fr),minmax(280px,1.15fr)] lg:items-center lg:gap-3">
+                      <div className="flex items-center gap-3.5">
+                        <Skeleton className="h-11 w-11 rounded-[16px]" />
+                        <div className="min-w-0 flex-1">
+                          <Skeleton className="h-4 w-36 rounded-full" />
+                          <Skeleton className="mt-2 h-3 w-24 rounded-full" />
+                        </div>
+                      </div>
+                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-3">
+                        <Skeleton className="h-3 w-full rounded-full" />
+                        <Skeleton className="mt-3 h-2.5 w-full rounded-full" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : visibleGoals.length > 0 ? (
               <div className="mt-5 space-y-2.5">

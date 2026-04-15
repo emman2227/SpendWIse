@@ -28,6 +28,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
+import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { Textarea } from '@/components/ui/textarea';
 import { formatMoney } from '@/lib/formatters';
@@ -914,8 +915,37 @@ export default function TransactionsPage() {
           ) : null}
 
           {expensesQuery.isLoading ? (
-            <div className="mt-5 rounded-[24px] border border-line bg-white/80 px-5 py-8 text-center text-sm text-slate-500">
-              Loading transactions for {formatMonthLabel(monthFilter)}...
+            <div className="mt-5 space-y-6">
+              {Array.from({ length: 3 }).map((_, groupIndex) => (
+                <div key={groupIndex}>
+                  <div className="flex items-center justify-between gap-3">
+                    <Skeleton className="h-3 w-24 rounded-full" />
+                    <Skeleton className="h-3 w-16 rounded-full" />
+                  </div>
+                  <div className="mt-3 space-y-2.5">
+                    {Array.from({ length: 2 }).map((_, itemIndex) => (
+                      <div
+                        key={itemIndex}
+                        className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                      >
+                        <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
+                          <div className="flex min-w-0 items-center gap-3.5">
+                            <Skeleton className="h-11 w-11 rounded-[16px]" />
+                            <div className="min-w-0 flex-1">
+                              <Skeleton className="h-4 w-40 rounded-full" />
+                              <Skeleton className="mt-2 h-3 w-24 rounded-full" />
+                            </div>
+                          </div>
+                          <div className="flex gap-3 xl:items-center">
+                            <Skeleton className="h-8 w-20 rounded-full" />
+                            <Skeleton className="h-8 w-24 rounded-full" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           ) : groupedTransactions.length > 0 ? (
             <div className="mt-5 space-y-6">

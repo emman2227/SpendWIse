@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { ProgressBar } from '@/components/ui/progress-bar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { getBudgetSummary } from '@/lib/budgets/client';
 import { formatMoney } from '@/lib/formatters';
@@ -539,8 +540,13 @@ export default function ReportsPage() {
           </div>
 
           {isLoading ? (
-            <div className="mt-5 rounded-[24px] border border-line bg-white/80 px-5 py-8 text-center text-sm text-slate-500">
-              Loading report history...
+            <div className="mt-5 space-y-4">
+              <Skeleton className="h-[240px] w-full rounded-[24px]" />
+              <div className="grid gap-3 md:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <Skeleton key={index} className="h-16 w-full rounded-[18px]" />
+                ))}
+              </div>
             </div>
           ) : spendingTrend.length > 0 ? (
             <div className="mt-5">

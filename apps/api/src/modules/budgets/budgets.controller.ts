@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import { createBudgetSchema } from '@spendwise/shared';
 
@@ -27,10 +26,9 @@ export class BudgetsController {
   constructor(@Inject(BudgetsService) private readonly budgetsService: BudgetsService) {}
 
   @Post()
-  @UsePipes(new ZodValidationPipe(createBudgetSchema))
   upsert(
     @CurrentUser() user: AuthUser,
-    @Body()
+    @Body(new ZodValidationPipe(createBudgetSchema))
     body: {
       categoryId: string;
       limitAmount: number;
@@ -42,14 +40,18 @@ export class BudgetsController {
   }
 
   @Get()
-  @UsePipes(new ZodValidationPipe(budgetSummaryQuerySchema))
-  list(@CurrentUser() user: AuthUser, @Query() query: { month: number; year: number }) {
+  list(
+    @CurrentUser() user: AuthUser,
+    @Query(new ZodValidationPipe(budgetSummaryQuerySchema)) query: { month: number; year: number },
+  ) {
     return this.budgetsService.list(user.userId, query.month, query.year);
   }
 
   @Get('summary')
-  @UsePipes(new ZodValidationPipe(budgetSummaryQuerySchema))
-  summary(@CurrentUser() user: AuthUser, @Query() query: { month: number; year: number }) {
+  summary(
+    @CurrentUser() user: AuthUser,
+    @Query(new ZodValidationPipe(budgetSummaryQuerySchema)) query: { month: number; year: number },
+  ) {
     return this.budgetsService.getSummary(user.userId, query.month, query.year);
   }
 

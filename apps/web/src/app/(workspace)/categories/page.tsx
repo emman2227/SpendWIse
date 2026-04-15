@@ -31,6 +31,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
+import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import {
   categoriesQueryKey,
@@ -701,8 +702,35 @@ export default function CategoriesPage() {
           ) : null}
 
           {categoriesQuery.isLoading || expensesQuery.isLoading ? (
-            <div className="mt-5 rounded-[24px] border border-line bg-white/80 px-5 py-8 text-center text-sm text-slate-500">
-              Loading categories for {formatMonthLabel(monthFilter)}...
+            <div className="mt-5 space-y-3">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                >
+                  <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(260px,1fr),minmax(260px,0.9fr),auto] lg:items-center lg:gap-3">
+                    <div className="flex items-center gap-3.5">
+                      <Skeleton className="h-11 w-11 rounded-[16px]" />
+                      <div className="min-w-0 flex-1">
+                        <Skeleton className="h-4 w-28 rounded-full" />
+                        <Skeleton className="mt-2 h-3 w-52 max-w-full rounded-full" />
+                      </div>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {Array.from({ length: 3 }).map((_, statIndex) => (
+                        <div
+                          key={statIndex}
+                          className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2"
+                        >
+                          <Skeleton className="h-3 w-14 rounded-full" />
+                          <Skeleton className="mt-2 h-4 w-16 rounded-full" />
+                        </div>
+                      ))}
+                    </div>
+                    <Skeleton className="h-10 w-full rounded-[18px] lg:w-24" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : visibleCategories.length > 0 ? (
             <div className="mt-5 space-y-2.5">

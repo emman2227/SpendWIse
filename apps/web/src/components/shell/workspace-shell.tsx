@@ -1,6 +1,6 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { Bell, CreditCard, LifeBuoy, LogOut, Plus, Search, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { LoadingIndicatorBar } from '../ui/loading-indicator-bar';
 
 interface WorkspaceShellProps {
   children: ReactNode;
@@ -72,6 +73,7 @@ const desktopNavigationItemClasses = (active: boolean) =>
 export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
   const pathname = usePathname();
   const queryClient = useQueryClient();
+  const activeFetchCount = useIsFetching();
   const router = useRouter();
   const { data: user } = useCurrentUserQuery();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -94,6 +96,8 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
 
   return (
     <div className="min-h-screen lg:pl-[248px]">
+      {activeFetchCount > 0 || isLoggingOut ? <LoadingIndicatorBar /> : null}
+
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-[color:var(--line-strong)] bg-[rgba(255,253,250,0.96)] text-ink backdrop-blur-xl lg:flex">
         <div className="sidebar-scroll flex h-full flex-col overflow-y-auto px-4 py-4">
           <Link href="/dashboard" className="flex items-center gap-2.5">
@@ -236,7 +240,7 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
             </div>
           </header>
 
-          <main className="flex-1">{children}</main>
+          <main className="module-page flex-1">{children}</main>
         </div>
       </div>
 

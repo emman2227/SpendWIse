@@ -145,4 +145,124 @@ a {
     background: rgba(91, 106, 125, 0.5);
     background-clip: padding-box;
   }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .loading-indicator-bar {
+    animation: loading-indicator-slide 1.25s ease-in-out infinite;
+    will-change: transform;
   }
+
+  .skeleton-shimmer {
+    background-image: linear-gradient(
+      90deg,
+      rgba(226, 232, 240, 0.9) 0%,
+      rgba(255, 255, 255, 0.92) 50%,
+      rgba(226, 232, 240, 0.9) 100%
+    );
+    background-size: 220% 100%;
+    animation: skeleton-shimmer 1.5s linear infinite;
+  }
+
+  .module-page > :nth-child(1) {
+    --module-enter-delay: 0ms;
+  }
+
+  .module-page > :nth-child(2) {
+    --module-enter-delay: 70ms;
+  }
+
+  .module-page > :nth-child(3) {
+    --module-enter-delay: 140ms;
+  }
+
+  .module-page > :nth-child(4) {
+    --module-enter-delay: 210ms;
+  }
+
+  .module-page > :nth-child(5) {
+    --module-enter-delay: 280ms;
+  }
+
+  .module-page > :nth-child(6) {
+    --module-enter-delay: 350ms;
+  }
+
+  .module-page .module-card-enter {
+    opacity: 0;
+    transform: scale(0.86);
+    transform-origin: center center;
+    animation: module-card-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--module-enter-delay, 0ms);
+    will-change: transform, opacity;
+  }
+
+  .module-page .module-card-enter:nth-child(2) {
+    animation-delay: calc(var(--module-enter-delay, 0ms) + 45ms);
+  }
+
+  .module-page .module-card-enter:nth-child(3) {
+    animation-delay: calc(var(--module-enter-delay, 0ms) + 90ms);
+  }
+
+  .module-page .module-card-enter:nth-child(4) {
+    animation-delay: calc(var(--module-enter-delay, 0ms) + 135ms);
+  }
+
+  .module-page .module-card-enter:nth-child(5) {
+    animation-delay: calc(var(--module-enter-delay, 0ms) + 180ms);
+  }
+}
+
+@keyframes loading-indicator-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  60% {
+    transform: translateX(140%);
+  }
+
+  100% {
+    transform: translateX(180%);
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes module-card-enter {
+  0% {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+
+  68% {
+    opacity: 1;
+    transform: scale(1.025);
+  }
+
+  84% {
+    opacity: 1;
+    transform: scale(0.995);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-indicator-bar,
+  .skeleton-shimmer {
+    animation: none;
+  }
+}

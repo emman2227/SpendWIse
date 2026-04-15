@@ -14,5 +14,5 @@ const toneClasses: Record<NonNullable<SurfaceCardProps['tone']>, string> = {
 };
 
 export const SurfaceCard = ({ className, tone = 'default', ...props }: SurfaceCardProps) => (
-  <div className={cn(toneClasses[tone], className)} {...props} />
+  <div className={cn(toneClasses[tone], 'module-card-enter', className)} {...props} />
 );
