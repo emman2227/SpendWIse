@@ -4,8 +4,8 @@ import {
   authPasswordAllowedPattern,
 } from '@spendwise/shared';
 
-const singleNameCharacterPattern = /[A-Za-z'-]/;
-const emailCharacterPattern = /[A-Za-z0-9._%+\-@]/;
+const singleNameCharacterPattern = /[A-Za-z' -]/;
+const emailCharacterPattern = /[A-Za-z0-9._%+@-]/;
 const phoneCharacterPattern = /[0-9+]/;
 
 const sanitizeWithPattern = (value: string, pattern: RegExp, maxLength: number) =>

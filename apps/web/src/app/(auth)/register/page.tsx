@@ -4,7 +4,7 @@ import {
   AUTH_EMAIL_VERIFICATION_CODE_LENGTH,
   AUTH_PASSWORD_MIN_LENGTH,
   authEmailPattern,
-  authNameSegmentPattern,
+  authNamePattern,
   authPasswordLowercasePattern,
   authPasswordNumberPattern,
   authPasswordSpecialCharacterPattern,
@@ -91,15 +91,15 @@ const validateField = (field: Field, values: Values) => {
     case 'firstName':
       if (!values.firstName) return 'Please enter your first name.';
       if (values.firstName.length < 2) return 'First name must be at least 2 characters.';
-      return authNameSegmentPattern.test(values.firstName)
+      return authNamePattern.test(values.firstName)
         ? ''
-        : 'Only letters, apostrophes, and hyphens are allowed.';
+        : 'Only letters, spaces, apostrophes, and hyphens are allowed.';
     case 'lastName':
       if (!values.lastName) return 'Please enter your last name.';
       if (values.lastName.length < 2) return 'Last name must be at least 2 characters.';
-      return authNameSegmentPattern.test(values.lastName)
+      return authNamePattern.test(values.lastName)
         ? ''
-        : 'Only letters, apostrophes, and hyphens are allowed.';
+        : 'Only letters, spaces, apostrophes, and hyphens are allowed.';
     case 'email':
       if (!values.email) return 'Please enter your email address.';
       return authEmailPattern.test(values.email)

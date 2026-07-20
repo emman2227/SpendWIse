@@ -9,21 +9,20 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
       origin: true,
-      credentials: true
-    }
+      credentials: true,
+    },
   });
 
   app.setGlobalPrefix('api');
   app.enableVersioning({
     type: VersioningType.URI,
-    defaultVersion: '1'
+    defaultVersion: '1',
   });
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ResponseEnvelopeInterceptor());
 
   const port = process.env.PORT ?? 4000;
   await app.listen(port);
-
   Logger.log(`SpendWise API listening on http://localhost:${port}/api/v1`, 'Bootstrap');
 }
 
