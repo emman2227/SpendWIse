@@ -132,7 +132,7 @@ export default function HomePage() {
             </div>
 
             <div className="mt-6 max-w-5xl space-y-4">
-              <h1 className="text-[2.35rem] font-semibold tracking-tight text-ink md:text-[3.45rem] md:leading-[0.95]">
+              <h1 className="text-[1.85rem] font-semibold tracking-tight text-ink sm:text-[2.35rem] md:text-[3.45rem] md:leading-[0.95]">
                 Master Your Money with
                 <span className="block text-brand">Intelligent</span>
                 Spending Analysis
@@ -159,7 +159,7 @@ export default function HomePage() {
 
         <section className="px-4 pb-14 md:px-6 md:pb-16">
           <div className="mx-auto max-w-[1220px] rounded-[28px] border border-line/80 bg-white/82 p-4 shadow-soft md:p-6">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {topMetrics.map((metric) => (
                 <article
                   key={metric.label}
@@ -193,7 +193,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {features.map((feature) => {
                 const Icon = feature.icon;
 
@@ -230,7 +230,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-2">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2">
               {benefits.map((benefit) => {
                 const Icon = benefit.icon;
 
@@ -261,7 +261,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl">
             <h2 className={cn(sectionTitleClasses, 'mx-auto max-w-4xl')}>Loved by Thousands</h2>
 
-            <div className="mt-8 grid gap-5 xl:grid-cols-3">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {testimonials.map((testimonial) => (
                 <article
                   key={testimonial.name}
@@ -293,7 +293,7 @@ export default function HomePage() {
         <section className="mt-6 bg-ink px-4 py-14 text-white md:px-6 md:py-16">
           <div className="mx-auto max-w-7xl">
             <div className="text-center">
-              <h2 className="text-[2.2rem] font-semibold tracking-tight md:text-[2.75rem]">
+              <h2 className="text-[1.75rem] font-semibold tracking-tight sm:text-[2.2rem] md:text-[2.75rem]">
                 Ready to Take Control of Your Finances?
               </h2>
               <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-white/75 md:text-[1.02rem]">
@@ -313,7 +313,7 @@ export default function HomePage() {
 
         <footer className="px-4 py-10 md:px-6 md:py-12">
           <div className="mx-auto max-w-7xl">
-            <div className="grid gap-7 border-b border-line/80 pb-9 md:grid-cols-[1.2fr,0.8fr,0.8fr,0.8fr]">
+            <div className="grid gap-7 border-b border-line/80 pb-9 sm:grid-cols-2 md:grid-cols-[1.2fr,0.8fr,0.8fr,0.8fr]">
               <div>
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-[14px] bg-brand text-white">

@@ -39,7 +39,7 @@ export default function AnomaliesPage() {
         title="Highlight the transactions that deserve a second look."
       />
 
-      <section className="grid gap-6 xl:grid-cols-[1fr,0.95fr]">
+      <section className="grid gap-6 lg:grid-cols-[1fr,0.95fr]">
         <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
           <p className="kicker">Alerts list</p>
           <h2 className="mt-3 text-2xl font-semibold text-ink">

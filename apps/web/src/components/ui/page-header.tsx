@@ -26,7 +26,7 @@ export const PageHeader = ({
         className,
       )}
     >
-      <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl space-y-4">
           {eyebrow ? <p className="kicker">{eyebrow}</p> : null}
           <div className="space-y-3">

@@ -329,7 +329,7 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      <section className="grid gap-4 xl:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           delta={formatDelta(spendDelta)}
           helper={currentMonth ? `${currentMonth.label} spending` : 'Current month'}
@@ -365,7 +365,7 @@ export default function DashboardPage() {
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.2fr,0.8fr]">
+      <section className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
         <SurfaceCard className="rounded-[32px] px-5 py-5 md:px-6 md:py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
@@ -383,7 +383,7 @@ export default function DashboardPage() {
           {isLoading ? (
             <div className="mt-5 space-y-4">
               <Skeleton className="h-[260px] w-full rounded-[24px]" />
-              <div className="grid gap-3 md:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={index}
@@ -400,7 +400,7 @@ export default function DashboardPage() {
               <div className="mt-5">
                 <SpendingOverviewChart data={spendingTrend} />
               </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                     Spend
@@ -617,7 +617,7 @@ export default function DashboardPage() {
         </SurfaceCard>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-2">
+      <section className="grid gap-6 lg:grid-cols-2">
         <SurfaceCard className="rounded-[30px] px-4 py-4 md:px-5 md:py-5">
           <div className="flex flex-col gap-3 border-b border-line/80 pb-4 md:flex-row md:items-end md:justify-between">
             <div>

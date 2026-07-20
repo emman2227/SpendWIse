@@ -44,8 +44,8 @@ export const MetricCard = ({
         </div>
       ) : null}
 
-      <div className={cn(Icon ? 'pr-16' : undefined)}>
-        <div>
+      <div className={cn('min-w-0', Icon ? 'pr-16' : undefined)}>
+        <div className="min-w-0">
           <p
             className={cn(
               'text-sm font-medium',
@@ -56,7 +56,7 @@ export const MetricCard = ({
           </p>
           <p
             className={cn(
-              'mt-3 text-3xl font-semibold',
+              'mt-3 text-2xl font-semibold sm:text-3xl',
               tone === 'ink' ? 'text-white' : 'text-ink',
             )}
           >
@@ -65,7 +65,12 @@ export const MetricCard = ({
         </div>
       </div>
       <div className="mt-4 flex items-center justify-between gap-3">
-        <p className={cn('text-sm', tone === 'ink' ? 'text-white/70' : 'text-slate-500')}>
+        <p
+          className={cn(
+            'min-w-0 truncate text-sm',
+            tone === 'ink' ? 'text-white/70' : 'text-slate-500',
+          )}
+        >
           {helper}
         </p>
         {delta ? <Badge variant={tone === 'ink' ? 'neutral' : 'info'}>{delta}</Badge> : null}

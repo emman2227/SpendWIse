@@ -50,11 +50,13 @@ export const AuthShell = ({ eyebrow, title, description, children, footer }: Aut
             <Badge className="bg-white/10 text-white" variant="neutral">
               {eyebrow}
             </Badge>
-            <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">{title}</h1>
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
+              {title}
+            </h1>
             <p className="text-base leading-8 text-white/80">{description}</p>
           </div>
 
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             {trustHighlights.map((item) => {
               const Icon = item.icon;
 

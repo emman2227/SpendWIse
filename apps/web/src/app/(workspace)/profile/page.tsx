@@ -46,7 +46,7 @@ export default function ProfilePage() {
         title="Manage the account details attached to your workspace."
       />
 
-      <section className="grid gap-6 xl:grid-cols-[0.9fr,1.1fr]">
+      <section className="grid gap-6 lg:grid-cols-[0.9fr,1.1fr]">
         <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
           <div className="flex flex-col items-center text-center">
             <div className="flex h-24 w-24 items-center justify-center rounded-full bg-ink text-2xl font-semibold text-white">

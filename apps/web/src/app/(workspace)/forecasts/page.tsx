@@ -30,7 +30,7 @@ export default function ForecastsPage() {
         title="Prepare for next month before spending pressure arrives."
       />
 
-      <section className="grid gap-4 xl:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <MetricCard
           delta="+3%"
           helper="Predicted total next month"
@@ -55,7 +55,7 @@ export default function ForecastsPage() {
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.15fr,0.85fr]">
+      <section className="grid gap-6 lg:grid-cols-[1.15fr,0.85fr]">
         <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
           <p className="kicker">Forecast chart</p>
           <h2 className="mt-3 text-2xl font-semibold text-ink">
@@ -84,7 +84,7 @@ export default function ForecastsPage() {
         </SurfaceCard>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1fr,1fr]">
+      <section className="grid gap-6 lg:grid-cols-2">
         <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
           <p className="kicker">Category-level forecast</p>
           <div className="mt-5 space-y-4">

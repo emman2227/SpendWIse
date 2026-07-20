@@ -78,6 +78,7 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
   const router = useRouter();
   const { data: user } = useCurrentUserQuery();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const initials = getUserInitials(user?.name);
   const profileName = truncateProfileText(user?.name, 20, 'Loading profile');
   const profileEmail = truncateProfileText(user?.email, 28, 'Secure workspace');
@@ -191,6 +192,14 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
                 >
                   SpendWise
                 </Link>
+                <button
+                  aria-label="Toggle search"
+                  className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-line bg-white/80 text-slate-500 transition hover:text-ink md:hidden"
+                  onClick={() => setMobileSearchOpen((open) => !open)}
+                  type="button"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
                 <div className="relative hidden min-w-0 flex-1 md:block md:max-w-[420px] lg:max-w-[520px]">
                   <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
@@ -222,6 +231,13 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
                 </Button>
                 <Link
                   href="/profile"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white sm:hidden"
+                  title={user?.name ?? 'Profile'}
+                >
+                  {initials}
+                </Link>
+                <Link
+                  href="/profile"
                   className="hidden min-w-0 max-w-full items-center gap-3 rounded-full border border-white/70 bg-white/75 px-3 py-2 shadow-sm sm:flex sm:max-w-[220px] lg:max-w-[260px] xl:max-w-[320px]"
                   title={user?.name && user?.email ? `${user.name} (${user.email})` : undefined}
                 >
@@ -233,6 +249,22 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
                     <p className="truncate text-xs text-slate-500">{profileEmail}</p>
                   </div>
                 </Link>
+              </div>
+            </div>
+
+            <div
+              className={cn(
+                'overflow-hidden transition-all duration-300 md:hidden',
+                mobileSearchOpen ? 'mt-3 max-h-20 opacity-100' : 'max-h-0 opacity-0',
+              )}
+            >
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  aria-label="Search transactions, budgets, and reports"
+                  className="border-white/80 bg-white/75 pl-11"
+                  placeholder="Search..."
+                />
               </div>
             </div>
           </header>
@@ -259,7 +291,7 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex min-w-[64px] flex-col items-center gap-1 rounded-[18px] px-3 py-2 text-[11px] font-semibold',
+                'flex min-w-[52px] flex-col items-center gap-1 rounded-[18px] px-2 py-2 text-[11px] font-semibold sm:min-w-[64px] sm:px-3',
                 active ? 'bg-brand/10 text-brand' : 'text-slate-500',
               )}
             >

@@ -28,7 +28,7 @@ export default function InsightsPage() {
         title="Translate spending behavior into clear, trustworthy guidance."
       />
 
-      <section className="grid gap-6 xl:grid-cols-[1.1fr,0.9fr]">
+      <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
         <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
           <div className="flex items-center justify-between gap-4">
             <div>
@@ -65,7 +65,7 @@ export default function InsightsPage() {
         </SurfaceCard>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.2fr,0.8fr]">
+      <section className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
         <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
           <p className="kicker">Insight cards</p>
           <h2 className="mt-3 text-2xl font-semibold text-ink">

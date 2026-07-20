@@ -713,7 +713,7 @@ export default function TransactionsPage() {
           title="Track spending fast."
         />
 
-        <section className="grid gap-4 xl:grid-cols-3">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <MetricCard
             delta={`${visibleTransactions.length} entries`}
             helper="Current filtered view"
@@ -740,7 +740,7 @@ export default function TransactionsPage() {
 
         <SurfaceCard className="overflow-hidden rounded-[34px] px-5 py-5 md:px-6 md:py-6">
           <div className="space-y-4">
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr),180px,180px,auto]">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr),180px,180px,auto]">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
@@ -822,7 +822,7 @@ export default function TransactionsPage() {
                 <Sparkles className="mt-1 h-5 w-5 shrink-0 text-brand" />
               </div>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-4">
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
                 <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                     Spend

@@ -89,19 +89,49 @@ export const OnboardingShell = ({
           </div>
         </aside>
 
-        <section className="panel-surface-strong px-6 py-7 md:px-10 md:py-10">
-          <div className="space-y-3">
-            <p className="kicker">
-              Step {activeIndex + 1} of {steps.length}
-            </p>
-            <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl">{title}</h1>
-            <p className="max-w-2xl text-sm leading-7 text-slate-600 md:text-[15px]">
-              {description}
+        <div className="space-y-4 lg:space-y-0">
+          <div className="flex items-center justify-between gap-3 rounded-[20px] border border-line/80 bg-white/80 px-4 py-3 lg:hidden">
+            <div className="flex items-center gap-3">
+              {steps.map((step, index) => {
+                const complete = index < activeIndex;
+                const active = index === activeIndex;
+
+                return (
+                  <div
+                    key={step.id}
+                    className={cn(
+                      'h-2.5 w-2.5 rounded-full transition-colors',
+                      complete
+                        ? 'bg-brand'
+                        : active
+                          ? 'bg-brand/50 ring-2 ring-brand/25'
+                          : 'bg-slate-200',
+                    )}
+                  />
+                );
+              })}
+            </div>
+            <p className="text-sm font-medium text-slate-500">
+              Step {activeIndex + 1}: {steps[activeIndex]?.label}
             </p>
           </div>
 
-          <div className="mt-8">{children}</div>
-        </section>
+          <section className="panel-surface-strong px-6 py-7 md:px-10 md:py-10">
+            <div className="space-y-3">
+              <p className="kicker">
+                Step {activeIndex + 1} of {steps.length}
+              </p>
+              <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl">
+                {title}
+              </h1>
+              <p className="max-w-2xl text-sm leading-7 text-slate-600 md:text-[15px]">
+                {description}
+              </p>
+            </div>
+
+            <div className="mt-8">{children}</div>
+          </section>
+        </div>
       </div>
     </main>
   );

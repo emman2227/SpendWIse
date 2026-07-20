@@ -145,6 +145,18 @@ a {
     background: rgba(91, 106, 125, 0.5);
     background-clip: padding-box;
   }
+
+  .scroll-row {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scroll-row::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
