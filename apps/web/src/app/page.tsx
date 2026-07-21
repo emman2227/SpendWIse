@@ -1,3 +1,5 @@
+'use client';
+
 import {
   ArrowRight,
   BrainCircuit,
@@ -5,20 +7,22 @@ import {
   Clock3,
   ShieldAlert,
   Sparkles,
-  Star,
   Target,
+  UserPlus,
   WalletCards,
+  Zap,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 
 import { LandingHeader } from '@/components/marketing/landing-header';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { fadeInUp, staggerContainer, staggerItem } from '@/config/animations';
 
 const navItems = [
   { href: '#features', label: 'Features' },
   { href: '#benefits', label: 'Benefits' },
-  { href: '#testimonials', label: 'Testimonials' },
+  { href: '#how-it-works', label: 'How It Works' },
 ];
 
 const topMetrics = [
@@ -76,27 +80,27 @@ const benefits = [
   },
 ];
 
-const testimonials = [
+const steps = [
   {
-    initials: 'SC',
-    name: 'Sarah Chen',
-    role: 'Product Designer',
-    quote:
-      'SpendWise helped me save $400/month by identifying subscription waste I did not know I had.',
+    step: '01',
+    icon: UserPlus,
+    title: 'Create Your Account',
+    description:
+      'Sign up in seconds. No credit card required. Start your journey to smarter spending today.',
   },
   {
-    initials: 'MJ',
-    name: 'Marcus Johnson',
-    role: 'Software Engineer',
-    quote:
-      'The AI insights are incredible. It predicted my holiday overspending before it happened.',
+    step: '02',
+    icon: WalletCards,
+    title: 'Connect & Track',
+    description:
+      'Add your expenses manually or connect accounts. SpendWise automatically categorizes every transaction.',
   },
   {
-    initials: 'ER',
-    name: 'Emily Rodriguez',
-    role: 'Marketing Manager',
-    quote:
-      'Finally a finance app that feels premium without being complicated. Love the forecasting.',
+    step: '03',
+    icon: Zap,
+    title: 'Get AI Insights',
+    description:
+      'Receive personalized recommendations, spending forecasts, and actionable tips to save more.',
   },
 ];
 
@@ -125,13 +129,22 @@ export default function HomePage() {
 
       <main className="min-h-screen pb-0 pt-15 md:pt-[4.35rem]">
         <section className="mx-auto max-w-7xl px-4 md:px-6">
-          <div className="flex min-h-[calc(100svh-7rem)] flex-col items-center justify-center rounded-[40px] px-4 py-6 text-center md:min-h-[calc(100svh-7.5rem)] md:py-7">
-            <div className="inline-flex items-center gap-2 rounded-full bg-brand/10 px-3 py-1.5 text-[0.7rem] font-medium text-brand md:text-[0.8rem]">
+          <motion.div
+            className="flex min-h-[calc(100svh-7rem)] flex-col items-center justify-center rounded-[40px] px-4 py-6 text-center md:min-h-[calc(100svh-7.5rem)] md:py-7"
+            initial="hidden"
+            variants={staggerContainer}
+            viewport={{ amount: 0.3, once: true }}
+            whileInView="visible"
+          >
+            <motion.div
+              className="inline-flex items-center gap-2 rounded-full bg-brand/10 px-3 py-1.5 text-[0.7rem] font-medium text-brand md:text-[0.8rem]"
+              variants={fadeInUp}
+            >
               <Sparkles className="h-3.5 w-3.5" />
               AI-Powered Finance Intelligence
-            </div>
+            </motion.div>
 
-            <div className="mt-6 max-w-5xl space-y-4">
+            <motion.div className="mt-6 max-w-5xl space-y-4" variants={fadeInUp}>
               <h1 className="text-[1.85rem] font-semibold tracking-tight text-ink sm:text-[2.35rem] md:text-[3.45rem] md:leading-[0.95]">
                 Master Your Money with
                 <span className="block text-brand">Intelligent</span>
@@ -141,9 +154,12 @@ export default function HomePage() {
                 Track expenses, understand habits, predict future spending, and get personalized AI
                 recommendations all in one beautifully designed dashboard.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <motion.div
+              className="mt-6 flex flex-wrap items-center justify-center gap-3"
+              variants={fadeInUp}
+            >
               <Button asChild className="min-w-[168px] text-[0.9rem]" size="lg" variant="secondary">
                 <Link href="/register">
                   Get Started
@@ -153,26 +169,33 @@ export default function HomePage() {
               <Button asChild className="min-w-[112px] text-[0.9rem]" size="lg" variant="soft">
                 <Link href="/login">Log In</Link>
               </Button>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </section>
 
         <section className="px-4 pb-14 md:px-6 md:pb-16">
           <div className="mx-auto max-w-[1220px] rounded-[28px] border border-line/80 bg-white/82 p-4 shadow-soft md:p-6">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <motion.div
+              className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+              initial="hidden"
+              variants={staggerContainer}
+              viewport={{ amount: 0.3, once: true }}
+              whileInView="visible"
+            >
               {topMetrics.map((metric) => (
-                <article
+                <motion.article
                   key={metric.label}
                   className="rounded-[20px] bg-gradient-to-br from-[rgba(221,236,231,0.9)] to-[rgba(250,252,249,0.92)] px-4 py-4"
+                  variants={staggerItem}
                 >
                   <p className="text-[0.86rem] font-medium text-slate-500">{metric.label}</p>
                   <p className="mt-2 text-[1.65rem] font-semibold tracking-tight text-ink">
                     {metric.value}
                   </p>
                   <p className="mt-1 text-[0.86rem] font-medium text-brand">{metric.helper}</p>
-                </article>
+                </motion.article>
               ))}
-            </div>
+            </motion.div>
 
             <div className="mt-5 rounded-[22px] bg-gradient-to-br from-[rgba(237,244,241,0.96)] to-[rgba(247,250,248,0.92)] px-5 py-10 md:px-6 md:py-11">
               <div className="flex items-center justify-center gap-3 text-center text-[0.92rem] text-slate-500 md:text-[1.08rem]">
@@ -193,14 +216,21 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            <motion.div
+              className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4"
+              initial="hidden"
+              variants={staggerContainer}
+              viewport={{ amount: 0.3, once: true }}
+              whileInView="visible"
+            >
               {features.map((feature) => {
                 const Icon = feature.icon;
 
                 return (
-                  <article
+                  <motion.article
                     key={feature.title}
                     className="rounded-[22px] border border-line/80 bg-white/88 px-5 py-5 shadow-soft"
+                    variants={staggerItem}
                   >
                     <div className="flex h-12 w-12 items-center justify-center rounded-[16px] bg-brand text-white">
                       <Icon className="h-5 w-5" />
@@ -211,10 +241,10 @@ export default function HomePage() {
                     <p className="mt-3 text-[0.92rem] leading-7 text-slate-500">
                       {feature.description}
                     </p>
-                  </article>
+                  </motion.article>
                 );
               })}
-            </div>
+            </motion.div>
           </div>
         </section>
 
@@ -230,14 +260,21 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="mt-8 grid gap-5 sm:grid-cols-2">
+            <motion.div
+              className="mt-8 grid gap-5 sm:grid-cols-2"
+              initial="hidden"
+              variants={staggerContainer}
+              viewport={{ amount: 0.3, once: true }}
+              whileInView="visible"
+            >
               {benefits.map((benefit) => {
                 const Icon = benefit.icon;
 
                 return (
-                  <article
+                  <motion.article
                     key={benefit.title}
                     className="flex gap-4 rounded-[22px] border border-line/80 bg-white/90 px-5 py-5 shadow-soft"
+                    variants={staggerItem}
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[rgba(221,236,231,0.72)] text-brand">
                       <Icon className="h-4.5 w-4.5" />
@@ -250,43 +287,60 @@ export default function HomePage() {
                         {benefit.description}
                       </p>
                     </div>
-                  </article>
+                  </motion.article>
                 );
               })}
-            </div>
+            </motion.div>
           </div>
         </section>
 
-        <section className="scroll-mt-24 px-4 py-14 md:px-6 md:py-16" id="testimonials">
+        <section className="scroll-mt-24 px-4 py-14 md:px-6 md:py-16" id="how-it-works">
           <div className="mx-auto max-w-7xl">
-            <h2 className={cn(sectionTitleClasses, 'mx-auto max-w-4xl')}>Loved by Thousands</h2>
-
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {testimonials.map((testimonial) => (
-                <article
-                  key={testimonial.name}
-                  className="rounded-[22px] border border-line/80 bg-white/90 px-5 py-5 shadow-soft"
-                >
-                  <div className="flex gap-1 text-[#F5A000]">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <Star key={index} className="h-4 w-4 fill-current" />
-                    ))}
-                  </div>
-                  <p className="mt-5 text-[0.92rem] leading-7 text-ink">
-                    &ldquo;{testimonial.quote}&rdquo;
-                  </p>
-                  <div className="mt-6 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white">
-                      {testimonial.initials}
-                    </div>
-                    <div>
-                      <p className="text-base font-semibold text-ink">{testimonial.name}</p>
-                      <p className="text-[0.82rem] text-slate-500">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </article>
-              ))}
+            <div className="mx-auto max-w-4xl text-center">
+              <h2 className={sectionTitleClasses}>Get Started in Minutes</h2>
+              <p className="mt-4 text-base leading-7 text-slate-500 md:text-[1.08rem] md:leading-[1.45]">
+                Three simple steps to transform the way you manage your money.
+              </p>
             </div>
+
+            <motion.div
+              className="mt-8 grid gap-5 sm:grid-cols-3"
+              initial="hidden"
+              variants={staggerContainer}
+              viewport={{ amount: 0.3, once: true }}
+              whileInView="visible"
+            >
+              {steps.map((item, index) => {
+                const Icon = item.icon;
+
+                return (
+                  <motion.article
+                    key={item.title}
+                    className="relative rounded-[22px] border border-line/80 bg-white/90 px-5 py-6 shadow-soft"
+                    variants={staggerItem}
+                  >
+                    <span className="text-[0.78rem] font-semibold tracking-widest text-brand/60">
+                      STEP {item.step}
+                    </span>
+                    <div className="mt-4 flex h-12 w-12 items-center justify-center rounded-[16px] bg-brand/10 text-brand">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <h3 className="mt-5 text-[1.22rem] font-semibold tracking-tight text-ink">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-[0.92rem] leading-7 text-slate-500">
+                      {item.description}
+                    </p>
+
+                    {index < steps.length - 1 && (
+                      <div className="absolute -right-3 top-1/2 z-10 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-white sm:flex">
+                        <ArrowRight className="h-3 w-3" />
+                      </div>
+                    )}
+                  </motion.article>
+                );
+              })}
+            </motion.div>
           </div>
         </section>
 

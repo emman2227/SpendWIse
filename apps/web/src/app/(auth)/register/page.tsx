@@ -13,6 +13,7 @@ import {
 } from '@spendwise/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, Eye, EyeOff, MailCheck, RefreshCw, ShieldCheck } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type ChangeEvent, type FocusEvent, type FormEvent, useState } from 'react';
@@ -20,6 +21,7 @@ import { type ChangeEvent, type FocusEvent, type FormEvent, useState } from 'rea
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ProgressBar } from '@/components/ui/progress-bar';
+import { pageTransition, slideInFromLeft, slideInFromRight, tapScale } from '@/config/animations';
 import {
   authQueryKey,
   getAuthErrorMessage,
@@ -320,9 +322,18 @@ export default function RegisterPage() {
         : '';
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#f4efe7_0%,#f7f2ea_46%,#efe6da_100%)] px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden">
+    <motion.main
+      className="min-h-screen bg-[radial-gradient(circle_at_top,#f4efe7_0%,#f7f2ea_46%,#efe6da_100%)] px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden"
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      variants={pageTransition}
+    >
       <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-white shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
-        <section className="relative overflow-hidden bg-[linear-gradient(180deg,#d8e4dc_0%,#dbe8df_100%)] px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]">
+        <motion.section
+          className="relative overflow-hidden bg-[linear-gradient(180deg,#d8e4dc_0%,#dbe8df_100%)] px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]"
+          variants={slideInFromLeft}
+        >
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -left-12 top-0 h-40 w-64 rounded-full bg-white/24 blur-md" />
             <div className="absolute right-[8%] top-[10%] h-52 w-52 rounded-full bg-[#f4ead9] opacity-90" />
@@ -413,9 +424,12 @@ export default function RegisterPage() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
-        <section className="min-h-0 overflow-y-auto bg-white px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5">
+        <motion.section
+          className="min-h-0 overflow-y-auto bg-white px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5"
+          variants={slideInFromRight}
+        >
           <div className="mx-auto flex h-full max-w-[360px] flex-col">
             <div className="space-y-2">
               <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
@@ -435,275 +449,290 @@ export default function RegisterPage() {
 
             <form className="mt-4 flex h-full flex-col" noValidate onSubmit={handleSubmit}>
               <div className="space-y-3">
-                {step === 1 ? (
-                  <>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1">
-                        <label
-                          className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
-                          htmlFor="firstName"
-                        >
-                          First Name
-                        </label>
-                        <Input
-                          id="firstName"
-                          name="firstName"
-                          value={values.firstName}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          disabled={isSubmitting}
-                          placeholder="John"
-                          autoComplete="given-name"
-                          className={cn(
-                            'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
-                            errors.firstName && 'border-[var(--danger)]',
-                          )}
-                        />
-                        <p
-                          className={cn(
-                            'text-[10px] leading-4',
-                            errors.firstName ? 'min-h-[0.75rem] text-[var(--danger)]' : 'hidden',
-                          )}
-                        >
-                          {errors.firstName ?? ' '}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <label
-                          className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
-                          htmlFor="lastName"
-                        >
-                          Last Name
-                        </label>
-                        <Input
-                          id="lastName"
-                          name="lastName"
-                          value={values.lastName}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          disabled={isSubmitting}
-                          placeholder="Doe"
-                          autoComplete="family-name"
-                          className={cn(
-                            'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
-                            errors.lastName && 'border-[var(--danger)]',
-                          )}
-                        />
-                        <p
-                          className={cn(
-                            'text-[10px] leading-4',
-                            errors.lastName ? 'min-h-[0.75rem] text-[var(--danger)]' : 'hidden',
-                          )}
-                        >
-                          {errors.lastName ?? ' '}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label
-                        className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
-                        htmlFor="email"
-                      >
-                        Email Address
-                      </label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={values.email}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        disabled={isSubmitting}
-                        placeholder="john@spendwise.com"
-                        autoComplete="email"
-                        className={cn(
-                          'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
-                          errors.email && 'border-[var(--danger)]',
-                        )}
-                      />
-                      <p
-                        className={cn(
-                          'min-h-[0.75rem] text-[10px] leading-4',
-                          errors.email ? 'text-[var(--danger)]' : 'text-transparent',
-                        )}
-                      >
-                        {errors.email ?? ' '}
-                      </p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label
-                        className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
-                        htmlFor="phone"
-                      >
-                        Phone Number
-                      </label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        value={values.phone}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        disabled={isSubmitting}
-                        placeholder="+639123456789"
-                        autoComplete="tel"
-                        className={cn(
-                          'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
-                          errors.phone && 'border-[var(--danger)]',
-                        )}
-                      />
-                      <p
-                        className={cn(
-                          'min-h-[0.75rem] text-[10px] leading-4',
-                          errors.phone ? 'text-[var(--danger)]' : 'text-transparent',
-                        )}
-                      >
-                        {errors.phone ?? ' '}
-                      </p>
-                    </div>
-                  </>
-                ) : null}
-
-                {step === 2 ? (
-                  <>
-                    <div className="rounded-[20px] border border-[#ece7df] bg-[#fbf8f2] px-4 py-4">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                        Registering
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-700">
-                        {values.firstName} {values.lastName}
-                      </p>
-                      <p className="mt-1 text-[12px] text-slate-500">{values.email}</p>
-                      <p className="mt-1 text-[12px] text-slate-500">{values.phone}</p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label
-                        className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
-                        htmlFor="password"
-                      >
-                        Create Password
-                      </label>
-                      <div className="relative">
-                        <Input
-                          id="password"
-                          name="password"
-                          type={showPassword ? 'text' : 'password'}
-                          value={values.password}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          disabled={isSubmitting}
-                          placeholder="Create a secure password"
-                          autoComplete="new-password"
-                          className={cn(
-                            'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] pr-11 text-sm shadow-none focus:border-brand focus:bg-white',
-                            errors.password && 'border-[var(--danger)]',
-                          )}
-                        />
-                        <button
-                          type="button"
-                          className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-slate-400 hover:text-slate-700"
-                          onClick={() => setShowPassword((current) => !current)}
-                          aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-3.5 w-3.5" />
-                          ) : (
-                            <Eye className="h-3.5 w-3.5" />
-                          )}
-                        </button>
-                      </div>
-                      <p
-                        className={cn(
-                          'min-h-[0.75rem] text-[10px] leading-4',
-                          errors.password ? 'text-[var(--danger)]' : 'text-slate-400',
-                        )}
-                      >
-                        {helperText}
-                      </p>
-                    </div>
-
-                    <div className="rounded-[18px] border border-[#ebe6df] bg-[#faf7f2] px-3.5 py-3">
-                      <ProgressBar
-                        label="Password strength"
-                        helper={passwordStrength.label}
-                        size="sm"
-                        status={passwordStrength.status}
-                        value={passwordStrength.progress}
-                      />
-                      <div className="mt-2.5 grid gap-x-4 gap-y-1.5 sm:grid-cols-2">
-                        {passwordStrength.checklist.map((item) => (
-                          <div
-                            key={item.label}
-                            className={cn(
-                              'flex items-center gap-1.5 text-[10.5px] leading-4',
-                              item.passed ? 'text-emerald-700' : 'text-slate-500',
-                            )}
-                          >
-                            <CheckCircle2
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.div
+                    key={step}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-3"
+                  >
+                    {step === 1 ? (
+                      <>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="space-y-1">
+                            <label
+                              className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                              htmlFor="firstName"
+                            >
+                              First Name
+                            </label>
+                            <Input
+                              id="firstName"
+                              name="firstName"
+                              value={values.firstName}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              disabled={isSubmitting}
+                              placeholder="John"
+                              autoComplete="given-name"
                               className={cn(
-                                'h-3.5 w-3.5 shrink-0',
-                                item.passed ? 'text-emerald-600' : 'text-slate-300',
+                                'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
+                                errors.firstName && 'border-[var(--danger)]',
                               )}
                             />
-                            <span>{item.label}</span>
+                            <p
+                              className={cn(
+                                'text-[10px] leading-4',
+                                errors.firstName
+                                  ? 'min-h-[0.75rem] text-[var(--danger)]'
+                                  : 'hidden',
+                              )}
+                            >
+                              {errors.firstName ?? ' '}
+                            </p>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                ) : null}
+                          <div className="space-y-1">
+                            <label
+                              className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                              htmlFor="lastName"
+                            >
+                              Last Name
+                            </label>
+                            <Input
+                              id="lastName"
+                              name="lastName"
+                              value={values.lastName}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              disabled={isSubmitting}
+                              placeholder="Doe"
+                              autoComplete="family-name"
+                              className={cn(
+                                'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
+                                errors.lastName && 'border-[var(--danger)]',
+                              )}
+                            />
+                            <p
+                              className={cn(
+                                'text-[10px] leading-4',
+                                errors.lastName ? 'min-h-[0.75rem] text-[var(--danger)]' : 'hidden',
+                              )}
+                            >
+                              {errors.lastName ?? ' '}
+                            </p>
+                          </div>
+                        </div>
 
-                {step === 3 ? (
-                  <>
-                    <div className="rounded-[20px] border border-[#ece7df] bg-[#fbf8f2] px-4 py-4">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                        Verification Destination
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-700">{values.email}</p>
-                      <p className="mt-1 text-[12px] text-slate-500">
-                        {deliveryHint === 'log'
-                          ? 'Email delivery is unavailable right now, so the code is in the API terminal.'
-                          : 'A 6-digit code is waiting in this inbox.'}
-                      </p>
-                    </div>
+                        <div className="space-y-1">
+                          <label
+                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                            htmlFor="email"
+                          >
+                            Email Address
+                          </label>
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            value={values.email}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            disabled={isSubmitting}
+                            placeholder="john@spendwise.com"
+                            autoComplete="email"
+                            className={cn(
+                              'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
+                              errors.email && 'border-[var(--danger)]',
+                            )}
+                          />
+                          <p
+                            className={cn(
+                              'min-h-[0.75rem] text-[10px] leading-4',
+                              errors.email ? 'text-[var(--danger)]' : 'text-transparent',
+                            )}
+                          >
+                            {errors.email ?? ' '}
+                          </p>
+                        </div>
 
-                    <div className="space-y-1">
-                      <label
-                        className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
-                        htmlFor="code"
-                      >
-                        Verification Code
-                      </label>
-                      <Input
-                        id="code"
-                        name="code"
-                        value={values.code}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        disabled={isSubmitting}
-                        placeholder={'0'.repeat(AUTH_EMAIL_VERIFICATION_CODE_LENGTH)}
-                        inputMode="numeric"
-                        autoComplete="one-time-code"
-                        maxLength={AUTH_EMAIL_VERIFICATION_CODE_LENGTH}
-                        className={cn(
-                          'h-12 rounded-[16px] border border-transparent bg-[#f5f1eb] text-center font-mono text-lg tracking-[0.4em] shadow-none focus:border-brand focus:bg-white',
-                          errors.code && 'border-[var(--danger)]',
-                        )}
-                      />
-                      <p
-                        className={cn(
-                          'min-h-[0.75rem] text-[10px] leading-4',
-                          errors.code ? 'text-[var(--danger)]' : 'text-slate-400',
-                        )}
-                      >
-                        {helperText}
-                      </p>
-                    </div>
-                  </>
-                ) : null}
+                        <div className="space-y-1">
+                          <label
+                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                            htmlFor="phone"
+                          >
+                            Phone Number
+                          </label>
+                          <Input
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            value={values.phone}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            disabled={isSubmitting}
+                            placeholder="+639123456789"
+                            autoComplete="tel"
+                            className={cn(
+                              'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
+                              errors.phone && 'border-[var(--danger)]',
+                            )}
+                          />
+                          <p
+                            className={cn(
+                              'min-h-[0.75rem] text-[10px] leading-4',
+                              errors.phone ? 'text-[var(--danger)]' : 'text-transparent',
+                            )}
+                          >
+                            {errors.phone ?? ' '}
+                          </p>
+                        </div>
+                      </>
+                    ) : null}
+
+                    {step === 2 ? (
+                      <>
+                        <div className="rounded-[20px] border border-[#ece7df] bg-[#fbf8f2] px-4 py-4">
+                          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                            Registering
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-slate-700">
+                            {values.firstName} {values.lastName}
+                          </p>
+                          <p className="mt-1 text-[12px] text-slate-500">{values.email}</p>
+                          <p className="mt-1 text-[12px] text-slate-500">{values.phone}</p>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label
+                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                            htmlFor="password"
+                          >
+                            Create Password
+                          </label>
+                          <div className="relative">
+                            <Input
+                              id="password"
+                              name="password"
+                              type={showPassword ? 'text' : 'password'}
+                              value={values.password}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              disabled={isSubmitting}
+                              placeholder="Create a secure password"
+                              autoComplete="new-password"
+                              className={cn(
+                                'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] pr-11 text-sm shadow-none focus:border-brand focus:bg-white',
+                                errors.password && 'border-[var(--danger)]',
+                              )}
+                            />
+                            <button
+                              type="button"
+                              className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-slate-400 hover:text-slate-700"
+                              onClick={() => setShowPassword((current) => !current)}
+                              aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-3.5 w-3.5" />
+                              ) : (
+                                <Eye className="h-3.5 w-3.5" />
+                              )}
+                            </button>
+                          </div>
+                          <p
+                            className={cn(
+                              'min-h-[0.75rem] text-[10px] leading-4',
+                              errors.password ? 'text-[var(--danger)]' : 'text-slate-400',
+                            )}
+                          >
+                            {helperText}
+                          </p>
+                        </div>
+
+                        <div className="rounded-[18px] border border-[#ebe6df] bg-[#faf7f2] px-3.5 py-3">
+                          <ProgressBar
+                            label="Password strength"
+                            helper={passwordStrength.label}
+                            size="sm"
+                            status={passwordStrength.status}
+                            value={passwordStrength.progress}
+                          />
+                          <div className="mt-2.5 grid gap-x-4 gap-y-1.5 sm:grid-cols-2">
+                            {passwordStrength.checklist.map((item) => (
+                              <div
+                                key={item.label}
+                                className={cn(
+                                  'flex items-center gap-1.5 text-[10.5px] leading-4',
+                                  item.passed ? 'text-emerald-700' : 'text-slate-500',
+                                )}
+                              >
+                                <CheckCircle2
+                                  className={cn(
+                                    'h-3.5 w-3.5 shrink-0',
+                                    item.passed ? 'text-emerald-600' : 'text-slate-300',
+                                  )}
+                                />
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    ) : null}
+
+                    {step === 3 ? (
+                      <>
+                        <div className="rounded-[20px] border border-[#ece7df] bg-[#fbf8f2] px-4 py-4">
+                          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                            Verification Destination
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-slate-700">
+                            {values.email}
+                          </p>
+                          <p className="mt-1 text-[12px] text-slate-500">
+                            {deliveryHint === 'log'
+                              ? 'Email delivery is unavailable right now, so the code is in the API terminal.'
+                              : 'A 6-digit code is waiting in this inbox.'}
+                          </p>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label
+                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                            htmlFor="code"
+                          >
+                            Verification Code
+                          </label>
+                          <Input
+                            id="code"
+                            name="code"
+                            value={values.code}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            disabled={isSubmitting}
+                            placeholder={'0'.repeat(AUTH_EMAIL_VERIFICATION_CODE_LENGTH)}
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            maxLength={AUTH_EMAIL_VERIFICATION_CODE_LENGTH}
+                            className={cn(
+                              'h-12 rounded-[16px] border border-transparent bg-[#f5f1eb] text-center font-mono text-lg tracking-[0.4em] shadow-none focus:border-brand focus:bg-white',
+                              errors.code && 'border-[var(--danger)]',
+                            )}
+                          />
+                          <p
+                            className={cn(
+                              'min-h-[0.75rem] text-[10px] leading-4',
+                              errors.code ? 'text-[var(--danger)]' : 'text-slate-400',
+                            )}
+                          >
+                            {helperText}
+                          </p>
+                        </div>
+                      </>
+                    ) : null}
+                  </motion.div>
+                </AnimatePresence>
 
                 {formError ? (
                   <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3 text-[12px] text-[var(--danger)]">
@@ -719,43 +748,7 @@ export default function RegisterPage() {
 
               <div className="mt-auto space-y-2.5 pb-3 pt-4 md:pb-4">
                 {step === 1 ? (
-                  <Button
-                    className="h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
-                    size="lg"
-                    type="submit"
-                    variant="secondary"
-                    disabled={isSubmitting}
-                  >
-                    Continue to password
-                  </Button>
-                ) : null}
-
-                {step === 2 ? (
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <Button
-                      className="h-10 rounded-full text-sm"
-                      size="lg"
-                      type="button"
-                      variant="outline"
-                      disabled={isSubmitting}
-                      onClick={() => setStep(1)}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      className="h-11 rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
-                      size="lg"
-                      type="submit"
-                      variant="secondary"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? 'Sending...' : 'Send code'}
-                    </Button>
-                  </div>
-                ) : null}
-
-                {step === 3 ? (
-                  <>
+                  <motion.div variants={tapScale} whileTap="whileTap">
                     <Button
                       className="h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
                       size="lg"
@@ -763,29 +756,77 @@ export default function RegisterPage() {
                       variant="secondary"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? 'Verifying...' : 'Verify and continue'}
+                      Continue to password
                     </Button>
-                    <div className="grid grid-cols-2 gap-2.5">
+                  </motion.div>
+                ) : null}
+
+                {step === 2 ? (
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <motion.div variants={tapScale} whileTap="whileTap">
                       <Button
-                        className="h-10 rounded-full text-sm"
+                        className="h-10 w-full rounded-full text-sm"
                         size="lg"
                         type="button"
                         variant="outline"
-                        disabled={isSubmitting || isResending}
-                        onClick={() => setStep(2)}
+                        disabled={isSubmitting}
+                        onClick={() => setStep(1)}
                       >
                         Back
                       </Button>
+                    </motion.div>
+                    <motion.div variants={tapScale} whileTap="whileTap">
                       <Button
-                        className="h-10 rounded-full text-sm"
+                        className="h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
                         size="lg"
-                        type="button"
-                        variant="outline"
-                        disabled={isSubmitting || isResending}
-                        onClick={handleResend}
+                        type="submit"
+                        variant="secondary"
+                        disabled={isSubmitting}
                       >
-                        {isResending ? 'Sending...' : 'Resend code'}
+                        {isSubmitting ? 'Sending...' : 'Send code'}
                       </Button>
+                    </motion.div>
+                  </div>
+                ) : null}
+
+                {step === 3 ? (
+                  <>
+                    <motion.div variants={tapScale} whileTap="whileTap">
+                      <Button
+                        className="h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                        size="lg"
+                        type="submit"
+                        variant="secondary"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Verifying...' : 'Verify and continue'}
+                      </Button>
+                    </motion.div>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <motion.div variants={tapScale} whileTap="whileTap">
+                        <Button
+                          className="h-10 w-full rounded-full text-sm"
+                          size="lg"
+                          type="button"
+                          variant="outline"
+                          disabled={isSubmitting || isResending}
+                          onClick={() => setStep(2)}
+                        >
+                          Back
+                        </Button>
+                      </motion.div>
+                      <motion.div variants={tapScale} whileTap="whileTap">
+                        <Button
+                          className="h-10 w-full rounded-full text-sm"
+                          size="lg"
+                          type="button"
+                          variant="outline"
+                          disabled={isSubmitting || isResending}
+                          onClick={handleResend}
+                        >
+                          {isResending ? 'Sending...' : 'Resend code'}
+                        </Button>
+                      </motion.div>
                     </div>
                   </>
                 ) : null}
@@ -799,8 +840,8 @@ export default function RegisterPage() {
               </div>
             </form>
           </div>
-        </section>
+        </motion.section>
       </div>
-    </main>
+    </motion.main>
   );
 }

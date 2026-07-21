@@ -3,12 +3,14 @@
 import { AUTH_LOGIN_PASSWORD_MIN_LENGTH, authEmailPattern } from '@spendwise/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff } from 'lucide-react';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type ChangeEvent, type FocusEvent, type FormEvent, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { pageTransition, slideInFromLeft, slideInFromRight, tapScale } from '@/config/animations';
 import { authQueryKey, getAuthErrorMessage, loginWithCredentials } from '@/lib/auth/client';
 import { INACTIVITY_TIMEOUT_MINUTES } from '@/lib/auth/constants';
 import { sanitizeEmailInput, sanitizePasswordInput } from '@/lib/auth/input';
@@ -188,9 +190,18 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#f7f2ea_0%,#f4efe7_100%)] px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden">
+    <motion.main
+      className="min-h-screen bg-[linear-gradient(180deg,#f7f2ea_0%,#f4efe7_100%)] px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden"
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      variants={pageTransition}
+    >
       <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-white shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
-        <section className="relative overflow-hidden bg-[#dbe6e1] px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]">
+        <motion.section
+          className="relative overflow-hidden bg-[#dbe6e1] px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]"
+          variants={slideInFromLeft}
+        >
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute left-[-4rem] top-[-3rem] h-40 w-48 rounded-full bg-white/26 blur-sm" />
             <div className="absolute right-[8%] top-[10%] h-48 w-48 rounded-full bg-[#efe9d9] opacity-95" />
@@ -251,9 +262,12 @@ export default function LoginPage() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
-        <section className="min-h-0 overflow-y-auto bg-white px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5">
+        <motion.section
+          className="min-h-0 overflow-y-auto bg-white px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5"
+          variants={slideInFromRight}
+        >
           <div className="mx-auto flex h-full max-w-[360px] flex-col">
             <div className="space-y-2">
               <h2 className="text-[1.45rem] font-semibold tracking-[-0.04em] text-slate-900 md:text-[1.55rem]">
@@ -265,20 +279,24 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
-              <button
+              <motion.button
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[#ebe6df] bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand/30 hover:text-brand"
                 type="button"
+                variants={tapScale}
+                whileTap="whileTap"
               >
                 <GoogleMark className="h-4 w-4 shrink-0" />
                 Google
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[#ebe6df] bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand/30 hover:text-brand"
                 type="button"
+                variants={tapScale}
+                whileTap="whileTap"
               >
                 <AppleMark className="h-3.5 w-3.5 shrink-0 text-slate-900" />
                 Apple
-              </button>
+              </motion.button>
             </div>
 
             <div className="mt-3.5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
@@ -400,15 +418,17 @@ export default function LoginPage() {
                 .
               </div>
 
-              <Button
-                className="mt-0.5 h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
-                disabled={isSubmitting}
-                size="lg"
-                type="submit"
-                variant="secondary"
-              >
-                {isSubmitting ? 'Logging In...' : 'Log In'}
-              </Button>
+              <motion.div variants={tapScale} whileTap="whileTap">
+                <Button
+                  className="mt-0.5 h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                  disabled={isSubmitting}
+                  size="lg"
+                  type="submit"
+                  variant="secondary"
+                >
+                  {isSubmitting ? 'Logging In...' : 'Log In'}
+                </Button>
+              </motion.div>
 
               <p className="text-center text-[12px] text-slate-500">
                 Don&apos;t have an account?{' '}
@@ -418,8 +438,8 @@ export default function LoginPage() {
               </p>
             </form>
           </div>
-        </section>
+        </motion.section>
       </div>
-    </main>
+    </motion.main>
   );
 }
