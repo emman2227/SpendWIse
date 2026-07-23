@@ -19,15 +19,11 @@ import {
 } from '@/lib/analytics/client';
 import { formatMoney } from '@/lib/formatters';
 import { goalsQueryKey, listGoals } from '@/lib/goals/client';
+import { useNotificationPreferences } from '@/lib/notifications/client';
 import {
-  defaultNotificationPreferences,
   type NotificationCategory,
   notificationCategoryPreferenceKey,
-  type NotificationPreferences,
-  notificationPreferencesChangedEvent,
-  notificationPreferencesStorageKey,
   notificationReadStorageKey,
-  parseNotificationPreferences,
   parseNotificationReadIds,
 } from '@/lib/notifications/preferences';
 import {
@@ -258,9 +254,16 @@ export const HeaderNotificationModal = () => {
     width: panelMaxWidth,
   });
   const [readIds, setReadIds] = useState<Set<string>>(() => new Set());
-  const [preferences, setPreferences] = useState<NotificationPreferences>(
-    defaultNotificationPreferences,
-  );
+  const {
+    data: preferences = {
+      budget: true,
+      ai: true,
+      forecast: true,
+      recurring: true,
+      goal: true,
+      transaction: true,
+    },
+  } = useNotificationPreferences();
   const { month, year } = getCurrentMonthYear();
 
   const analyticsQuery = useQuery({
@@ -288,31 +291,21 @@ export const HeaderNotificationModal = () => {
       setReadIds(
         new Set(parseNotificationReadIds(window.localStorage.getItem(notificationReadStorageKey))),
       );
-      setPreferences(
-        parseNotificationPreferences(
-          window.localStorage.getItem(notificationPreferencesStorageKey),
-        ),
-      );
     };
 
     setIsMounted(true);
     syncNotificationSettings();
 
     const handleStorage = (event: StorageEvent) => {
-      if (
-        event.key === notificationReadStorageKey ||
-        event.key === notificationPreferencesStorageKey
-      ) {
+      if (event.key === notificationReadStorageKey) {
         syncNotificationSettings();
       }
     };
 
     window.addEventListener('storage', handleStorage);
-    window.addEventListener(notificationPreferencesChangedEvent, syncNotificationSettings);
 
     return () => {
       window.removeEventListener('storage', handleStorage);
-      window.removeEventListener(notificationPreferencesChangedEvent, syncNotificationSettings);
     };
   }, []);
 
@@ -348,9 +341,6 @@ export const HeaderNotificationModal = () => {
 
     setReadIds(
       new Set(parseNotificationReadIds(window.localStorage.getItem(notificationReadStorageKey))),
-    );
-    setPreferences(
-      parseNotificationPreferences(window.localStorage.getItem(notificationPreferencesStorageKey)),
     );
   }, [isOpen]);
 

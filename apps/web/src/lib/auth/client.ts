@@ -36,7 +36,7 @@ const parseJsonSafely = async (response: Response) => {
   }
 };
 
-const request = async <T>(path: string, init: RequestInit = {}) => {
+export const request = async <T>(path: string, init: RequestInit = {}) => {
   const headers = new Headers(init.headers);
 
   if (init.body && !headers.has('content-type')) {

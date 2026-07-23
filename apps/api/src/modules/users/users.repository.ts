@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { UserProfile } from '@spendwise/shared';
+import {
+  defaultNotificationPreferences,
+  type NotificationPreferences,
+  type UserProfile,
+} from '@spendwise/shared';
 import type { Model } from 'mongoose';
 
 import { type UserDocument, UserModel } from './user.schema';
@@ -149,6 +153,29 @@ export class UsersRepository {
     }
 
     return this.userModel.findByIdAndUpdate(userId, updates, { new: true }).exec();
+  }
+
+  getNotificationPreferences(document: UserDocument): NotificationPreferences {
+    const stored = document.notificationPreferences ?? {};
+
+    return Object.fromEntries(
+      Object.entries(defaultNotificationPreferences).map(([key, defaultValue]) => [
+        key,
+        typeof stored[key] === 'boolean' ? stored[key] : defaultValue,
+      ]),
+    ) as NotificationPreferences;
+  }
+
+  updateNotificationPreferences(userId: string, input: Partial<NotificationPreferences>) {
+    const updates: Record<string, boolean> = {};
+
+    for (const [key, value] of Object.entries(input)) {
+      if (typeof value === 'boolean') {
+        updates[`notificationPreferences.${key}`] = value;
+      }
+    }
+
+    return this.userModel.findByIdAndUpdate(userId, { $set: updates }, { new: true }).exec();
   }
 
   toProfile(document: UserDocument): UserProfile {

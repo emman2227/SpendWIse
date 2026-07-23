@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Patch, UseGuards, UsePipes } from '@nestjs/common';
-import { updateProfileSchema } from '@spendwise/shared';
+import { updateNotificationPreferencesSchema, updateProfileSchema } from '@spendwise/shared';
 import type { z } from 'zod';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -26,5 +26,21 @@ export class UsersController {
   @UsePipes(new ZodValidationPipe(updateProfileSchema))
   updateProfile(@CurrentUser() user: AuthUser, @Body() body: z.infer<typeof updateProfileSchema>) {
     return this.usersService.updateProfile(user.userId, body);
+  }
+
+  @Get('me/notification-preferences')
+  @UseGuards(JwtAuthGuard)
+  getNotificationPreferences(@CurrentUser() user: AuthUser) {
+    return this.usersService.getNotificationPreferences(user.userId);
+  }
+
+  @Patch('me/notification-preferences')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ZodValidationPipe(updateNotificationPreferencesSchema))
+  updateNotificationPreferences(
+    @CurrentUser() user: AuthUser,
+    @Body() body: z.infer<typeof updateNotificationPreferencesSchema>,
+  ) {
+    return this.usersService.updateNotificationPreferences(user.userId, body);
   }
 }

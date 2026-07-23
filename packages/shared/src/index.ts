@@ -7,6 +7,7 @@ export * from './schemas/expense';
 export * from './schemas/forecast';
 export * from './schemas/goal';
 export * from './schemas/insight';
+export * from './schemas/notification-preferences';
 export * from './schemas/user';
 export * from './types/api';
 export * from './types/auth';

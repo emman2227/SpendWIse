@@ -52,6 +52,19 @@ export class UserModel {
   @Prop({ required: true })
   passwordHash!: string;
 
+  @Prop({
+    type: Object,
+    default: () => ({
+      budget: true,
+      ai: true,
+      forecast: true,
+      recurring: true,
+      goal: true,
+      transaction: true,
+    }),
+  })
+  notificationPreferences!: Record<string, boolean>;
+
   @Prop()
   refreshTokenHash?: string;
 

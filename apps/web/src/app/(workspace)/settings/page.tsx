@@ -50,13 +50,13 @@ import { getUserInitials, LOGOUT_INTENT_STORAGE_KEY } from '@/lib/auth/constants
 import { sanitizeNameInput, sanitizePasswordInput, sanitizePhoneInput } from '@/lib/auth/input';
 import { getPasswordStrength } from '@/lib/auth/password-strength';
 import {
+  useNotificationPreferences,
+  useUpdateNotificationPreferences,
+} from '@/lib/notifications/client';
+import {
   defaultNotificationPreferences,
   type NotificationPreferenceKey,
   notificationPreferenceOptions,
-  type NotificationPreferences,
-  notificationPreferencesChangedEvent,
-  notificationPreferencesStorageKey,
-  parseNotificationPreferences,
 } from '@/lib/notifications/preferences';
 import { cn } from '@/lib/utils';
 
@@ -877,45 +877,43 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
 }
 
 function NotificationsPanel() {
-  const [preferences, setPreferences] = useState<NotificationPreferences>(
-    defaultNotificationPreferences,
-  );
+  const { data } = useNotificationPreferences();
+  const preferences = data || defaultNotificationPreferences;
+  const updatePreferences = useUpdateNotificationPreferences();
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    setPreferences(
-      parseNotificationPreferences(window.localStorage.getItem(notificationPreferencesStorageKey)),
-    );
-  }, []);
-
-  const persistPreferences = (nextPreferences: NotificationPreferences, nextMessage: string) => {
-    setPreferences(nextPreferences);
-    setMessage(nextMessage);
-    window.localStorage.setItem(notificationPreferencesStorageKey, JSON.stringify(nextPreferences));
-    window.dispatchEvent(new Event(notificationPreferencesChangedEvent));
-  };
+  // Feature is currently paused for development
+  const isFeaturePaused = true;
 
   const setPreference = (key: NotificationPreferenceKey, enabled: boolean) => {
-    persistPreferences(
-      {
-        ...preferences,
-        [key]: enabled,
-      },
+    if (isFeaturePaused) return;
+    updatePreferences.mutate({ [key]: enabled });
+    setMessage(
       `${enabled ? 'Enabled' : 'Paused'} ${notificationPreferenceOptions.find((item) => item.key === key)?.label.toLowerCase()}.`,
     );
   };
 
   const setAllPreferences = (enabled: boolean) => {
-    persistPreferences(
-      Object.fromEntries(
-        notificationPreferenceOptions.map((option) => [option.key, enabled]),
-      ) as NotificationPreferences,
+    if (isFeaturePaused) return;
+    updatePreferences.mutate(
+      Object.fromEntries(notificationPreferenceOptions.map((option) => [option.key, enabled])),
+    );
+    setMessage(
       enabled ? 'All notification channels enabled.' : 'All notification channels paused.',
     );
   };
 
   const resetPreferences = () => {
-    persistPreferences(defaultNotificationPreferences, 'Notification settings reset to default.');
+    if (isFeaturePaused) return;
+    updatePreferences.mutate({
+      budget: true,
+      ai: true,
+      forecast: true,
+      recurring: true,
+      goal: true,
+      transaction: true,
+    });
+    setMessage('Notification settings reset to default.');
   };
 
   const activeChannelCount = notificationPreferenceOptions.filter(
@@ -934,7 +932,12 @@ function NotificationsPanel() {
                 <BellRing className="h-5 w-5" />
               </div>
               <div>
-                <p className="kicker">Notifications</p>
+                <div className="flex items-center gap-2">
+                  <p className="kicker">Notifications</p>
+                  <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-slate-600">
+                    Under development.
+                  </span>
+                </div>
                 <h2 className="mt-2 text-2xl font-semibold text-ink">Choose what reaches you</h2>
               </div>
             </div>
@@ -957,7 +960,7 @@ function NotificationsPanel() {
 
         <div className="mt-5 flex flex-wrap gap-2">
           <Button
-            disabled={allChannelsEnabled}
+            disabled={allChannelsEnabled || isFeaturePaused}
             onClick={() => setAllPreferences(true)}
             size="sm"
             variant="secondary"
@@ -965,14 +968,14 @@ function NotificationsPanel() {
             Enable all
           </Button>
           <Button
-            disabled={allChannelsPaused}
+            disabled={allChannelsPaused || isFeaturePaused}
             onClick={() => setAllPreferences(false)}
             size="sm"
             variant="soft"
           >
             Pause all
           </Button>
-          <Button onClick={resetPreferences} size="sm" variant="outline">
+          <Button disabled={isFeaturePaused} onClick={resetPreferences} size="sm" variant="outline">
             Reset defaults
           </Button>
         </div>
@@ -996,7 +999,9 @@ function NotificationsPanel() {
                 enabled
                   ? 'border-brand/20 bg-brand/5 shadow-sm'
                   : 'border-line bg-white/80 hover:border-brand/20',
+                isFeaturePaused && 'cursor-not-allowed opacity-60',
               )}
+              disabled={isFeaturePaused}
               key={option.key}
               onClick={() => setPreference(option.key, !enabled)}
               type="button"
