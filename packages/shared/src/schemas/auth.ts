@@ -160,3 +160,18 @@ export const resetPasswordWithCodeSchema = z.object({
     ),
   password: strongPasswordSchema,
 });
+
+export const updateProfileSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(2, 'Name must be at least 2 characters.')
+      .max(80, 'Name must be at most 80 characters.')
+      .regex(authNamePattern, 'Name can only use letters, spaces, apostrophes, and hyphens.')
+      .optional(),
+    phone: phoneSchema.optional(),
+  })
+  .refine((data) => data.name !== undefined || data.phone !== undefined, {
+    message: 'At least one field must be provided.',
+  });

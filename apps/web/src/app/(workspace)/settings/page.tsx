@@ -3,28 +3,32 @@
 import {
   AUTH_EMAIL_VERIFICATION_CODE_LENGTH,
   AUTH_PASSWORD_MIN_LENGTH,
+  AUTH_PHONE_MAX_LENGTH,
+  AUTH_PHONE_MIN_LENGTH,
+  authNamePattern,
   authPasswordLowercasePattern,
   authPasswordNumberPattern,
   authPasswordSpecialCharacterPattern,
   authPasswordUppercasePattern,
+  authPhonePattern,
   type UserProfile,
 } from '@spendwise/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
 import {
   BellRing,
+  Calendar,
   CheckCircle2,
-  Download,
-  EyeOff,
-  Globe2,
-  Lock,
+  LogOut,
   MailCheck,
-  Palette,
+  Pencil,
+  Phone,
   RefreshCw,
   Shield,
-  SlidersHorizontal,
-  Smartphone,
+  ShieldAlert,
+  ShieldCheck,
   UserRound,
+  X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -37,10 +41,13 @@ import { SurfaceCard } from '@/components/ui/surface-card';
 import {
   authQueryKey,
   changePasswordWithOtp,
+  logoutSession,
   requestPasswordChangeOtp,
+  updateProfile,
   useCurrentUserQuery,
 } from '@/lib/auth/client';
-import { sanitizePasswordInput } from '@/lib/auth/input';
+import { getUserInitials, LOGOUT_INTENT_STORAGE_KEY } from '@/lib/auth/constants';
+import { sanitizeNameInput, sanitizePasswordInput, sanitizePhoneInput } from '@/lib/auth/input';
 import { getPasswordStrength } from '@/lib/auth/password-strength';
 import {
   defaultNotificationPreferences,
@@ -53,7 +60,7 @@ import {
 } from '@/lib/notifications/preferences';
 import { cn } from '@/lib/utils';
 
-type SettingsTabId = 'account' | 'security' | 'notifications' | 'preferences' | 'privacy';
+type SettingsTabId = 'account' | 'security' | 'notifications';
 type DeliveryHint = 'smtp' | 'log';
 type SecurityField = 'currentPassword' | 'newPassword' | 'confirmPassword' | 'code';
 
@@ -80,7 +87,7 @@ const settingsTabs: SettingsTab[] = [
   {
     id: 'account',
     label: 'Account',
-    description: 'Profile details, workspace defaults, and identity settings.',
+    description: 'Profile details and identity settings.',
     icon: UserRound,
   },
   {
@@ -94,18 +101,6 @@ const settingsTabs: SettingsTab[] = [
     label: 'Notifications',
     description: 'Alerts, reminders, and digest behavior.',
     icon: BellRing,
-  },
-  {
-    id: 'preferences',
-    label: 'Preferences',
-    description: 'Appearance, locale, and workspace behavior.',
-    icon: SlidersHorizontal,
-  },
-  {
-    id: 'privacy',
-    label: 'Privacy',
-    description: 'Data sharing, exports, and destructive actions.',
-    icon: Lock,
   },
 ];
 
@@ -141,6 +136,22 @@ const maskEmail = (email?: string) => {
   }
 
   return `${localPart.slice(0, 2)}***${localPart.slice(-1)}@${domain}`;
+};
+
+const formatMemberSince = (dateString?: string) => {
+  if (!dateString) {
+    return null;
+  }
+
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(new Date(dateString));
+  } catch {
+    return null;
+  }
 };
 
 const validateNewPassword = (password: string) => {
@@ -211,125 +222,313 @@ const getSecurityErrors = (values: SecurityValues, codeRequested: boolean) => ({
   code: validateSecurityField('code', values, codeRequested),
 });
 
-function ToggleRow({
-  label,
-  description,
-  enabled = false,
-}: {
-  label: string;
-  description: string;
-  enabled?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-[22px] border border-white/80 bg-white/80 px-4 py-4">
-      <div className="max-w-[85%]">
-        <p className="font-medium text-ink">{label}</p>
-        <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
-      </div>
-      <div
-        className={cn(
-          'flex h-7 w-12 items-center rounded-full p-1 transition-colors',
-          enabled ? 'bg-brand' : 'bg-slate-300',
-        )}
-      >
-        <div
-          className={cn(
-            'h-5 w-5 rounded-full bg-white transition-transform',
-            enabled ? 'translate-x-5' : 'translate-x-0',
-          )}
-        />
-      </div>
-    </div>
-  );
-}
+const validateProfileName = (name: string) => {
+  const trimmed = name.trim();
 
-function DetailCard({
-  icon: Icon,
-  title,
-  description,
-  actionLabel,
-  actionVariant = 'soft',
-}: {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  actionLabel?: string;
-  actionVariant?: 'secondary' | 'soft' | 'outline' | 'danger';
-}) {
-  return (
-    <SurfaceCard className="rounded-[30px] px-6 py-6">
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-        <Icon className="h-5 w-5" />
-      </div>
-      <h3 className="mt-5 text-xl font-semibold text-ink">{title}</h3>
-      <p className="mt-2 text-sm leading-7 text-slate-600">{description}</p>
-      {actionLabel ? (
-        <Button className="mt-5" variant={actionVariant}>
-          {actionLabel}
-        </Button>
-      ) : null}
-    </SurfaceCard>
-  );
-}
+  if (!trimmed) {
+    return 'Name is required.';
+  }
+
+  if (trimmed.length < 2) {
+    return 'Name must be at least 2 characters.';
+  }
+
+  if (trimmed.length > 80) {
+    return 'Name must be at most 80 characters.';
+  }
+
+  if (!authNamePattern.test(trimmed)) {
+    return 'Name can only use letters, spaces, apostrophes, and hyphens.';
+  }
+
+  return '';
+};
+
+const validateProfilePhone = (phone: string) => {
+  const trimmed = phone.trim();
+
+  if (!trimmed) {
+    return 'Phone number is required.';
+  }
+
+  if (!authPhonePattern.test(trimmed)) {
+    return `Use a valid phone number with ${AUTH_PHONE_MIN_LENGTH}–${AUTH_PHONE_MAX_LENGTH} digits.`;
+  }
+
+  return '';
+};
 
 function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [saveNotice, setSaveNotice] = useState('');
+  const [saveError, setSaveError] = useState('');
+
+  const initials = getUserInitials(user?.name);
+  const memberSince = formatMemberSince(user?.createdAt);
+
+  const startEditing = () => {
+    setName(user?.name ?? '');
+    setPhone(user?.phone ?? '');
+    setNameError('');
+    setPhoneError('');
+    setSaveNotice('');
+    setSaveError('');
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setNameError('');
+    setPhoneError('');
+    setSaveError('');
+  };
+
+  const handleSave = async () => {
+    const nextNameError = validateProfileName(name);
+    const nextPhoneError = validateProfilePhone(phone);
+
+    setNameError(nextNameError);
+    setPhoneError(nextPhoneError);
+
+    if (nextNameError || nextPhoneError) {
+      return;
+    }
+
+    const changes: { name?: string; phone?: string } = {};
+
+    if (name.trim() !== user?.name) {
+      changes.name = name.trim();
+    }
+
+    if (phone.trim() !== user?.phone) {
+      changes.phone = phone.trim();
+    }
+
+    if (!Object.keys(changes).length) {
+      setIsEditing(false);
+      setSaveNotice('No changes to save.');
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError('');
+
+    try {
+      const updated = await updateProfile(changes);
+
+      queryClient.setQueryData(authQueryKey, updated);
+      setIsEditing(false);
+      setSaveNotice('Profile updated successfully.');
+    } catch (error) {
+      setSaveError(resolveErrorMessage(error, 'Unable to save your profile right now.'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+
+    try {
+      await logoutSession();
+    } finally {
+      window.sessionStorage.setItem(LOGOUT_INTENT_STORAGE_KEY, 'manual');
+      queryClient.setQueryData(authQueryKey, null);
+      router.replace('/login');
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <div className="grid gap-6 xl:grid-cols-[1.15fr,0.85fr]">
       <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-            <UserRound className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="kicker">Account</p>
-            <h2 className="mt-2 text-2xl font-semibold text-ink">Identity and workspace basics</h2>
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {[
-            { label: 'Display name', value: user?.name ?? 'Loading...' },
-            { label: 'Email address', value: user?.email ?? 'Loading...' },
-            { label: 'Default landing page', value: 'Dashboard overview' },
-            { label: 'Budget role', value: 'Primary household owner' },
-          ].map(({ label, value }) => (
-            <div
-              key={label}
-              className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5"
-            >
-              <p className="text-sm text-slate-500">{label}</p>
-              <p className="mt-2 font-semibold text-ink">{value}</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-brand/10 text-xl font-bold text-brand">
+              {initials}
             </div>
-          ))}
+            <div>
+              <p className="kicker">Account</p>
+              <h2 className="mt-2 text-2xl font-semibold text-ink">Your profile</h2>
+            </div>
+          </div>
+          {!isEditing ? (
+            <Button onClick={startEditing} size="sm" variant="soft">
+              <Pencil className="h-3.5 w-3.5" />
+              Edit
+            </Button>
+          ) : null}
         </div>
 
-        <div className="mt-6 space-y-4">
-          <ToggleRow
-            description="Show a more personal welcome state across the dashboard and reports."
-            enabled
-            label="Use full name in workspace greetings"
-          />
-          <ToggleRow
-            description="Keep your most-used views and filters ready when you return."
-            enabled
-            label="Restore previous workspace session"
-          />
-        </div>
+        {isEditing ? (
+          <div className="mt-6 space-y-5">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-ink" htmlFor="profile-name">
+                Display name
+              </label>
+              <Input
+                autoComplete="name"
+                className={cn(
+                  'h-14 rounded-[24px] bg-white/90',
+                  nameError && 'border-danger focus:border-danger',
+                )}
+                id="profile-name"
+                onChange={(event) => {
+                  const sanitized = sanitizeNameInput(event.target.value);
+                  setName(sanitized);
+                  setNameError('');
+                  setSaveError('');
+                }}
+                placeholder="Your display name"
+                type="text"
+                value={name}
+              />
+              {nameError ? <p className="text-sm text-danger">{nameError}</p> : null}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-ink" htmlFor="profile-phone">
+                Phone number
+              </label>
+              <Input
+                autoComplete="tel"
+                className={cn(
+                  'h-14 rounded-[24px] bg-white/90',
+                  phoneError && 'border-danger focus:border-danger',
+                )}
+                id="profile-phone"
+                inputMode="tel"
+                onChange={(event) => {
+                  const sanitized = sanitizePhoneInput(event.target.value);
+                  setPhone(sanitized);
+                  setPhoneError('');
+                  setSaveError('');
+                }}
+                placeholder="+639123456789"
+                type="tel"
+                value={phone}
+              />
+              {phoneError ? <p className="text-sm text-danger">{phoneError}</p> : null}
+            </div>
+
+            <div className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5">
+              <p className="text-sm text-slate-500">Email address</p>
+              <p className="mt-2 font-semibold text-ink">{user?.email ?? 'Loading...'}</p>
+              <p className="mt-1 text-xs text-slate-400">Email cannot be changed from settings.</p>
+            </div>
+
+            {saveError ? (
+              <div className="rounded-[20px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
+                {saveError}
+              </div>
+            ) : null}
+
+            <div className="flex flex-wrap gap-3">
+              <Button disabled={isSaving} onClick={handleSave} variant="secondary">
+                {isSaving ? 'Saving...' : 'Save changes'}
+              </Button>
+              <Button disabled={isSaving} onClick={cancelEditing} variant="soft">
+                <X className="h-4 w-4" />
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {[
+              { label: 'Display name', value: user?.name ?? 'Loading...' },
+              { label: 'Email address', value: user?.email ?? 'Loading...' },
+              {
+                label: 'Phone number',
+                value: user?.phone ?? 'Not set',
+                icon: Phone,
+              },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5"
+              >
+                <p className="text-sm text-slate-500">{label}</p>
+                <p className="mt-2 font-semibold text-ink">{value}</p>
+              </div>
+            ))}
+
+            <div
+              className={cn(
+                'flex items-center gap-3 rounded-[24px] border px-5 py-5',
+                user?.emailVerified
+                  ? 'border-emerald-200/80 bg-emerald-50/60'
+                  : 'border-amber-200/80 bg-amber-50/60',
+              )}
+            >
+              {user?.emailVerified ? (
+                <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600" />
+              ) : (
+                <ShieldAlert className="h-5 w-5 shrink-0 text-amber-600" />
+              )}
+              <div>
+                <p className="text-sm text-slate-500">Email status</p>
+                <p
+                  className={cn(
+                    'mt-1 font-semibold',
+                    user?.emailVerified ? 'text-emerald-700' : 'text-amber-700',
+                  )}
+                >
+                  {user?.emailVerified ? 'Verified' : 'Unverified'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {saveNotice && !isEditing ? (
+          <div className="mt-4 rounded-[18px] border border-brand/15 bg-brand/10 px-4 py-3 text-sm text-slate-700">
+            {saveNotice}
+          </div>
+        ) : null}
       </SurfaceCard>
 
       <div className="space-y-6">
-        <DetailCard
-          actionLabel="Review profile"
-          description="Keep profile details aligned with the account people recognize in shared budgeting spaces."
-          icon={UserRound}
-          title="Profile visibility"
-        />
-        <DetailCard
-          actionLabel="Change defaults"
-          description="Choose the page, density, and summary style that should greet you every day."
-          icon={SlidersHorizontal}
-          title="Workspace defaults"
-        />
+        {memberSince ? (
+          <SurfaceCard className="rounded-[30px] px-6 py-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500">Member since</p>
+                <p className="mt-1 text-lg font-semibold text-ink">{memberSince}</p>
+              </div>
+            </div>
+          </SurfaceCard>
+        ) : null}
+
+        <SurfaceCard className="rounded-[30px] px-6 py-6">
+          <h3 className="text-lg font-semibold text-ink">Sign out</h3>
+          <p className="mt-2 text-sm leading-7 text-slate-600">
+            End your current session on this device. You&apos;ll need to sign in again to access
+            your workspace.
+          </p>
+          <Button
+            className="mt-5"
+            disabled={isLoggingOut}
+            onClick={() => {
+              void handleLogout();
+            }}
+            variant="outline"
+          >
+            <LogOut className="h-4 w-4" />
+            {isLoggingOut ? 'Logging out...' : 'Log out'}
+          </Button>
+        </SurfaceCard>
       </div>
     </div>
   );
@@ -349,6 +548,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const passwordStrength = getPasswordStrength(values.newPassword);
   const maskedEmail = maskEmail(user?.email);
+  const memberSince = formatMemberSince(user?.createdAt);
 
   const setFieldValue = (field: SecurityField, value: string) => {
     const sanitizedValue =
@@ -450,241 +650,229 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
   };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.15fr,0.85fr]">
-      <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-        <div className="flex items-start gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-brand/10 text-brand">
-            <Shield className="h-7 w-7" />
-          </div>
-          <div>
-            <p className="kicker">Security</p>
-            <h2 className="mt-2 text-2xl font-semibold text-ink md:text-[2.1rem]">
-              Password and sign-in protection
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-              Confirm your current password first, then we&apos;ll send a one-time code to{' '}
-              <span className="font-semibold text-ink">{maskedEmail}</span> before the change is
-              saved.
-            </p>
-          </div>
+    <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+      <div className="flex items-start gap-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-brand/10 text-brand">
+          <Shield className="h-7 w-7" />
         </div>
-
-        <div className="mt-8 space-y-5">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-ink" htmlFor="current-password">
-              Current password
-            </label>
-            <Input
-              autoComplete="current-password"
-              className={cn(
-                'h-14 rounded-[24px] bg-white/90',
-                errors.currentPassword && 'border-danger focus:border-danger',
-              )}
-              id="current-password"
-              onChange={(event) => setFieldValue('currentPassword', event.target.value)}
-              placeholder="Enter your current password"
-              type="password"
-              value={values.currentPassword}
-            />
-            {errors.currentPassword ? (
-              <p className="text-sm text-danger">{errors.currentPassword}</p>
-            ) : null}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-ink" htmlFor="new-password">
-              New password
-            </label>
-            <Input
-              autoComplete="new-password"
-              className={cn(
-                'h-14 rounded-[24px] bg-white/90',
-                errors.newPassword && 'border-danger focus:border-danger',
-              )}
-              id="new-password"
-              onChange={(event) => setFieldValue('newPassword', event.target.value)}
-              placeholder="Create a stronger password"
-              type="password"
-              value={values.newPassword}
-            />
-            {errors.newPassword ? (
-              <p className="text-sm text-danger">{errors.newPassword}</p>
-            ) : null}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-ink" htmlFor="confirm-password">
-              Confirm new password
-            </label>
-            <Input
-              autoComplete="new-password"
-              className={cn(
-                'h-14 rounded-[24px] bg-white/90',
-                errors.confirmPassword && 'border-danger focus:border-danger',
-              )}
-              id="confirm-password"
-              onChange={(event) => setFieldValue('confirmPassword', event.target.value)}
-              placeholder="Re-enter the new password"
-              type="password"
-              value={values.confirmPassword}
-            />
-            {errors.confirmPassword ? (
-              <p className="text-sm text-danger">{errors.confirmPassword}</p>
-            ) : null}
-          </div>
+        <div>
+          <p className="kicker">Security</p>
+          <h2 className="mt-2 text-2xl font-semibold text-ink md:text-[2.1rem]">
+            Password and sign-in protection
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+            Confirm your current password first, then we&apos;ll send a one-time code to{' '}
+            <span className="font-semibold text-ink">{maskedEmail}</span> before the change is
+            saved.
+          </p>
         </div>
-
-        <div className="mt-6 rounded-[24px] border border-white/80 bg-white/80 px-5 py-5">
-          <ProgressBar
-            helper={passwordStrength.label}
-            label="Password strength"
-            status={passwordStrength.status}
-            value={passwordStrength.progress}
-          />
-          <div className="mt-4 grid gap-x-4 gap-y-2 sm:grid-cols-2">
-            {passwordStrength.checklist.map((item) => (
-              <div
-                key={item.label}
-                className={cn(
-                  'flex items-center gap-2 text-sm',
-                  item.passed ? 'text-emerald-700' : 'text-slate-500',
-                )}
-              >
-                <CheckCircle2
-                  className={cn(
-                    'h-4 w-4 shrink-0',
-                    item.passed ? 'text-emerald-600' : 'text-slate-300',
-                  )}
-                />
-                <span>{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {codeRequested ? (
-          <div className="mt-6 rounded-[26px] border border-brand/15 bg-[linear-gradient(135deg,rgba(214,235,231,0.78),rgba(255,255,255,0.92))] px-5 py-5">
-            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div className="flex items-start gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/90 text-brand shadow-soft">
-                  <MailCheck className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-ink">
-                    Enter your email verification code
-                  </p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
-                    {deliveryHint === 'log'
-                      ? 'SMTP is unavailable right now, so the code was written to the API terminal for local development.'
-                      : `We sent a ${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit code to ${maskedEmail}.`}
-                  </p>
-                </div>
-              </div>
-              <Button
-                className="shrink-0"
-                disabled={isResendingCode || isUpdatingPassword}
-                onClick={() => requestOtp(true)}
-                size="sm"
-                type="button"
-                variant="soft"
-              >
-                <RefreshCw className={cn('h-4 w-4', isResendingCode && 'animate-spin')} />
-                {isResendingCode ? 'Sending...' : 'Resend code'}
-              </Button>
-            </div>
-
-            <div className="mt-5 space-y-2">
-              <label className="text-sm font-semibold text-ink" htmlFor="password-change-code">
-                Verification code
-              </label>
-              <Input
-                autoComplete="one-time-code"
-                className={cn(
-                  'h-14 rounded-[24px] bg-white/95 text-center font-mono text-lg tracking-[0.42em]',
-                  errors.code && 'border-danger focus:border-danger',
-                )}
-                id="password-change-code"
-                inputMode="numeric"
-                maxLength={AUTH_EMAIL_VERIFICATION_CODE_LENGTH}
-                onChange={(event) => setFieldValue('code', event.target.value)}
-                placeholder={'0'.repeat(AUTH_EMAIL_VERIFICATION_CODE_LENGTH)}
-                type="text"
-                value={values.code}
-              />
-              {errors.code ? <p className="text-sm text-danger">{errors.code}</p> : null}
-            </div>
-          </div>
-        ) : null}
-
-        {formError ? (
-          <div className="mt-6 rounded-[20px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
-            {formError}
-          </div>
-        ) : null}
-
-        {notice ? (
-          <div
-            className={cn(
-              'mt-6 rounded-[20px] px-4 py-3 text-sm',
-              notice.tone === 'success'
-                ? 'border border-brand/15 bg-brand/10 text-slate-700'
-                : 'border border-white/70 bg-white/80 text-slate-700',
-            )}
-          >
-            {notice.message}
-          </div>
-        ) : null}
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          {codeRequested ? (
-            <>
-              <Button
-                disabled={isUpdatingPassword || isSendingCode || !user?.email}
-                onClick={handleChangePassword}
-                variant="secondary"
-              >
-                {isUpdatingPassword ? 'Updating...' : 'Verify code and update'}
-              </Button>
-              <Button
-                disabled={isUpdatingPassword || isSendingCode || isResendingCode}
-                onClick={clearFlow}
-                variant="soft"
-              >
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                disabled={isSendingCode || !user?.email}
-                onClick={() => requestOtp(false)}
-                variant="secondary"
-              >
-                {isSendingCode ? 'Sending code...' : 'Send verification code'}
-              </Button>
-              <Button disabled={isSendingCode} onClick={clearFlow} variant="soft">
-                Clear
-              </Button>
-            </>
-          )}
-        </div>
-      </SurfaceCard>
-
-      <div className="space-y-6">
-        <DetailCard
-          actionLabel="Manage sessions"
-          description="Password updates sign you out on this device and force other sessions to refresh before they can continue."
-          icon={Smartphone}
-          title="Device sessions"
-        />
-        <DetailCard
-          actionLabel="Set up recovery"
-          description="Keep recovery methods current so legitimate lockouts stay low-stress and fast to resolve."
-          icon={Lock}
-          title="Recovery methods"
-        />
       </div>
-    </div>
+
+      {memberSince ? (
+        <div className="mt-5 flex items-center gap-2 rounded-[18px] border border-white/80 bg-white/80 px-4 py-3">
+          <Calendar className="h-4 w-4 shrink-0 text-slate-400" />
+          <p className="text-sm text-slate-500">
+            Account created on <span className="font-medium text-ink">{memberSince}</span>
+          </p>
+        </div>
+      ) : null}
+
+      <div className="mt-8 space-y-5">
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-ink" htmlFor="current-password">
+            Current password
+          </label>
+          <Input
+            autoComplete="current-password"
+            className={cn(
+              'h-14 rounded-[24px] bg-white/90',
+              errors.currentPassword && 'border-danger focus:border-danger',
+            )}
+            id="current-password"
+            onChange={(event) => setFieldValue('currentPassword', event.target.value)}
+            placeholder="Enter your current password"
+            type="password"
+            value={values.currentPassword}
+          />
+          {errors.currentPassword ? (
+            <p className="text-sm text-danger">{errors.currentPassword}</p>
+          ) : null}
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-ink" htmlFor="new-password">
+            New password
+          </label>
+          <Input
+            autoComplete="new-password"
+            className={cn(
+              'h-14 rounded-[24px] bg-white/90',
+              errors.newPassword && 'border-danger focus:border-danger',
+            )}
+            id="new-password"
+            onChange={(event) => setFieldValue('newPassword', event.target.value)}
+            placeholder="Create a stronger password"
+            type="password"
+            value={values.newPassword}
+          />
+          {errors.newPassword ? <p className="text-sm text-danger">{errors.newPassword}</p> : null}
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-ink" htmlFor="confirm-password">
+            Confirm new password
+          </label>
+          <Input
+            autoComplete="new-password"
+            className={cn(
+              'h-14 rounded-[24px] bg-white/90',
+              errors.confirmPassword && 'border-danger focus:border-danger',
+            )}
+            id="confirm-password"
+            onChange={(event) => setFieldValue('confirmPassword', event.target.value)}
+            placeholder="Re-enter the new password"
+            type="password"
+            value={values.confirmPassword}
+          />
+          {errors.confirmPassword ? (
+            <p className="text-sm text-danger">{errors.confirmPassword}</p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-[24px] border border-white/80 bg-white/80 px-5 py-5">
+        <ProgressBar
+          helper={passwordStrength.label}
+          label="Password strength"
+          status={passwordStrength.status}
+          value={passwordStrength.progress}
+        />
+        <div className="mt-4 grid gap-x-4 gap-y-2 sm:grid-cols-2">
+          {passwordStrength.checklist.map((item) => (
+            <div
+              key={item.label}
+              className={cn(
+                'flex items-center gap-2 text-sm',
+                item.passed ? 'text-emerald-700' : 'text-slate-500',
+              )}
+            >
+              <CheckCircle2
+                className={cn(
+                  'h-4 w-4 shrink-0',
+                  item.passed ? 'text-emerald-600' : 'text-slate-300',
+                )}
+              />
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {codeRequested ? (
+        <div className="mt-6 rounded-[26px] border border-brand/15 bg-[linear-gradient(135deg,rgba(214,235,231,0.78),rgba(255,255,255,0.92))] px-5 py-5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/90 text-brand shadow-soft">
+                <MailCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-ink">Enter your email verification code</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  {deliveryHint === 'log'
+                    ? 'SMTP is unavailable right now, so the code was written to the API terminal for local development.'
+                    : `We sent a ${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit code to ${maskedEmail}.`}
+                </p>
+              </div>
+            </div>
+            <Button
+              className="shrink-0"
+              disabled={isResendingCode || isUpdatingPassword}
+              onClick={() => requestOtp(true)}
+              size="sm"
+              type="button"
+              variant="soft"
+            >
+              <RefreshCw className={cn('h-4 w-4', isResendingCode && 'animate-spin')} />
+              {isResendingCode ? 'Sending...' : 'Resend code'}
+            </Button>
+          </div>
+
+          <div className="mt-5 space-y-2">
+            <label className="text-sm font-semibold text-ink" htmlFor="password-change-code">
+              Verification code
+            </label>
+            <Input
+              autoComplete="one-time-code"
+              className={cn(
+                'h-14 rounded-[24px] bg-white/95 text-center font-mono text-lg tracking-[0.42em]',
+                errors.code && 'border-danger focus:border-danger',
+              )}
+              id="password-change-code"
+              inputMode="numeric"
+              maxLength={AUTH_EMAIL_VERIFICATION_CODE_LENGTH}
+              onChange={(event) => setFieldValue('code', event.target.value)}
+              placeholder={'0'.repeat(AUTH_EMAIL_VERIFICATION_CODE_LENGTH)}
+              type="text"
+              value={values.code}
+            />
+            {errors.code ? <p className="text-sm text-danger">{errors.code}</p> : null}
+          </div>
+        </div>
+      ) : null}
+
+      {formError ? (
+        <div className="mt-6 rounded-[20px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
+          {formError}
+        </div>
+      ) : null}
+
+      {notice ? (
+        <div
+          className={cn(
+            'mt-6 rounded-[20px] px-4 py-3 text-sm',
+            notice.tone === 'success'
+              ? 'border border-brand/15 bg-brand/10 text-slate-700'
+              : 'border border-white/70 bg-white/80 text-slate-700',
+          )}
+        >
+          {notice.message}
+        </div>
+      ) : null}
+
+      <div className="mt-6 flex flex-wrap gap-3">
+        {codeRequested ? (
+          <>
+            <Button
+              disabled={isUpdatingPassword || isSendingCode || !user?.email}
+              onClick={handleChangePassword}
+              variant="secondary"
+            >
+              {isUpdatingPassword ? 'Updating...' : 'Verify code and update'}
+            </Button>
+            <Button
+              disabled={isUpdatingPassword || isSendingCode || isResendingCode}
+              onClick={clearFlow}
+              variant="soft"
+            >
+              Cancel
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              disabled={isSendingCode || !user?.email}
+              onClick={() => requestOtp(false)}
+              variant="secondary"
+            >
+              {isSendingCode ? 'Sending code...' : 'Send verification code'}
+            </Button>
+            <Button disabled={isSendingCode} onClick={clearFlow} variant="soft">
+              Clear
+            </Button>
+          </>
+        )}
+      </div>
+    </SurfaceCard>
   );
 }
 
@@ -840,147 +1028,8 @@ function NotificationsPanel() {
   );
 }
 
-function PreferencesPanel() {
-  return (
-    <div className="grid gap-6 xl:grid-cols-[1.15fr,0.85fr]">
-      <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-            <Palette className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="kicker">Preferences</p>
-            <h2 className="mt-2 text-2xl font-semibold text-ink">
-              Make the workspace feel like yours
-            </h2>
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {[
-            {
-              label: 'Warm light',
-              description: 'Soft neutrals with gentle contrast',
-              selected: true,
-            },
-            {
-              label: 'Focused mint',
-              description: 'A calmer accent palette for tracking',
-              selected: false,
-            },
-            {
-              label: 'High contrast',
-              description: 'Sharper surfaces for dense review work',
-              selected: false,
-            },
-          ].map(({ label, description, selected }) => (
-            <div
-              key={label}
-              className={cn(
-                'rounded-[24px] border px-5 py-5 transition-colors',
-                selected
-                  ? 'border-brand bg-brand/10'
-                  : 'border-white/80 bg-white/80 hover:border-brand/30',
-              )}
-            >
-              <p className="font-semibold text-ink">{label}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-6 space-y-4">
-          <ToggleRow
-            description="Use a tighter card rhythm when you want more information visible at once."
-            label="Compact density"
-          />
-          <ToggleRow
-            description="Reduce animation in charts and transitions for a steadier workspace."
-            enabled
-            label="Gentle motion"
-          />
-        </div>
-      </SurfaceCard>
-
-      <div className="space-y-6">
-        <DetailCard
-          actionLabel="Adjust locale"
-          description="Preferred currency is PHP, date format is long-form, and weeks begin on Monday."
-          icon={Globe2}
-          title="Language and locale"
-        />
-        <DetailCard
-          actionLabel="Update layout"
-          description="Control whether reports, dashboards, and category views open with more guidance or more density."
-          icon={SlidersHorizontal}
-          title="Workspace behavior"
-        />
-      </div>
-    </div>
-  );
-}
-
-function PrivacyPanel() {
-  return (
-    <div className="grid gap-6 xl:grid-cols-[1.15fr,0.85fr]">
-      <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-            <EyeOff className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="kicker">Privacy</p>
-            <h2 className="mt-2 text-2xl font-semibold text-ink">
-              Control what is shared and retained
-            </h2>
-          </div>
-        </div>
-
-        <div className="mt-6 space-y-4">
-          <ToggleRow
-            description="Keep AI explanations visible only when you explicitly open them."
-            enabled
-            label="Show explanations on demand"
-          />
-          <ToggleRow
-            description="Hide sensitive category names in dashboard snapshots and print views."
-            enabled
-            label="Mask private labels in shared views"
-          />
-          <ToggleRow
-            description="Allow product analytics that help improve planning insights over time."
-            label="Share anonymous usage data"
-          />
-        </div>
-      </SurfaceCard>
-
-      <div className="space-y-6">
-        <DetailCard
-          actionLabel="Export archive"
-          description="Download your transactions, budgets, and supporting records in a portable format."
-          icon={Download}
-          title="Data export"
-        />
-        <SurfaceCard className="rounded-[30px] border border-danger/25 bg-danger/10 px-6 py-6">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-danger/15 text-danger">
-            <Lock className="h-5 w-5" />
-          </div>
-          <h3 className="mt-5 text-xl font-semibold text-ink">Delete account</h3>
-          <p className="mt-2 text-sm leading-7 text-slate-700">
-            Destructive actions should stay separated from everyday controls and always explain the
-            consequences in plain language.
-          </p>
-          <Button className="mt-5" variant="danger">
-            Review deletion steps
-          </Button>
-        </SurfaceCard>
-      </div>
-    </div>
-  );
-}
-
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<SettingsTabId>('security');
+  const [activeTab, setActiveTab] = useState<SettingsTabId>('account');
   const { data: user } = useCurrentUserQuery();
 
   useEffect(() => {
@@ -996,19 +1045,15 @@ export default function SettingsPage() {
       <AccountPanel user={user} />
     ) : activeTab === 'security' ? (
       <SecurityPanel user={user} />
-    ) : activeTab === 'notifications' ? (
-      <NotificationsPanel />
-    ) : activeTab === 'preferences' ? (
-      <PreferencesPanel />
     ) : (
-      <PrivacyPanel />
+      <NotificationsPanel />
     );
 
   return (
     <div className="space-y-6">
       <PageHeader
         className="px-6 py-5 md:px-7 md:py-6"
-        description="Manage your application preferences with clear sections for account details, security, notifications, workspace behavior, and privacy."
+        description="Manage your account details, security, and notification preferences."
         eyebrow="Settings"
         title="Settings"
       />

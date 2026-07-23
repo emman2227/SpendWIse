@@ -137,6 +137,20 @@ export class UsersRepository {
       .exec();
   }
 
+  updateProfile(userId: string, input: { name?: string; phone?: string }) {
+    const updates: Record<string, string> = {};
+
+    if (input.name !== undefined) {
+      updates.name = input.name;
+    }
+
+    if (input.phone !== undefined) {
+      updates.phone = input.phone;
+    }
+
+    return this.userModel.findByIdAndUpdate(userId, updates, { new: true }).exec();
+  }
+
   toProfile(document: UserDocument): UserProfile {
     return {
       id: document.id,

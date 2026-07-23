@@ -1,14 +1,16 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, UseGuards, UsePipes } from '@nestjs/common';
+import { updateProfileSchema } from '@spendwise/shared';
+import type { z } from 'zod';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { AuthUser } from '../../common/types/auth-user.interface';
-
-import { UsersService } from './users.service';
+import type { UsersService } from './users.service';
 
 @Controller({
   path: 'users',
-  version: '1'
+  version: '1',
 })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -17,5 +19,12 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   getProfile(@CurrentUser() user: AuthUser) {
     return this.usersService.getProfile(user.userId);
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ZodValidationPipe(updateProfileSchema))
+  updateProfile(@CurrentUser() user: AuthUser, @Body() body: z.infer<typeof updateProfileSchema>) {
+    return this.usersService.updateProfile(user.userId, body);
   }
 }

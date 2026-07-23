@@ -162,4 +162,10 @@ export const logoutSession = async () => {
   }
 };
 
+export const updateProfile = (input: { name?: string; phone?: string }) =>
+  request<UserProfile>('/api/users/me', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+
 export const getAuthErrorMessage = (_error: unknown, fallback: string) => fallback;
