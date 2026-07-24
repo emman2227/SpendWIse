@@ -16,6 +16,9 @@ export class UserModel {
   @Prop({ required: true, trim: true })
   phone!: string;
 
+  @Prop({ default: 'USD', required: true, trim: true, uppercase: true })
+  currency!: string;
+
   @Prop({ default: false })
   emailVerified!: boolean;
 

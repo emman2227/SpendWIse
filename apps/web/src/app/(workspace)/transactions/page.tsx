@@ -31,7 +31,8 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { Textarea } from '@/components/ui/textarea';
-import { formatMoney } from '@/lib/formatters';
+import { useCurrentUserQuery } from '@/lib/auth/client';
+import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 import {
   createExpense,
   deleteExpense,
@@ -397,6 +398,8 @@ function TransactionEditorModal({
 
 export default function TransactionsPage() {
   const queryClient = useQueryClient();
+  const { data: user } = useCurrentUserQuery();
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('create');
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
@@ -488,20 +491,21 @@ export default function TransactionsPage() {
   ).size;
 
   useEffect(() => {
+    const currentCategories = categoriesQuery.data ?? [];
     if (
       !isEditorOpen ||
       editorMode !== 'create' ||
       formValues.categoryId ||
-      categories.length === 0
+      currentCategories.length === 0
     ) {
       return;
     }
 
     setFormValues((currentValues) => ({
       ...currentValues,
-      categoryId: currentValues.categoryId || categories[0]?.id || '',
+      categoryId: currentValues.categoryId || currentCategories[0]?.id || '',
     }));
-  }, [categories, editorMode, formValues.categoryId, isEditorOpen]);
+  }, [categoriesQuery.data, editorMode, formValues.categoryId, isEditorOpen]);
 
   const resetEditorState = (defaultCategoryId?: string) => {
     setFieldErrors({});

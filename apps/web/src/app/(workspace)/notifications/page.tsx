@@ -19,7 +19,7 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,8 @@ import {
   type DashboardBudgetSummaryItem,
   getDashboardAnalytics,
 } from '@/lib/analytics/client';
-import { formatMoney } from '@/lib/formatters';
+import { useCurrentUserQuery } from '@/lib/auth/client';
+import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 import { goalsQueryKey, listGoals } from '@/lib/goals/client';
 import {
   listExpenses,
@@ -201,6 +202,7 @@ const resolveNotificationsError = (error: unknown, fallback: string) =>
 const buildBudgetNotifications = (
   items: DashboardBudgetSummaryItem[],
   categoryNames: Map<string, string>,
+  formatMoney: (amount: number) => string,
 ) =>
   items
     .map((item): WorkspaceNotification | null => {
@@ -252,7 +254,10 @@ const buildInsightNotifications = (insights: Insight[]) =>
     }),
   );
 
-const buildRecurringNotifications = (expenses: Expense[]) => {
+const buildRecurringNotifications = (
+  expenses: Expense[],
+  formatMoney: (amount: number) => string,
+) => {
   const grouped = new Map<string, Expense[]>();
 
   expenses.forEach((expense) => {
@@ -302,6 +307,11 @@ const buildRecurringNotifications = (expenses: Expense[]) => {
 
 export default function NotificationsPage() {
   const queryClient = useQueryClient();
+  const { data: user } = useCurrentUserQuery();
+  const formatMoney = useCallback(
+    (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD'),
+    [user?.currency],
+  );
   const [readIds, setReadIds] = useState<Set<string>>(() => new Set());
   const [preferences, setPreferences] = useState<NotificationPreferences>(defaultPreferences);
   const [activeCategory, setActiveCategory] = useState<'all' | NotificationCategory>('all');
@@ -358,7 +368,7 @@ export default function NotificationsPage() {
 
     if (analytics) {
       generatedNotifications.push(
-        ...buildBudgetNotifications(analytics.budgetSummary.items, categoryNames),
+        ...buildBudgetNotifications(analytics.budgetSummary.items, categoryNames, formatMoney),
         ...buildInsightNotifications(analytics.insights),
       );
 
@@ -381,7 +391,7 @@ export default function NotificationsPage() {
       }
     }
 
-    generatedNotifications.push(...buildRecurringNotifications(expenses));
+    generatedNotifications.push(...buildRecurringNotifications(expenses, formatMoney));
 
     expenses
       .filter((expense) => {
@@ -478,6 +488,7 @@ export default function NotificationsPage() {
     categoryNames,
     expensesQuery.data,
     expensesQuery.isLoading,
+    formatMoney,
     goalsQuery.data,
     month,
     preferences,

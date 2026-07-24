@@ -24,7 +24,8 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { Textarea } from '@/components/ui/textarea';
-import { formatMoney } from '@/lib/formatters';
+import { useCurrentUserQuery } from '@/lib/auth/client';
+import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 import { createGoal, deleteGoal, goalsQueryKey, listGoals, updateGoal } from '@/lib/goals/client';
 import { cn } from '@/lib/utils';
 
@@ -316,6 +317,9 @@ function FundGoalModal({
 
 export default function GoalsPage() {
   const queryClient = useQueryClient();
+  const { data: user } = useCurrentUserQuery();
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<GoalEditorMode>('create');
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null);

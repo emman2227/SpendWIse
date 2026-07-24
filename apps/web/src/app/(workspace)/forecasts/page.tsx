@@ -1,3 +1,5 @@
+'use client';
+
 import { CircleAlert, TrendingUp } from 'lucide-react';
 
 import { ForecastProjectionChart } from '@/components/charts/finance-charts';
@@ -6,10 +8,14 @@ import { Button } from '@/components/ui/button';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { SurfaceCard } from '@/components/ui/surface-card';
+import { useCurrentUserQuery } from '@/lib/auth/client';
 import { forecastCategories, forecastTrend } from '@/lib/demo-data';
-import { formatConfidence, formatMoney } from '@/lib/formatters';
+import { formatConfidence, formatMoney as baseFormatMoney } from '@/lib/formatters';
 
 export default function ForecastsPage() {
+  const { data: user } = useCurrentUserQuery();
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+
   return (
     <div className="space-y-6">
       <PageHeader

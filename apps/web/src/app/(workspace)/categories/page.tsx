@@ -33,6 +33,7 @@ import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
+import { useCurrentUserQuery } from '@/lib/auth/client';
 import {
   categoriesQueryKey,
   createCategory,
@@ -40,7 +41,7 @@ import {
   listCategories,
   updateCategory,
 } from '@/lib/categories/client';
-import { formatMoney } from '@/lib/formatters';
+import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 import {
   listExpenses,
   transactionCategoriesQueryKey,
@@ -299,6 +300,8 @@ function CategoryEditorModal({
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient();
+  const { data: user } = useCurrentUserQuery();
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('create');
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
@@ -323,11 +326,11 @@ export default function CategoriesPage() {
   });
 
   const categories = categoriesQuery.data ?? [];
-  const expenses = expensesQuery.data ?? [];
   const spendByCategory = useMemo(() => {
     const totals = new Map<string, { spend: number; transactionCount: number }>();
+    const currentExpenses = expensesQuery.data ?? [];
 
-    expenses.forEach((expense) => {
+    currentExpenses.forEach((expense) => {
       const current = totals.get(expense.categoryId) ?? { spend: 0, transactionCount: 0 };
 
       totals.set(expense.categoryId, {
@@ -337,7 +340,7 @@ export default function CategoriesPage() {
     });
 
     return totals;
-  }, [expenses]);
+  }, [expensesQuery.data]);
 
   const categoryViews: CategoryView[] = categories.map((category) => {
     const totals = spendByCategory.get(category.id);

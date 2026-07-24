@@ -141,7 +141,7 @@ export class UsersRepository {
       .exec();
   }
 
-  updateProfile(userId: string, input: { name?: string; phone?: string }) {
+  updateProfile(userId: string, input: { name?: string; phone?: string; currency?: string }) {
     const updates: Record<string, string> = {};
 
     if (input.name !== undefined) {
@@ -150,6 +150,10 @@ export class UsersRepository {
 
     if (input.phone !== undefined) {
       updates.phone = input.phone;
+    }
+
+    if (input.currency !== undefined) {
+      updates.currency = input.currency;
     }
 
     return this.userModel.findByIdAndUpdate(userId, updates, { new: true }).exec();
@@ -184,6 +188,7 @@ export class UsersRepository {
       name: document.name,
       email: document.email,
       phone: document.phone,
+      currency: document.currency,
       emailVerified: document.emailVerified,
       createdAt: document.createdAt.toISOString(),
       updatedAt: document.updatedAt.toISOString(),

@@ -9,7 +9,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, CheckCheck, CircleX, RefreshCw, TriangleAlert } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import {
@@ -17,7 +17,8 @@ import {
   type DashboardBudgetSummaryItem,
   getDashboardAnalytics,
 } from '@/lib/analytics/client';
-import { formatMoney } from '@/lib/formatters';
+import { useCurrentUserQuery } from '@/lib/auth/client';
+import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 import { goalsQueryKey, listGoals } from '@/lib/goals/client';
 import { useNotificationPreferences } from '@/lib/notifications/client';
 import {
@@ -243,6 +244,11 @@ const buildRecurringNotifications = (expenses: Expense[]) => {
 };
 
 export const HeaderNotificationModal = () => {
+  const { data: user } = useCurrentUserQuery();
+  const formatMoney = useCallback(
+    (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD'),
+    [user?.currency],
+  );
   const queryClient = useQueryClient();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -455,7 +461,14 @@ export const HeaderNotificationModal = () => {
 
         return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
       });
-  }, [analyticsQuery.data, categoryNames, expensesQuery.data, goalsQuery.data, preferences]);
+  }, [
+    analyticsQuery.data,
+    categoryNames,
+    expensesQuery.data,
+    formatMoney,
+    goalsQuery.data,
+    preferences,
+  ]);
 
   const unreadCount = notifications.filter((notification) => !readIds.has(notification.id)).length;
   const highPriorityCount = notifications.filter(

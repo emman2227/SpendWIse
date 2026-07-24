@@ -23,8 +23,9 @@ import { PageHeader } from '@/components/ui/page-header';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
+import { useCurrentUserQuery } from '@/lib/auth/client';
 import { getBudgetSummary } from '@/lib/budgets/client';
-import { formatMoney } from '@/lib/formatters';
+import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 import {
   listExpenses,
   listTransactionCategories,
@@ -96,6 +97,8 @@ const statusRank: Record<BudgetStatus, number> = {
 };
 
 export default function ReportsPage() {
+  const { data: user } = useCurrentUserQuery();
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
   const [monthValue, setMonthValue] = useState(getInitialMonthValue());
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [pageMessage, setPageMessage] = useState('');

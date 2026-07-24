@@ -399,8 +399,7 @@ export default function LoginPage() {
                   id="password-error"
                   role="alert"
                 >
-                  {errors.password ??
-                    `Spaces and emoji are blocked. Use at least ${AUTH_LOGIN_PASSWORD_MIN_LENGTH} characters.`}
+                  {errors.password}
                 </p>
               </div>
 

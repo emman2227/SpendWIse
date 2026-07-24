@@ -23,6 +23,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
+import { useCurrentUserQuery } from '@/lib/auth/client';
 import {
   type BudgetSummaryItem,
   budgetSummaryQueryKey,
@@ -31,7 +32,7 @@ import {
   upsertBudget,
 } from '@/lib/budgets/client';
 import { categoriesQueryKey, listCategories } from '@/lib/categories/client';
-import { formatMoney } from '@/lib/formatters';
+import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 
 type BudgetStatusFilter = 'all' | 'safe' | 'warning' | 'danger';
@@ -199,6 +200,10 @@ function BudgetEditorModal({
 
 export default function BudgetsPage() {
   const queryClient = useQueryClient();
+  const { data: user } = useCurrentUserQuery();
+
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+
   const [isCreateBudgetOpen, setIsCreateBudgetOpen] = useState(false);
   const [monthFilter, setMonthFilter] = useState(getInitialMonthValue);
   const [searchValue, setSearchValue] = useState('');
@@ -223,22 +228,21 @@ export default function BudgetsPage() {
   });
 
   const categories = categoriesQuery.data ?? [];
-  const budgets = budgetSummary.data?.items ?? [];
-  const budgetViews = useMemo(
-    () =>
-      budgets.map((budget) => {
-        const category = categories.find((item) => item.id === budget.categoryId);
-        const status = getBudgetStatus(budget);
+  const budgetViews = useMemo(() => {
+    const currentCategories = categoriesQuery.data ?? [];
+    const currentBudgets = budgetSummary.data?.items ?? [];
+    return currentBudgets.map((budget) => {
+      const category = currentCategories.find((item) => item.id === budget.categoryId);
+      const status = getBudgetStatus(budget);
 
-        return {
-          ...budget,
-          status,
-          categoryName: category?.name ?? 'Unknown category',
-          categoryColor: category?.color ?? '#94A3B8',
-        };
-      }),
-    [budgets, categories],
-  );
+      return {
+        ...budget,
+        status,
+        categoryName: category?.name ?? 'Unknown category',
+        categoryColor: category?.color ?? '#94A3B8',
+      };
+    });
+  }, [budgetSummary.data?.items, categoriesQuery.data]);
 
   const visibleBudgets = budgetViews.filter((budget) => {
     const matchesSearch =

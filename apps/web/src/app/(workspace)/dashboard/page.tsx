@@ -20,8 +20,9 @@ import {
   generateAnalytics,
   getDashboardAnalytics,
 } from '@/lib/analytics/client';
+import { useCurrentUserQuery } from '@/lib/auth/client';
 import { getBudgetSummary } from '@/lib/budgets/client';
-import { formatDelta, formatMoney } from '@/lib/formatters';
+import { formatDelta, formatMoney as baseFormatMoney } from '@/lib/formatters';
 import { goalsQueryKey, listGoals } from '@/lib/goals/client';
 import {
   listExpenses,
@@ -88,6 +89,8 @@ const getInsightBadge = (type: string) => {
 
 export default function DashboardPage() {
   const queryClient = useQueryClient();
+  const { data: user } = useCurrentUserQuery();
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
   const [pageMessage, setPageMessage] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 

@@ -17,7 +17,7 @@ export class UsersService {
     return this.usersRepository.toProfile(user);
   }
 
-  async updateProfile(userId: string, input: { name?: string; phone?: string }) {
+  async updateProfile(userId: string, input: { name?: string; phone?: string; currency?: string }) {
     const user = await this.usersRepository.updateProfile(userId, input);
 
     if (!user) {

@@ -1,13 +1,19 @@
+'use client';
+
 import { ShieldAlert } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { SurfaceCard } from '@/components/ui/surface-card';
+import { useCurrentUserQuery } from '@/lib/auth/client';
 import { alerts } from '@/lib/demo-data';
-import { formatMoney } from '@/lib/formatters';
+import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 
 export default function AnomaliesPage() {
+  const { data: user } = useCurrentUserQuery();
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+
   const selected = alerts[0] ?? {
     id: 'fallback-alert',
     severity: 'info' as const,

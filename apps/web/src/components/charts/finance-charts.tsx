@@ -14,29 +14,19 @@ import {
   PieChart,
   ResponsiveContainer,
   Tooltip,
+  type TooltipProps,
   XAxis,
   YAxis,
 } from 'recharts';
 
+import { useCurrentUserQuery } from '@/lib/auth/client';
 import type { CategorySlice, TrendPoint } from '@/lib/demo-data';
-import { formatMoney } from '@/lib/formatters';
+import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 
-interface TooltipPayloadItem {
-  color?: string;
-  dataKey?: string;
-  name?: string;
-  value?: number;
-}
+const ChartTooltip = ({ active, label, payload }: TooltipProps<number, string>) => {
+  const { data: user } = useCurrentUserQuery();
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
 
-const ChartTooltip = ({
-  active,
-  label,
-  payload,
-}: {
-  active?: boolean;
-  label?: string;
-  payload?: TooltipPayloadItem[];
-}) => {
   if (!active || !payload?.length) {
     return null;
   }

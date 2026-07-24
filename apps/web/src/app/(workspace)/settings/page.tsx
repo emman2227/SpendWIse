@@ -11,6 +11,7 @@ import {
   authPasswordSpecialCharacterPattern,
   authPasswordUppercasePattern,
   authPhonePattern,
+  SUPPORTED_CURRENCIES,
   type UserProfile,
 } from '@spendwise/shared';
 import { useQueryClient } from '@tanstack/react-query';
@@ -264,8 +265,10 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [currency, setCurrency] = useState('');
   const [nameError, setNameError] = useState('');
   const [phoneError, setPhoneError] = useState('');
+  const [currencyError, setCurrencyError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [saveNotice, setSaveNotice] = useState('');
@@ -277,8 +280,10 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
   const startEditing = () => {
     setName(user?.name ?? '');
     setPhone(user?.phone ?? '');
+    setCurrency(user?.currency ?? 'USD');
     setNameError('');
     setPhoneError('');
+    setCurrencyError('');
     setSaveNotice('');
     setSaveError('');
     setIsEditing(true);
@@ -288,21 +293,26 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
     setIsEditing(false);
     setNameError('');
     setPhoneError('');
+    setCurrencyError('');
     setSaveError('');
   };
 
   const handleSave = async () => {
     const nextNameError = validateProfileName(name);
     const nextPhoneError = validateProfilePhone(phone);
+    const nextCurrencyError = !SUPPORTED_CURRENCIES.find((c) => c.code === currency)
+      ? 'Please select a valid currency.'
+      : '';
 
     setNameError(nextNameError);
     setPhoneError(nextPhoneError);
+    setCurrencyError(nextCurrencyError);
 
-    if (nextNameError || nextPhoneError) {
+    if (nextNameError || nextPhoneError || nextCurrencyError) {
       return;
     }
 
-    const changes: { name?: string; phone?: string } = {};
+    const changes: { name?: string; phone?: string; currency?: string } = {};
 
     if (name.trim() !== user?.name) {
       changes.name = name.trim();
@@ -310,6 +320,10 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
 
     if (phone.trim() !== user?.phone) {
       changes.phone = phone.trim();
+    }
+
+    if (currency.trim().toUpperCase() !== user?.currency) {
+      changes.currency = currency.trim().toUpperCase();
     }
 
     if (!Object.keys(changes).length) {
@@ -419,6 +433,32 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
               {phoneError ? <p className="text-sm text-danger">{phoneError}</p> : null}
             </div>
 
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-ink" htmlFor="profile-currency">
+                Currency
+              </label>
+              <select
+                className={cn(
+                  'h-14 w-full appearance-none rounded-[24px] border border-line bg-white/90 px-5 text-ink outline-none transition focus:border-brand focus:bg-white',
+                  currencyError && 'border-danger focus:border-danger',
+                )}
+                id="profile-currency"
+                onChange={(event) => {
+                  setCurrency(event.target.value);
+                  setCurrencyError('');
+                  setSaveError('');
+                }}
+                value={currency}
+              >
+                {SUPPORTED_CURRENCIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.code} - {c.label} ({c.symbol})
+                  </option>
+                ))}
+              </select>
+              {currencyError ? <p className="text-sm text-danger">{currencyError}</p> : null}
+            </div>
+
             <div className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5">
               <p className="text-sm text-slate-500">Email address</p>
               <p className="mt-2 font-semibold text-ink">{user?.email ?? 'Loading...'}</p>
@@ -450,6 +490,12 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
                 label: 'Phone number',
                 value: user?.phone ?? 'Not set',
                 icon: Phone,
+              },
+              {
+                label: 'Currency',
+                value: user?.currency
+                  ? `${SUPPORTED_CURRENCIES.find((c) => c.code === user.currency)?.label ?? user.currency} (${user.currency})`
+                  : 'USD',
               },
             ].map(({ label, value }) => (
               <div

@@ -171,7 +171,11 @@ export const updateProfileSchema = z
       .regex(authNamePattern, 'Name can only use letters, spaces, apostrophes, and hyphens.')
       .optional(),
     phone: phoneSchema.optional(),
+    currency: z.string().length(3, 'Currency must be a 3-letter code.').optional(),
   })
-  .refine((data) => data.name !== undefined || data.phone !== undefined, {
-    message: 'At least one field must be provided.',
-  });
+  .refine(
+    (data) => data.name !== undefined || data.phone !== undefined || data.currency !== undefined,
+    {
+      message: 'At least one field must be provided.',
+    },
+  );

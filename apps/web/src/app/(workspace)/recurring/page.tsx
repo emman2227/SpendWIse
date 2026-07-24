@@ -20,7 +20,8 @@ import { PageHeader } from '@/components/ui/page-header';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
-import { formatConfidence, formatMoney } from '@/lib/formatters';
+import { useCurrentUserQuery } from '@/lib/auth/client';
+import { formatConfidence, formatMoney as baseFormatMoney } from '@/lib/formatters';
 import { listExpenses, listTransactionCategories } from '@/lib/transactions/client';
 import { cn } from '@/lib/utils';
 
@@ -388,7 +389,9 @@ const detectRecurringSeries = (expenses: Expense[], categories: Category[]) => {
 
 export default function RecurringPage() {
   const queryClient = useQueryClient();
-  const [searchValue, setSearchValue] = useState('');
+  const { data: user } = useCurrentUserQuery();
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+
   const [statusFilter, setStatusFilter] = useState<RecurringFilter>('all');
 
   const expensesQuery = useQuery({
@@ -401,12 +404,9 @@ export default function RecurringPage() {
     queryFn: listTransactionCategories,
   });
 
-  const expenses = expensesQuery.data ?? [];
-  const categories = categoriesQuery.data ?? [];
-
   const recurringSeries = useMemo(
-    () => detectRecurringSeries(expenses, categories),
-    [categories, expenses],
+    () => detectRecurringSeries(expensesQuery.data ?? [], categoriesQuery.data ?? []),
+    [categoriesQuery.data, expensesQuery.data],
   );
 
   const visibleSeries = recurringSeries.filter((series) => {
