@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { compareSync, hashSync } from '@node-rs/bcrypt';
 import type {
   AuthSession,
   AuthTokens,
@@ -21,7 +22,6 @@ import type {
   VerificationDeliveryMethod,
   VerificationDispatchResult,
 } from '@spendwise/shared';
-import { compare, hash } from 'bcryptjs';
 import { randomInt } from 'crypto';
 
 import { AuditLogService } from '../../common/services/audit-log.service';
@@ -79,7 +79,7 @@ export class AuthService {
 
     try {
       const existing = await this.usersRepository.findByEmail(normalizedEmail);
-      const passwordHash = await hash(input.password, 12);
+      const passwordHash = hashSync(input.password, 10);
 
       let user: UserDocument;
 
@@ -308,7 +308,7 @@ export class AuthService {
 
       await this.assertPasswordResetCode(user, input.code);
 
-      const passwordHash = await hash(input.password, 12);
+      const passwordHash = hashSync(input.password, 10);
       const updatedUser = await this.usersRepository.updatePassword(user.id, passwordHash);
 
       if (!updatedUser) {
@@ -343,7 +343,7 @@ export class AuthService {
     try {
       const user = await this.getPasswordChangeUser(userId);
 
-      if (!(await compare(input.currentPassword, user.passwordHash))) {
+      if (!compareSync(input.currentPassword, user.passwordHash)) {
         throw new UnauthorizedException('Your current password is incorrect.');
       }
 
@@ -384,11 +384,11 @@ export class AuthService {
     try {
       const user = await this.getPasswordChangeUser(userId);
 
-      if (!(await compare(input.currentPassword, user.passwordHash))) {
+      if (!compareSync(input.currentPassword, user.passwordHash)) {
         throw new UnauthorizedException('Your current password is incorrect.');
       }
 
-      if (await compare(input.password, user.passwordHash)) {
+      if (compareSync(input.password, user.passwordHash)) {
         throw new BadRequestException(
           'Choose a new password that is different from your current password.',
         );
@@ -396,7 +396,7 @@ export class AuthService {
 
       await this.assertPasswordChangeCode(user, input.code);
 
-      const passwordHash = await hash(input.password, 12);
+      const passwordHash = hashSync(input.password, 10);
       const updatedUser = await this.usersRepository.updatePassword(user.id, passwordHash);
 
       if (!updatedUser) {
@@ -431,7 +431,7 @@ export class AuthService {
     try {
       const user = await this.usersRepository.findByEmail(normalizedEmail);
 
-      if (!user || !(await compare(input.password, user.passwordHash))) {
+      if (!user || !compareSync(input.password, user.passwordHash)) {
         throw new UnauthorizedException('Invalid email or password');
       }
 
@@ -469,14 +469,14 @@ export class AuthService {
         throw new UnauthorizedException('Refresh session not found');
       }
 
-      const isValidRefresh = await compare(refreshToken, user.refreshTokenHash);
+      const isValidRefresh = compareSync(refreshToken, user.refreshTokenHash);
 
       if (!isValidRefresh) {
         throw new UnauthorizedException('Refresh token is invalid');
       }
 
       const tokens = await this.issueTokens(user.id, user.email);
-      const refreshTokenHash = await hash(tokens.refreshToken, 10);
+      const refreshTokenHash = hashSync(tokens.refreshToken, 10);
       await this.usersRepository.updateRefreshToken(user.id, refreshTokenHash);
 
       this.auditLogService.record({
@@ -550,7 +550,7 @@ export class AuthService {
     }
 
     const tokens = await this.issueTokens(user.id, email);
-    const refreshTokenHash = await hash(tokens.refreshToken, 10);
+    const refreshTokenHash = hashSync(tokens.refreshToken, 10);
     await this.usersRepository.updateRefreshToken(user.id, refreshTokenHash);
 
     return {
@@ -605,7 +605,7 @@ export class AuthService {
       throw new BadRequestException('Your verification code has expired. Request a new one.');
     }
 
-    const isValidCode = await compare(code.trim(), user.emailVerificationCodeHash);
+    const isValidCode = compareSync(code.trim(), user.emailVerificationCodeHash);
 
     if (!isValidCode) {
       throw new BadRequestException('That verification code is incorrect.');
@@ -621,7 +621,7 @@ export class AuthService {
       throw new BadRequestException('Your password reset code has expired. Request a new one.');
     }
 
-    const isValidCode = await compare(code.trim(), user.passwordResetCodeHash);
+    const isValidCode = compareSync(code.trim(), user.passwordResetCodeHash);
 
     if (!isValidCode) {
       throw new BadRequestException('That password reset code is incorrect.');
@@ -637,7 +637,7 @@ export class AuthService {
       throw new BadRequestException('Your password change code has expired. Request a new one.');
     }
 
-    const isValidCode = await compare(code.trim(), user.passwordChangeCodeHash);
+    const isValidCode = compareSync(code.trim(), user.passwordChangeCodeHash);
 
     if (!isValidCode) {
       throw new BadRequestException('That password change code is incorrect.');
@@ -661,7 +661,7 @@ export class AuthService {
       'EMAIL_VERIFICATION_CODE_TTL_MINUTES',
     );
     const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
-    const codeHash = await hash(code, 10);
+    const codeHash = hashSync(code, 10);
     const expiresAt = new Date(sentAt.getTime() + expiresInMinutes * 60 * 1000);
 
     await this.usersRepository.updateEmailVerification(user.id, {
@@ -695,7 +695,7 @@ export class AuthService {
       'PASSWORD_RESET_CODE_TTL_MINUTES',
     );
     const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
-    const codeHash = await hash(code, 10);
+    const codeHash = hashSync(code, 10);
     const expiresAt = new Date(sentAt.getTime() + expiresInMinutes * 60 * 1000);
 
     await this.usersRepository.updatePasswordReset(user.id, {
@@ -729,7 +729,7 @@ export class AuthService {
       'PASSWORD_RESET_CODE_TTL_MINUTES',
     );
     const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
-    const codeHash = await hash(code, 10);
+    const codeHash = hashSync(code, 10);
     const expiresAt = new Date(sentAt.getTime() + expiresInMinutes * 60 * 1000);
 
     await this.usersRepository.updatePasswordChange(user.id, {
