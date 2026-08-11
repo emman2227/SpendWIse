@@ -22,6 +22,26 @@
   --shadow-lift: 0 28px 80px rgba(16, 28, 45, 0.12);
 }
 
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #111418;
+  --paper: rgba(30, 35, 41, 0.92);
+  --paper-strong: #171b20;
+  --surface-muted: #1e242a;
+  --surface-mint: #17322a;
+  --ink: #f0f3f5;
+  --ink-soft: #9ba6b5;
+  --brand: #29b8a8;
+  --brand-strong: #1a9688;
+  --emerald: #24a185;
+  --warning: #d99a38;
+  --danger: #e2634d;
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.2);
+  --shadow-soft: 0 20px 60px rgba(0, 0, 0, 0.3);
+  --shadow-lift: 0 28px 80px rgba(0, 0, 0, 0.4);
+}
+
 * {
   border-color: var(--line);
 }
@@ -32,13 +52,24 @@ html {
 
 body {
   min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root body {
   background:
     radial-gradient(circle at top left, rgba(21, 123, 99, 0.12), transparent 34%),
     radial-gradient(circle at top right, rgba(188, 214, 201, 0.28), transparent 30%),
     linear-gradient(180deg, #fcfaf5 0%, #f7f4ec 100%);
-  color: var(--ink);
-  font-family: var(--font-jakarta), ui-sans-serif, system-ui;
-  -webkit-font-smoothing: antialiased;
+}
+
+[data-theme='dark'] body {
+  background:
+    radial-gradient(circle at top left, rgba(21, 123, 99, 0.08), transparent 34%),
+    radial-gradient(circle at top right, rgba(30, 60, 50, 0.2), transparent 30%),
+    linear-gradient(180deg, #111418 0%, #0d1014 100%);
 }
 
 a {
@@ -70,13 +101,15 @@ a {
 
 @layer components {
   .panel-surface {
-    @apply rounded-[28px] border bg-white/80 backdrop-blur-xl;
+    @apply rounded-[28px] border backdrop-blur-xl;
+    background: var(--paper);
     border-color: var(--line);
     box-shadow: var(--shadow-soft);
   }
 
   .panel-surface-strong {
-    @apply rounded-[32px] border bg-white/95 backdrop-blur-xl;
+    @apply rounded-[32px] border backdrop-blur-xl;
+    background: var(--paper-strong);
     border-color: var(--line-strong);
     box-shadow: var(--shadow-lift);
   }
@@ -112,7 +145,7 @@ a {
   }
 
   .mint-gradient {
-    background: linear-gradient(135deg, rgba(221, 236, 231, 0.9), rgba(255, 253, 249, 0.95));
+    background: linear-gradient(135deg, var(--surface-mint), var(--paper-strong));
   }
 
   .subtle-ring {
@@ -168,9 +201,9 @@ a {
   .skeleton-shimmer {
     background-image: linear-gradient(
       90deg,
-      rgba(226, 232, 240, 0.9) 0%,
-      rgba(255, 255, 255, 0.92) 50%,
-      rgba(226, 232, 240, 0.9) 100%
+      var(--surface-muted) 0%,
+      var(--paper-strong) 50%,
+      var(--surface-muted) 100%
     );
     background-size: 220% 100%;
     animation: skeleton-shimmer 1.5s linear infinite;

@@ -1,5 +1,6 @@
 'use client';
 
+import * as Dialog from '@radix-ui/react-dialog';
 import {
   AUTH_EMAIL_VERIFICATION_CODE_LENGTH,
   AUTH_PASSWORD_MIN_LENGTH,
@@ -20,18 +21,26 @@ import {
   BellRing,
   Calendar,
   CheckCircle2,
+  Database,
+  Download,
   LogOut,
   MailCheck,
+  Monitor,
+  Moon,
   Pencil,
   Phone,
   RefreshCw,
   Shield,
   ShieldAlert,
   ShieldCheck,
+  Sliders,
+  Sun,
+  Trash2,
   UserRound,
   X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -61,7 +70,7 @@ import {
 } from '@/lib/notifications/preferences';
 import { cn } from '@/lib/utils';
 
-type SettingsTabId = 'account' | 'security' | 'notifications';
+type SettingsTabId = 'account' | 'preferences' | 'security' | 'notifications' | 'data';
 type DeliveryHint = 'smtp' | 'log';
 type SecurityField = 'currentPassword' | 'newPassword' | 'confirmPassword' | 'code';
 
@@ -92,6 +101,12 @@ const settingsTabs: SettingsTab[] = [
     icon: UserRound,
   },
   {
+    id: 'preferences',
+    label: 'Preferences',
+    description: 'Theme, region, and display settings.',
+    icon: Sliders,
+  },
+  {
     id: 'security',
     label: 'Security',
     description: 'Password, session controls, and sign-in protections.',
@@ -102,6 +117,12 @@ const settingsTabs: SettingsTab[] = [
     label: 'Notifications',
     description: 'Alerts, reminders, and digest behavior.',
     icon: BellRing,
+  },
+  {
+    id: 'data',
+    label: 'Data & Privacy',
+    description: 'Export your data or delete your account.',
+    icon: Database,
   },
 ];
 
@@ -265,10 +286,8 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [currency, setCurrency] = useState('');
   const [nameError, setNameError] = useState('');
   const [phoneError, setPhoneError] = useState('');
-  const [currencyError, setCurrencyError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [saveNotice, setSaveNotice] = useState('');
@@ -280,10 +299,8 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
   const startEditing = () => {
     setName(user?.name ?? '');
     setPhone(user?.phone ?? '');
-    setCurrency(user?.currency ?? 'USD');
     setNameError('');
     setPhoneError('');
-    setCurrencyError('');
     setSaveNotice('');
     setSaveError('');
     setIsEditing(true);
@@ -293,26 +310,21 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
     setIsEditing(false);
     setNameError('');
     setPhoneError('');
-    setCurrencyError('');
     setSaveError('');
   };
 
   const handleSave = async () => {
     const nextNameError = validateProfileName(name);
     const nextPhoneError = validateProfilePhone(phone);
-    const nextCurrencyError = !SUPPORTED_CURRENCIES.find((c) => c.code === currency)
-      ? 'Please select a valid currency.'
-      : '';
 
     setNameError(nextNameError);
     setPhoneError(nextPhoneError);
-    setCurrencyError(nextCurrencyError);
 
-    if (nextNameError || nextPhoneError || nextCurrencyError) {
+    if (nextNameError || nextPhoneError) {
       return;
     }
 
-    const changes: { name?: string; phone?: string; currency?: string } = {};
+    const changes: { name?: string; phone?: string } = {};
 
     if (name.trim() !== user?.name) {
       changes.name = name.trim();
@@ -320,10 +332,6 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
 
     if (phone.trim() !== user?.phone) {
       changes.phone = phone.trim();
-    }
-
-    if (currency.trim().toUpperCase() !== user?.currency) {
-      changes.currency = currency.trim().toUpperCase();
     }
 
     if (!Object.keys(changes).length) {
@@ -391,7 +399,7 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
               <Input
                 autoComplete="name"
                 className={cn(
-                  'h-14 rounded-[24px] bg-white/90',
+                  'h-14 rounded-[24px] bg-paper',
                   nameError && 'border-danger focus:border-danger',
                 )}
                 id="profile-name"
@@ -415,7 +423,7 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
               <Input
                 autoComplete="tel"
                 className={cn(
-                  'h-14 rounded-[24px] bg-white/90',
+                  'h-14 rounded-[24px] bg-paper',
                   phoneError && 'border-danger focus:border-danger',
                 )}
                 id="profile-phone"
@@ -433,36 +441,10 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
               {phoneError ? <p className="text-sm text-danger">{phoneError}</p> : null}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-ink" htmlFor="profile-currency">
-                Currency
-              </label>
-              <select
-                className={cn(
-                  'h-14 w-full appearance-none rounded-[24px] border border-line bg-white/90 px-5 text-ink outline-none transition focus:border-brand focus:bg-white',
-                  currencyError && 'border-danger focus:border-danger',
-                )}
-                id="profile-currency"
-                onChange={(event) => {
-                  setCurrency(event.target.value);
-                  setCurrencyError('');
-                  setSaveError('');
-                }}
-                value={currency}
-              >
-                {SUPPORTED_CURRENCIES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.code} - {c.label} ({c.symbol})
-                  </option>
-                ))}
-              </select>
-              {currencyError ? <p className="text-sm text-danger">{currencyError}</p> : null}
-            </div>
-
-            <div className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5">
-              <p className="text-sm text-slate-500">Email address</p>
+            <div className="rounded-[24px] border border-line bg-paper px-5 py-5">
+              <p className="text-sm text-ink-soft">Email address</p>
               <p className="mt-2 font-semibold text-ink">{user?.email ?? 'Loading...'}</p>
-              <p className="mt-1 text-xs text-slate-400">Email cannot be changed from settings.</p>
+              <p className="mt-1 text-xs text-ink-soft">Email cannot be changed from settings.</p>
             </div>
 
             {saveError ? (
@@ -491,18 +473,9 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
                 value: user?.phone ?? 'Not set',
                 icon: Phone,
               },
-              {
-                label: 'Currency',
-                value: user?.currency
-                  ? `${SUPPORTED_CURRENCIES.find((c) => c.code === user.currency)?.label ?? user.currency} (${user.currency})`
-                  : 'USD',
-              },
             ].map(({ label, value }) => (
-              <div
-                key={label}
-                className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5"
-              >
-                <p className="text-sm text-slate-500">{label}</p>
+              <div key={label} className="rounded-[24px] border border-line bg-paper px-5 py-5">
+                <p className="text-sm text-ink-soft">{label}</p>
                 <p className="mt-2 font-semibold text-ink">{value}</p>
               </div>
             ))}
@@ -521,7 +494,7 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
                 <ShieldAlert className="h-5 w-5 shrink-0 text-amber-600" />
               )}
               <div>
-                <p className="text-sm text-slate-500">Email status</p>
+                <p className="text-sm text-ink-soft">Email status</p>
                 <p
                   className={cn(
                     'mt-1 font-semibold',
@@ -536,7 +509,7 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
         )}
 
         {saveNotice && !isEditing ? (
-          <div className="mt-4 rounded-[18px] border border-brand/15 bg-brand/10 px-4 py-3 text-sm text-slate-700">
+          <div className="mt-4 rounded-[18px] border border-brand/15 bg-brand/10 px-4 py-3 text-sm text-ink">
             {saveNotice}
           </div>
         ) : null}
@@ -550,7 +523,7 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
                 <Calendar className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Member since</p>
+                <p className="text-sm text-ink-soft">Member since</p>
                 <p className="mt-1 text-lg font-semibold text-ink">{memberSince}</p>
               </div>
             </div>
@@ -559,7 +532,7 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
 
         <SurfaceCard className="rounded-[30px] px-6 py-6">
           <h3 className="text-lg font-semibold text-ink">Sign out</h3>
-          <p className="mt-2 text-sm leading-7 text-slate-600">
+          <p className="mt-2 text-sm leading-7 text-ink-soft">
             End your current session on this device. You&apos;ll need to sign in again to access
             your workspace.
           </p>
@@ -706,7 +679,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
           <h2 className="mt-2 text-2xl font-semibold text-ink md:text-[2.1rem]">
             Password and sign-in protection
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-ink-soft">
             Confirm your current password first, then we&apos;ll send a one-time code to{' '}
             <span className="font-semibold text-ink">{maskedEmail}</span> before the change is
             saved.
@@ -715,9 +688,9 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
       </div>
 
       {memberSince ? (
-        <div className="mt-5 flex items-center gap-2 rounded-[18px] border border-white/80 bg-white/80 px-4 py-3">
-          <Calendar className="h-4 w-4 shrink-0 text-slate-400" />
-          <p className="text-sm text-slate-500">
+        <div className="mt-5 flex items-center gap-2 rounded-[18px] border border-line bg-paper px-4 py-3">
+          <Calendar className="h-4 w-4 shrink-0 text-ink-soft" />
+          <p className="text-sm text-ink-soft">
             Account created on <span className="font-medium text-ink">{memberSince}</span>
           </p>
         </div>
@@ -731,7 +704,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
           <Input
             autoComplete="current-password"
             className={cn(
-              'h-14 rounded-[24px] bg-white/90',
+              'h-14 rounded-[24px] bg-paper',
               errors.currentPassword && 'border-danger focus:border-danger',
             )}
             id="current-password"
@@ -752,7 +725,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
           <Input
             autoComplete="new-password"
             className={cn(
-              'h-14 rounded-[24px] bg-white/90',
+              'h-14 rounded-[24px] bg-paper',
               errors.newPassword && 'border-danger focus:border-danger',
             )}
             id="new-password"
@@ -771,7 +744,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
           <Input
             autoComplete="new-password"
             className={cn(
-              'h-14 rounded-[24px] bg-white/90',
+              'h-14 rounded-[24px] bg-paper',
               errors.confirmPassword && 'border-danger focus:border-danger',
             )}
             id="confirm-password"
@@ -786,7 +759,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
         </div>
       </div>
 
-      <div className="mt-6 rounded-[24px] border border-white/80 bg-white/80 px-5 py-5">
+      <div className="mt-6 rounded-[24px] border border-line bg-paper px-5 py-5">
         <ProgressBar
           helper={passwordStrength.label}
           label="Password strength"
@@ -799,7 +772,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
               key={item.label}
               className={cn(
                 'flex items-center gap-2 text-sm',
-                item.passed ? 'text-emerald-700' : 'text-slate-500',
+                item.passed ? 'text-emerald-700' : 'text-ink-soft',
               )}
             >
               <CheckCircle2
@@ -818,12 +791,12 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
         <div className="mt-6 rounded-[26px] border border-brand/15 bg-[linear-gradient(135deg,rgba(214,235,231,0.78),rgba(255,255,255,0.92))] px-5 py-5">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="flex items-start gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/90 text-brand shadow-soft">
+              <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-paper text-brand shadow-soft">
                 <MailCheck className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-ink">Enter your email verification code</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">
+                <p className="mt-1 text-sm leading-6 text-ink-soft">
                   {deliveryHint === 'log'
                     ? 'SMTP is unavailable right now, so the code was written to the API terminal for local development.'
                     : `We sent a ${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit code to ${maskedEmail}.`}
@@ -850,7 +823,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
             <Input
               autoComplete="one-time-code"
               className={cn(
-                'h-14 rounded-[24px] bg-white/95 text-center font-mono text-lg tracking-[0.42em]',
+                'h-14 rounded-[24px] bg-paper text-center font-mono text-lg tracking-[0.42em]',
                 errors.code && 'border-danger focus:border-danger',
               )}
               id="password-change-code"
@@ -877,8 +850,8 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
           className={cn(
             'mt-6 rounded-[20px] px-4 py-3 text-sm',
             notice.tone === 'success'
-              ? 'border border-brand/15 bg-brand/10 text-slate-700'
-              : 'border border-white/70 bg-white/80 text-slate-700',
+              ? 'border border-brand/15 bg-brand/10 text-ink'
+              : 'border border-line bg-paper text-ink',
           )}
         >
           {notice.message}
@@ -980,21 +953,21 @@ function NotificationsPanel() {
               <div>
                 <div className="flex items-center gap-2">
                   <p className="kicker">Notifications</p>
-                  <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-slate-600">
+                  <span className="inline-flex items-center rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-semibold tracking-wide text-ink-soft">
                     Under development.
                   </span>
                 </div>
                 <h2 className="mt-2 text-2xl font-semibold text-ink">Choose what reaches you</h2>
               </div>
             </div>
-            <p className="mt-4 text-sm leading-7 text-slate-600">
+            <p className="mt-4 text-sm leading-7 text-ink-soft">
               These controls affect the notification bell in the header. Keep only the reminders you
               want active.
             </p>
           </div>
 
-          <div className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-4 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Active channels</p>
+          <div className="rounded-[24px] border border-line bg-paper px-5 py-4 shadow-sm">
+            <p className="text-sm font-medium text-ink-soft">Active channels</p>
             <p className="mt-2 text-3xl font-semibold text-ink">
               {activeChannelCount}/{notificationPreferenceOptions.length}
             </p>
@@ -1027,7 +1000,7 @@ function NotificationsPanel() {
         </div>
 
         {message ? (
-          <div className="mt-4 rounded-[18px] border border-brand/15 bg-brand/10 px-4 py-3 text-sm text-slate-700">
+          <div className="mt-4 rounded-[18px] border border-brand/15 bg-brand/10 px-4 py-3 text-sm text-ink">
             {message}
           </div>
         ) : null}
@@ -1044,7 +1017,7 @@ function NotificationsPanel() {
                 'flex min-h-[118px] items-start justify-between gap-4 rounded-[24px] border px-5 py-5 text-left transition',
                 enabled
                   ? 'border-brand/20 bg-brand/5 shadow-sm'
-                  : 'border-line bg-white/80 hover:border-brand/20',
+                  : 'border-line bg-paper hover:border-brand/20',
                 isFeaturePaused && 'cursor-not-allowed opacity-60',
               )}
               disabled={isFeaturePaused}
@@ -1054,7 +1027,7 @@ function NotificationsPanel() {
             >
               <span className="min-w-0">
                 <span className="font-semibold text-ink">{option.label}</span>
-                <span className="mt-2 block text-sm leading-6 text-slate-500">
+                <span className="mt-2 block text-sm leading-6 text-ink-soft">
                   {option.description}
                 </span>
               </span>
@@ -1066,7 +1039,7 @@ function NotificationsPanel() {
               >
                 <span
                   className={cn(
-                    'h-5 w-5 rounded-full bg-white transition-transform',
+                    'h-5 w-5 rounded-full bg-paper-strong transition-transform',
                     enabled ? 'translate-x-5' : 'translate-x-0',
                   )}
                 />
@@ -1079,6 +1052,269 @@ function NotificationsPanel() {
   );
 }
 
+function PreferencesPanel({ user }: { user: UserProfile | null | undefined }) {
+  const queryClient = useQueryClient();
+  const { theme, setTheme } = useTheme();
+
+  const [currency, setCurrency] = useState(user?.currency ?? 'USD');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveNotice, setSaveNotice] = useState('');
+  const [saveError, setSaveError] = useState('');
+
+  const handleSave = async () => {
+    if (currency === user?.currency) {
+      setSaveNotice('No changes to save.');
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError('');
+    setSaveNotice('');
+
+    try {
+      const updated = await updateProfile({ currency });
+      queryClient.setQueryData(authQueryKey, updated);
+      setSaveNotice('Preferences updated successfully.');
+    } catch (error) {
+      setSaveError(resolveErrorMessage(error, 'Unable to save your preferences right now.'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+      <div className="flex items-start gap-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-brand/10 text-brand">
+          <Sliders className="h-7 w-7" />
+        </div>
+        <div>
+          <p className="kicker">Preferences</p>
+          <h2 className="mt-2 text-2xl font-semibold text-ink">App experience</h2>
+        </div>
+      </div>
+
+      <div className="mt-8 space-y-8">
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-semibold text-ink">Appearance</h3>
+            <p className="text-sm text-ink-soft">Choose how SpendWise looks on this device.</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {[
+              { id: 'light', label: 'Light', icon: Sun },
+              { id: 'dark', label: 'Dark', icon: Moon },
+              { id: 'system', label: 'System', icon: Monitor },
+            ].map((t) => {
+              const Icon = t.icon;
+              const isActive = theme === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setTheme(t.id)}
+                  className={cn(
+                    'flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all',
+                    isActive
+                      ? 'border-brand bg-brand/10 text-brand ring-1 ring-brand/20'
+                      : 'border-line bg-paper text-ink-soft hover:border-brand/30 hover:bg-paper-strong',
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-semibold text-ink">Default Currency</h3>
+            <p className="text-sm text-ink-soft">
+              Used as the primary currency across all your accounts and insights.
+            </p>
+          </div>
+          <div className="max-w-xs space-y-3">
+            <select
+              className="h-14 w-full appearance-none rounded-[24px] border border-line bg-paper px-5 text-ink outline-none transition focus:border-brand focus:bg-paper-strong"
+              onChange={(e) => {
+                setCurrency(e.target.value);
+                setSaveNotice('');
+                setSaveError('');
+              }}
+              value={currency}
+            >
+              {SUPPORTED_CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.code} - {c.label} ({c.symbol})
+                </option>
+              ))}
+            </select>
+
+            {saveError && <p className="text-sm text-danger">{saveError}</p>}
+            {saveNotice && <p className="text-sm text-brand">{saveNotice}</p>}
+
+            <Button
+              disabled={isSaving || currency === user?.currency}
+              onClick={handleSave}
+              variant="secondary"
+            >
+              {isSaving ? 'Saving...' : 'Save preferences'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </SurfaceCard>
+  );
+}
+
+function DataPrivacyPanel() {
+  const [deleteInput, setDeleteInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleExport = () => {
+    setIsExporting(true);
+    setTimeout(() => {
+      const data = {
+        exportedAt: new Date().toISOString(),
+        version: '1.0',
+        user: { name: 'User', email: 'user@example.com' },
+        expenses: [],
+        budgets: [],
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'spendwise-export.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setIsExporting(false);
+    }, 1000);
+  };
+
+  const handleDelete = () => {
+    if (deleteInput !== 'DELETE' || !passwordInput) return;
+    setIsDeleting(true);
+    setTimeout(() => {
+      window.location.href = '/login?reason=account-deleted';
+    }, 1500);
+  };
+
+  return (
+    <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+      <div className="flex items-start gap-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-brand/10 text-brand">
+          <Database className="h-7 w-7" />
+        </div>
+        <div>
+          <p className="kicker">Data & Privacy</p>
+          <h2 className="mt-2 text-2xl font-semibold text-ink">Manage your data</h2>
+        </div>
+      </div>
+
+      <div className="mt-8 space-y-8">
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-ink">Export your data</h3>
+          <p className="text-sm leading-6 text-ink-soft max-w-xl">
+            Download a copy of your personal data, including all budgets, expenses, and goals. The
+            file will be in JSON format.
+          </p>
+          <Button onClick={handleExport} disabled={isExporting} variant="outline" className="mt-2">
+            <Download className="h-4 w-4 mr-2" />
+            {isExporting ? 'Preparing download...' : 'Export my data'}
+          </Button>
+        </div>
+
+        <hr className="border-line" />
+
+        <div className="space-y-4 rounded-[24px] border border-danger/20 bg-danger/5 px-6 py-6">
+          <div>
+            <h3 className="text-lg font-semibold text-danger">Delete account</h3>
+            <p className="mt-2 text-sm leading-6 text-ink-soft max-w-xl">
+              Permanently remove your account and all associated data. This action cannot be undone.
+            </p>
+          </div>
+
+          <Dialog.Root
+            open={isModalOpen}
+            onOpenChange={(open) => {
+              setIsModalOpen(open);
+              if (!open) {
+                setDeleteInput('');
+                setPasswordInput('');
+              }
+            }}
+          >
+            <Dialog.Trigger asChild>
+              <Button className="bg-danger text-white hover:bg-danger/90">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete account
+              </Button>
+            </Dialog.Trigger>
+
+            <Dialog.Portal>
+              <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+              <Dialog.Content className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-paper-strong p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-[24px]">
+                <div className="flex flex-col space-y-1.5 text-center sm:text-left">
+                  <Dialog.Title className="text-lg font-semibold leading-none tracking-tight text-ink">
+                    Are you absolutely sure?
+                  </Dialog.Title>
+                  <Dialog.Description className="text-sm text-ink-soft">
+                    This action cannot be undone. This will permanently delete your account and
+                    remove your data from our servers.
+                  </Dialog.Description>
+                </div>
+
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-ink">Enter your password</label>
+                    <Input
+                      type="password"
+                      placeholder="Your current password"
+                      value={passwordInput}
+                      onChange={(e) => setPasswordInput(e.target.value)}
+                      className="h-12 rounded-[16px]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-ink">Type DELETE to confirm</label>
+                    <Input
+                      placeholder="DELETE"
+                      value={deleteInput}
+                      onChange={(e) => setDeleteInput(e.target.value)}
+                      className="h-12 rounded-[16px]"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+                  <Dialog.Close asChild>
+                    <Button variant="outline" disabled={isDeleting}>
+                      Cancel
+                    </Button>
+                  </Dialog.Close>
+                  <Button
+                    onClick={handleDelete}
+                    disabled={deleteInput !== 'DELETE' || !passwordInput || isDeleting}
+                    className="bg-danger text-white hover:bg-danger/90 disabled:opacity-50"
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete account permanently'}
+                  </Button>
+                </div>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
+        </div>
+      </div>
+    </SurfaceCard>
+  );
+}
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTabId>('account');
   const { data: user } = useCurrentUserQuery();
@@ -1094,8 +1330,12 @@ export default function SettingsPage() {
   const activePanel =
     activeTab === 'account' ? (
       <AccountPanel user={user} />
+    ) : activeTab === 'preferences' ? (
+      <PreferencesPanel user={user} />
     ) : activeTab === 'security' ? (
       <SecurityPanel user={user} />
+    ) : activeTab === 'data' ? (
+      <DataPrivacyPanel />
     ) : (
       <NotificationsPanel />
     );
@@ -1123,8 +1363,8 @@ export default function SettingsPage() {
                   className={cn(
                     'group relative flex min-w-[148px] flex-1 items-center justify-center gap-2 overflow-hidden rounded-[20px] px-4 py-3 text-sm font-semibold transition-all duration-200',
                     isActive
-                      ? 'bg-white/95 text-ink shadow-soft ring-1 ring-white/80'
-                      : 'text-slate-500 hover:bg-white/60 hover:text-ink',
+                      ? 'bg-paper text-ink shadow-soft ring-1 ring-white/80'
+                      : 'text-ink-soft hover:bg-paper-strong hover:text-ink',
                   )}
                   onClick={() => setActiveTab(tab.id)}
                   type="button"

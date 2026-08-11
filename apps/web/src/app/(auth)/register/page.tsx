@@ -323,23 +323,23 @@ export default function RegisterPage() {
 
   return (
     <motion.main
-      className="min-h-screen bg-[radial-gradient(circle_at_top,#f4efe7_0%,#f7f2ea_46%,#efe6da_100%)] px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden"
+      className="min-h-screen bg-cream px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden"
       initial="hidden"
       animate="visible"
       exit="exit"
       variants={pageTransition}
     >
-      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-white shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
+      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-paper-strong shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
         <motion.section
-          className="relative overflow-hidden bg-[linear-gradient(180deg,#d8e4dc_0%,#dbe8df_100%)] px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]"
+          className="relative overflow-hidden bg-mint px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]"
           variants={slideInFromLeft}
         >
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -left-12 top-0 h-40 w-64 rounded-full bg-white/24 blur-md" />
-            <div className="absolute right-[8%] top-[10%] h-52 w-52 rounded-full bg-[#f4ead9] opacity-90" />
+            <div className="absolute right-[8%] top-[10%] h-52 w-52 rounded-full bg-surface-muted opacity-90" />
             <div className="absolute left-[12%] top-[22%] h-56 w-56 rounded-[42%_58%_59%_41%/48%_43%_57%_52%] border border-white/35 bg-white/12" />
             <div className="absolute left-[18%] top-[34%] h-10 w-56 rounded-full bg-[linear-gradient(90deg,rgba(18,40,33,0.86),rgba(15,123,113,0.54),rgba(255,255,255,0.08))] opacity-90 blur-[1px]" />
-            <div className="absolute -left-16 bottom-8 h-48 w-56 rounded-[48%_52%_57%_43%/44%_34%_66%_56%] bg-[#f5e6d2]" />
+            <div className="absolute -left-16 bottom-8 h-48 w-56 rounded-[48%_52%_57%_43%/44%_34%_66%_56%] bg-surface-muted" />
             <div className="absolute right-[-10%] bottom-[-10%] h-48 w-56 rounded-[58%_42%_61%_39%/44%_55%_45%_56%] bg-white/28" />
           </div>
 
@@ -356,7 +356,7 @@ export default function RegisterPage() {
                 Step {step} of 3
               </div>
               <h1
-                className="text-[2rem] font-semibold leading-[0.98] tracking-[-0.05em] text-[#13281f] md:text-[2.4rem]"
+                className="text-[2rem] font-semibold leading-[0.98] tracking-[-0.05em] text-ink md:text-[2.4rem]"
                 style={{ fontFamily: 'var(--font-fraunces)' }}
               >
                 {step === 1
@@ -365,7 +365,7 @@ export default function RegisterPage() {
                     ? 'Create a password with confidence.'
                     : 'Verify the code and finish signing in.'}
               </h1>
-              <p className="text-[13px] leading-6 text-slate-600">
+              <p className="text-[13px] leading-6 text-ink-soft">
                 {step === 1
                   ? 'Signup feels smoother when the first step is simple and focused.'
                   : step === 2
@@ -405,17 +405,17 @@ export default function RegisterPage() {
                   <div className="h-3 w-14 rounded-full bg-brand/24" />
                 </div>
                 <div className="mt-5 rounded-[20px] border border-white/35 bg-white/18 px-4 py-4">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft">
                     {step === 1 ? 'Profile setup' : step === 2 ? 'Password check' : 'Verification'}
                   </p>
-                  <p className="mt-2 text-sm font-semibold text-slate-700">
+                  <p className="mt-2 text-sm font-semibold text-ink">
                     {step === 1
                       ? `${values.firstName || 'First'} ${values.lastName || 'Last'}`
                       : step === 2
                         ? passwordStrength.label
                         : values.code.padEnd(AUTH_EMAIL_VERIFICATION_CODE_LENGTH, '*')}
                   </p>
-                  <p className="mt-1 text-[12px] text-slate-500">
+                  <p className="mt-1 text-[12px] text-ink-soft">
                     {step === 3
                       ? values.email || 'registered@email.com'
                       : values.email || 'john@spendwise.com'}
@@ -427,18 +427,18 @@ export default function RegisterPage() {
         </motion.section>
 
         <motion.section
-          className="min-h-0 overflow-y-auto bg-white px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5"
+          className="min-h-0 overflow-y-auto bg-paper-strong px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5"
           variants={slideInFromRight}
         >
           <div className="mx-auto flex h-full max-w-[360px] flex-col">
             <div className="space-y-2">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
                 {step === 1 ? 'Profile' : step === 2 ? 'Password' : 'Verification'}
               </div>
-              <h2 className="text-[1.48rem] font-semibold tracking-[-0.04em] text-slate-900 md:text-[1.6rem]">
+              <h2 className="text-[1.48rem] font-semibold tracking-[-0.04em] text-ink md:text-[1.6rem]">
                 Create Account
               </h2>
-              <p className="text-[13px] leading-5 text-slate-500">
+              <p className="text-[13px] leading-5 text-ink-soft">
                 {step === 1
                   ? 'Enter your name, email, and phone number first.'
                   : step === 2
@@ -463,7 +463,7 @@ export default function RegisterPage() {
                         <div className="grid gap-3 sm:grid-cols-2">
                           <div className="space-y-1">
                             <label
-                              className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                              className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                               htmlFor="firstName"
                             >
                               First Name
@@ -478,7 +478,7 @@ export default function RegisterPage() {
                               placeholder="John"
                               autoComplete="given-name"
                               className={cn(
-                                'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
+                                'h-10 rounded-[14px] border border-transparent bg-surface-muted text-sm shadow-none focus:border-brand focus:bg-paper-strong',
                                 errors.firstName && 'border-[var(--danger)]',
                               )}
                             />
@@ -495,7 +495,7 @@ export default function RegisterPage() {
                           </div>
                           <div className="space-y-1">
                             <label
-                              className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                              className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                               htmlFor="lastName"
                             >
                               Last Name
@@ -510,7 +510,7 @@ export default function RegisterPage() {
                               placeholder="Doe"
                               autoComplete="family-name"
                               className={cn(
-                                'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
+                                'h-10 rounded-[14px] border border-transparent bg-surface-muted text-sm shadow-none focus:border-brand focus:bg-paper-strong',
                                 errors.lastName && 'border-[var(--danger)]',
                               )}
                             />
@@ -527,7 +527,7 @@ export default function RegisterPage() {
 
                         <div className="space-y-1">
                           <label
-                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                             htmlFor="email"
                           >
                             Email Address
@@ -543,7 +543,7 @@ export default function RegisterPage() {
                             placeholder="john@spendwise.com"
                             autoComplete="email"
                             className={cn(
-                              'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
+                              'h-10 rounded-[14px] border border-transparent bg-surface-muted text-sm shadow-none focus:border-brand focus:bg-paper-strong',
                               errors.email && 'border-[var(--danger)]',
                             )}
                           />
@@ -559,7 +559,7 @@ export default function RegisterPage() {
 
                         <div className="space-y-1">
                           <label
-                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                             htmlFor="phone"
                           >
                             Phone Number
@@ -575,7 +575,7 @@ export default function RegisterPage() {
                             placeholder="+639123456789"
                             autoComplete="tel"
                             className={cn(
-                              'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none focus:border-brand focus:bg-white',
+                              'h-10 rounded-[14px] border border-transparent bg-surface-muted text-sm shadow-none focus:border-brand focus:bg-paper-strong',
                               errors.phone && 'border-[var(--danger)]',
                             )}
                           />
@@ -593,20 +593,20 @@ export default function RegisterPage() {
 
                     {step === 2 ? (
                       <>
-                        <div className="rounded-[20px] border border-[#ece7df] bg-[#fbf8f2] px-4 py-4">
-                          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                        <div className="rounded-[20px] border border-line bg-paper px-4 py-4">
+                          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft">
                             Registering
                           </p>
-                          <p className="mt-1 text-sm font-semibold text-slate-700">
+                          <p className="mt-1 text-sm font-semibold text-ink">
                             {values.firstName} {values.lastName}
                           </p>
-                          <p className="mt-1 text-[12px] text-slate-500">{values.email}</p>
-                          <p className="mt-1 text-[12px] text-slate-500">{values.phone}</p>
+                          <p className="mt-1 text-[12px] text-ink-soft">{values.email}</p>
+                          <p className="mt-1 text-[12px] text-ink-soft">{values.phone}</p>
                         </div>
 
                         <div className="space-y-1">
                           <label
-                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                             htmlFor="password"
                           >
                             Create Password
@@ -623,13 +623,13 @@ export default function RegisterPage() {
                               placeholder="Create a secure password"
                               autoComplete="new-password"
                               className={cn(
-                                'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] pr-11 text-sm shadow-none focus:border-brand focus:bg-white',
+                                'h-10 rounded-[14px] border border-transparent bg-surface-muted pr-11 text-sm shadow-none focus:border-brand focus:bg-paper-strong',
                                 errors.password && 'border-[var(--danger)]',
                               )}
                             />
                             <button
                               type="button"
-                              className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-slate-400 hover:text-slate-700"
+                              className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-ink-soft hover:text-ink"
                               onClick={() => setShowPassword((current) => !current)}
                               aria-label={showPassword ? 'Hide password' : 'Show password'}
                             >
@@ -643,14 +643,14 @@ export default function RegisterPage() {
                           <p
                             className={cn(
                               'min-h-[0.75rem] text-[10px] leading-4',
-                              errors.password ? 'text-[var(--danger)]' : 'text-slate-400',
+                              errors.password ? 'text-[var(--danger)]' : 'text-ink-soft',
                             )}
                           >
                             {helperText}
                           </p>
                         </div>
 
-                        <div className="rounded-[18px] border border-[#ebe6df] bg-[#faf7f2] px-3.5 py-3">
+                        <div className="rounded-[18px] border border-line bg-paper px-3.5 py-3">
                           <ProgressBar
                             label="Password strength"
                             helper={passwordStrength.label}
@@ -664,13 +664,13 @@ export default function RegisterPage() {
                                 key={item.label}
                                 className={cn(
                                   'flex items-center gap-1.5 text-[10.5px] leading-4',
-                                  item.passed ? 'text-emerald-700' : 'text-slate-500',
+                                  item.passed ? 'text-emerald-700' : 'text-ink-soft',
                                 )}
                               >
                                 <CheckCircle2
                                   className={cn(
                                     'h-3.5 w-3.5 shrink-0',
-                                    item.passed ? 'text-emerald-600' : 'text-slate-300',
+                                    item.passed ? 'text-emerald-600' : 'text-ink-soft/40',
                                   )}
                                 />
                                 <span>{item.label}</span>
@@ -683,14 +683,12 @@ export default function RegisterPage() {
 
                     {step === 3 ? (
                       <>
-                        <div className="rounded-[20px] border border-[#ece7df] bg-[#fbf8f2] px-4 py-4">
-                          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                        <div className="rounded-[20px] border border-line bg-paper px-4 py-4">
+                          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft">
                             Verification Destination
                           </p>
-                          <p className="mt-1 text-sm font-semibold text-slate-700">
-                            {values.email}
-                          </p>
-                          <p className="mt-1 text-[12px] text-slate-500">
+                          <p className="mt-1 text-sm font-semibold text-ink">{values.email}</p>
+                          <p className="mt-1 text-[12px] text-ink-soft">
                             {deliveryHint === 'log'
                               ? 'Email delivery is unavailable right now, so the code is in the API terminal.'
                               : 'A 6-digit code is waiting in this inbox.'}
@@ -699,7 +697,7 @@ export default function RegisterPage() {
 
                         <div className="space-y-1">
                           <label
-                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                            className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                             htmlFor="code"
                           >
                             Verification Code
@@ -716,14 +714,14 @@ export default function RegisterPage() {
                             autoComplete="one-time-code"
                             maxLength={AUTH_EMAIL_VERIFICATION_CODE_LENGTH}
                             className={cn(
-                              'h-12 rounded-[16px] border border-transparent bg-[#f5f1eb] text-center font-mono text-lg tracking-[0.4em] shadow-none focus:border-brand focus:bg-white',
+                              'h-12 rounded-[16px] border border-transparent bg-surface-muted text-center font-mono text-lg tracking-[0.4em] shadow-none focus:border-brand focus:bg-paper-strong',
                               errors.code && 'border-[var(--danger)]',
                             )}
                           />
                           <p
                             className={cn(
                               'min-h-[0.75rem] text-[10px] leading-4',
-                              errors.code ? 'text-[var(--danger)]' : 'text-slate-400',
+                              errors.code ? 'text-[var(--danger)]' : 'text-ink-soft',
                             )}
                           >
                             {helperText}
@@ -740,7 +738,7 @@ export default function RegisterPage() {
                   </div>
                 ) : null}
                 {notice ? (
-                  <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-slate-700">
+                  <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-ink">
                     {notice}
                   </div>
                 ) : null}
@@ -831,7 +829,7 @@ export default function RegisterPage() {
                   </>
                 ) : null}
 
-                <p className="text-center text-[12px] text-slate-500">
+                <p className="text-center text-[12px] text-ink-soft">
                   Already have an account?{' '}
                   <Link className="font-semibold text-brand" href="/login">
                     Login

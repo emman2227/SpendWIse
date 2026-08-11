@@ -71,7 +71,7 @@ export const AuthShell = ({ eyebrow, title, description, children, footer }: Aut
               return (
                 <article
                   key={item.title}
-                  className="rounded-[24px] border border-white/10 bg-white/10 px-5 py-5 backdrop-blur"
+                  className="rounded-[24px] border border-line bg-white/10 px-5 py-5 backdrop-blur"
                 >
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
                     <Icon className="h-5 w-5" />

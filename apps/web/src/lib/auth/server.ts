@@ -14,7 +14,7 @@ import {
 } from './constants';
 
 const backendBaseUrl =
-  process.env.API_BASE_URL ?? process.env.MOBILE_API_URL ?? 'http://localhost:4000/api/v1';
+  process.env.API_BASE_URL ?? process.env.MOBILE_API_URL ?? 'http://127.0.0.1:4000/api/v1';
 
 class ApiRouteError extends Error {
   constructor(

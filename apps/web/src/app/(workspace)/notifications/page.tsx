@@ -572,7 +572,7 @@ export default function NotificationsPage() {
       />
 
       {pageMessage ? (
-        <div className="rounded-[22px] border border-brand/15 bg-brand/10 px-4 py-4 text-sm text-slate-700">
+        <div className="rounded-[22px] border border-brand/15 bg-brand/10 px-4 py-4 text-sm text-ink">
           {pageMessage}
         </div>
       ) : null}
@@ -610,9 +610,9 @@ export default function NotificationsPage() {
             <SurfaceCard key={metric.label} className="rounded-[28px] px-5 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-slate-500">{metric.label}</p>
+                  <p className="text-sm font-medium text-ink-soft">{metric.label}</p>
                   <p className="mt-3 text-3xl font-semibold text-ink">{metric.value}</p>
-                  <p className="mt-3 text-sm text-slate-500">{metric.helper}</p>
+                  <p className="mt-3 text-sm text-ink-soft">{metric.helper}</p>
                 </div>
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
                   <Icon className="h-5 w-5" />
@@ -629,7 +629,7 @@ export default function NotificationsPage() {
             <div className="max-w-3xl">
               <p className="kicker">Notification filters</p>
               <h2 className="mt-2 text-xl font-semibold text-ink">Control the feed</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="mt-2 text-sm leading-6 text-ink-soft">
                 Filter by source, refresh live data, or mark the current view as read.
               </p>
             </div>
@@ -669,7 +669,7 @@ export default function NotificationsPage() {
                   'rounded-full px-4 py-2 text-sm font-semibold transition',
                   activeCategory === category
                     ? 'bg-brand text-white shadow-sm'
-                    : 'border border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink',
+                    : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
                 )}
                 onClick={() => setActiveCategory(category)}
                 type="button"
@@ -694,7 +694,7 @@ export default function NotificationsPage() {
           </div>
 
           {isLoading ? (
-            <div className="mt-6 rounded-[24px] border border-line bg-white/80 px-5 py-8 text-center text-sm text-slate-500">
+            <div className="mt-6 rounded-[24px] border border-line bg-paper px-5 py-8 text-center text-sm text-ink-soft">
               Loading live notifications...
             </div>
           ) : notifications.length > 0 ? (
@@ -707,7 +707,7 @@ export default function NotificationsPage() {
                     key={item.id}
                     className={cn(
                       'rounded-[24px] border px-5 py-5 transition',
-                      unread ? 'border-brand/25 bg-brand/5' : 'border-white/80 bg-white/80',
+                      unread ? 'border-brand/25 bg-brand/5' : 'border-line bg-paper',
                     )}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -735,9 +735,9 @@ export default function NotificationsPage() {
                         </Badge>
                       </div>
                     </div>
-                    <p className="mt-3 text-sm leading-6 text-slate-600">{item.detail}</p>
+                    <p className="mt-3 text-sm leading-6 text-ink-soft">{item.detail}</p>
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                      <p className="text-sm text-slate-400">{getRelativeTime(item.createdAt)}</p>
+                      <p className="text-sm text-ink-soft">{getRelativeTime(item.createdAt)}</p>
                       <div className="flex flex-wrap gap-2">
                         {unread ? (
                           <Button
@@ -828,7 +828,7 @@ export default function NotificationsPage() {
               return (
                 <button
                   key={item.key}
-                  className="flex w-full items-center justify-between gap-4 rounded-[22px] border border-white/80 bg-white/80 px-4 py-4 text-left transition hover:border-brand/30"
+                  className="flex w-full items-center justify-between gap-4 rounded-[22px] border border-line bg-paper px-4 py-4 text-left transition hover:border-brand/30"
                   onClick={() => togglePreference(item.key)}
                   type="button"
                 >
@@ -838,7 +838,7 @@ export default function NotificationsPage() {
                     </div>
                     <div>
                       <p className="font-medium text-ink">{item.label}</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-500">{item.description}</p>
+                      <p className="mt-1 text-sm leading-6 text-ink-soft">{item.description}</p>
                     </div>
                   </div>
                   <span
@@ -849,7 +849,7 @@ export default function NotificationsPage() {
                   >
                     <span
                       className={cn(
-                        'h-5 w-5 rounded-full bg-white transition-transform',
+                        'h-5 w-5 rounded-full bg-paper-strong transition-transform',
                         enabled ? 'translate-x-5' : 'translate-x-0',
                       )}
                     />

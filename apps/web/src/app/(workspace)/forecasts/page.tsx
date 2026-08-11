@@ -77,11 +77,11 @@ export default function ForecastsPage() {
           <h2 className="mt-3 text-2xl font-semibold text-ink">
             Calm summary with clear confidence language
           </h2>
-          <div className="mt-5 rounded-[24px] border border-white/80 bg-white/80 px-5 py-5">
+          <div className="mt-5 rounded-[24px] border border-line bg-paper px-5 py-5">
             <p className="text-lg font-semibold text-ink">
               Next month is likely to stay manageable.
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-ink-soft">
               Fixed costs are stable, dining looks more controlled, and the main watch area is
               transport. Use this summary at the top so users can orient quickly before reading the
               category details.
@@ -95,18 +95,15 @@ export default function ForecastsPage() {
           <p className="kicker">Category-level forecast</p>
           <div className="mt-5 space-y-4">
             {forecastCategories.map((item) => (
-              <div
-                key={item.name}
-                className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5"
-              >
+              <div key={item.name} className="rounded-[24px] border border-line bg-paper px-5 py-5">
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-semibold text-ink">{item.name}</p>
                   <Badge variant="info">{formatConfidence(item.confidence)}</Badge>
                 </div>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-2 text-sm text-ink-soft">
                   Predicted {formatMoney(item.projected)}
                 </p>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{item.note}</p>
+                <p className="mt-3 text-sm leading-6 text-ink-soft">{item.note}</p>
               </div>
             ))}
           </div>
@@ -117,21 +114,21 @@ export default function ForecastsPage() {
           <div className="mt-5 space-y-4">
             <div className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
               <p className="font-semibold text-ink">Transport may finish above baseline</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-ink-soft">
                 The forecast model sees a higher ride-share pace than usual in the middle of the
                 month.
               </p>
             </div>
-            <div className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5">
+            <div className="rounded-[24px] border border-line bg-paper px-5 py-5">
               <p className="font-semibold text-ink">Recurring bills remain stable</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-ink-soft">
                 High-confidence fixed costs keep the overall prediction grounded and easier to
                 trust.
               </p>
             </div>
-            <div className="rounded-[24px] border border-white/80 bg-sage/30 px-5 py-5">
+            <div className="rounded-[24px] border border-line bg-sage/30 px-5 py-5">
               <p className="font-semibold text-ink">Design note</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-ink-soft">
                 Risk cards should never feel like panic alerts. Keep the language informative,
                 specific, and next-step oriented.
               </p>

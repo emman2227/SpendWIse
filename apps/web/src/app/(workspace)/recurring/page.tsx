@@ -544,7 +544,7 @@ export default function RecurringPage() {
                   'rounded-full px-4 py-2 text-sm font-semibold transition',
                   statusFilter === value
                     ? 'bg-brand text-white shadow-sm'
-                    : 'border border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink',
+                    : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
                 )}
                 onClick={() => setStatusFilter(value as RecurringFilter)}
                 type="button"
@@ -555,24 +555,24 @@ export default function RecurringPage() {
           </div>
 
           <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
-            <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+            <div className="rounded-[24px] border border-line bg-paper px-4 py-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                 Largest
               </p>
               <p className="mt-2 text-lg font-semibold leading-tight text-ink">
                 {largestSeries?.name ?? 'No recurring pattern yet'}
               </p>
             </div>
-            <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+            <div className="rounded-[24px] border border-line bg-paper px-4 py-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                 Next due
               </p>
               <p className="mt-2 text-lg font-semibold leading-tight text-ink">
                 {nextCharge ? formatShortDate(nextCharge.nextCharge) : 'No upcoming charge'}
               </p>
             </div>
-            <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+            <div className="rounded-[24px] border border-line bg-paper px-4 py-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                 Watch
               </p>
               <p className="mt-2 text-lg font-semibold leading-tight text-ink">
@@ -591,7 +591,7 @@ export default function RecurringPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 What lands next
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">
+              <p className="mt-1.5 text-sm leading-6 text-ink-soft">
                 Predictions are based on repeated timing and amount patterns.
               </p>
             </div>
@@ -607,10 +607,7 @@ export default function RecurringPage() {
           {isLoading ? (
             <div className="mt-5 space-y-3">
               {Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="rounded-[22px] border border-white/80 bg-white/88 px-4 py-3"
-                >
+                <div key={index} className="rounded-[22px] border border-line bg-paper px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <Skeleton className="h-4 w-32 rounded-full" />
@@ -630,12 +627,12 @@ export default function RecurringPage() {
               {upcomingCharges.slice(0, 4).map((series) => (
                 <article
                   key={series.id}
-                  className="rounded-[22px] border border-white/80 bg-white/88 px-4 py-3"
+                  className="rounded-[22px] border border-line bg-paper px-4 py-3"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-semibold text-ink">{series.name}</p>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-ink-soft">
                         {series.frequency} / {series.categoryName}
                       </p>
                     </div>
@@ -645,16 +642,16 @@ export default function RecurringPage() {
                   </div>
 
                   <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                         Estimated amount
                       </p>
                       <p className="mt-1 text-sm font-medium text-ink">
                         {formatMoney(series.averageAmount)}
                       </p>
                     </div>
-                    <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                         Next charge
                       </p>
                       <p className="mt-1 text-sm font-medium text-ink">
@@ -681,7 +678,7 @@ export default function RecurringPage() {
 
           <div className="mt-5 rounded-[22px] border border-brand/15 bg-brand/5 px-4 py-4">
             <p className="font-semibold text-ink">Detection notes</p>
-            <p className="mt-1.5 text-sm leading-6 text-slate-600">
+            <p className="mt-1.5 text-sm leading-6 text-ink-soft">
               Repeats are inferred from similar descriptions, timing gaps, and amount stability.
             </p>
           </div>
@@ -694,7 +691,7 @@ export default function RecurringPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Live recurring patterns
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">
+              <p className="mt-1.5 text-sm leading-6 text-ink-soft">
                 Review cadence, confidence, next charge, and payment method in one place.
               </p>
             </div>
@@ -714,7 +711,7 @@ export default function RecurringPage() {
                 {Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={index}
-                    className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                    className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
                   >
                     <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(240px,0.95fr),minmax(280px,1.15fr)] lg:items-center lg:gap-3">
                       <div className="flex items-center gap-3.5">
@@ -724,7 +721,7 @@ export default function RecurringPage() {
                           <Skeleton className="mt-2 h-3 w-24 rounded-full" />
                         </div>
                       </div>
-                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-3">
+                      <div className="rounded-[16px] border border-line bg-paper px-3 py-3">
                         <Skeleton className="h-3 w-full rounded-full" />
                         <div className="mt-3 grid gap-2 sm:grid-cols-3">
                           {Array.from({ length: 3 }).map((_, statIndex) => (
@@ -740,7 +737,7 @@ export default function RecurringPage() {
               visibleSeries.map((series) => (
                 <article
                   key={series.id}
-                  className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                  className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
                 >
                   <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(240px,0.95fr),minmax(280px,1.15fr)] lg:items-center lg:gap-3">
                     <div className="flex min-w-0 items-center gap-3.5">
@@ -766,13 +763,13 @@ export default function RecurringPage() {
                                 : 'Renewing'}
                           </Badge>
                         </div>
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="mt-1 text-sm text-ink-soft">
                           {series.frequency} / {series.categoryName}
                         </p>
                       </div>
                     </div>
 
-                    <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-3">
+                    <div className="rounded-[16px] border border-line bg-paper px-3 py-3">
                       <ProgressBar
                         helper={formatConfidence(series.confidence)}
                         size="sm"
@@ -784,46 +781,46 @@ export default function RecurringPage() {
 
                   <div className="mt-3 border-t border-line/70 pt-3">
                     <div className="grid gap-2.5 lg:grid-cols-[132px,minmax(0,1fr),auto] lg:items-start">
-                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                           Next charge
                         </p>
                         <p className="mt-1 text-sm font-medium text-ink">
                           {formatShortDate(series.nextCharge)}
                         </p>
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-ink-soft">
                           {getDueLabel(series.dueInDays)}
                         </p>
                       </div>
 
                       <div className="grid gap-2 sm:grid-cols-3">
-                        <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                             Estimate
                           </p>
                           <p className="mt-1 text-sm font-medium text-ink">
                             {formatMoney(series.averageAmount)}
                           </p>
                         </div>
-                        <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                             Method
                           </p>
                           <div className="mt-1 flex items-center gap-2">
-                            <CreditCard className="h-4 w-4 text-slate-400" />
+                            <CreditCard className="h-4 w-4 text-ink-soft" />
                             <p className="text-sm font-medium text-ink">
                               {paymentMethodLabels[series.paymentMethod]}
                             </p>
                           </div>
                         </div>
-                        <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                             History
                           </p>
                           <p className="mt-1 text-sm font-medium text-ink">
                             {series.transactionCount} charges
                           </p>
-                          <p className="mt-1 text-xs text-slate-500">
+                          <p className="mt-1 text-xs text-ink-soft">
                             Last seen {formatShortDate(series.lastCharge)}
                           </p>
                         </div>
@@ -876,13 +873,10 @@ export default function RecurringPage() {
 
         <div className="mt-5 grid gap-3 lg:grid-cols-3">
           {insights.map((insight) => (
-            <article
-              key={insight}
-              className="rounded-[22px] border border-white/80 bg-white/88 px-4 py-3"
-            >
+            <article key={insight} className="rounded-[22px] border border-line bg-paper px-4 py-3">
               <div className="flex items-start gap-3">
                 <TriangleAlert className="mt-0.5 h-4.5 w-4.5 shrink-0 text-brand" />
-                <p className="text-sm leading-6 text-slate-700">{insight}</p>
+                <p className="text-sm leading-6 text-ink">{insight}</p>
               </div>
             </article>
           ))}

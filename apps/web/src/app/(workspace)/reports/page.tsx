@@ -372,7 +372,7 @@ export default function ReportsPage() {
       />
 
       {pageMessage ? (
-        <div className="rounded-[22px] border border-brand/15 bg-brand/10 px-4 py-4 text-sm text-slate-700">
+        <div className="rounded-[22px] border border-brand/15 bg-brand/10 px-4 py-4 text-sm text-ink">
           {pageMessage}
         </div>
       ) : null}
@@ -419,7 +419,7 @@ export default function ReportsPage() {
                 value={monthValue}
               />
               <select
-                className="flex h-12 rounded-[20px] border border-line bg-white px-4 text-sm font-medium text-slate-600 outline-none transition focus:border-brand"
+                className="flex h-12 rounded-[20px] border border-line bg-paper-strong px-4 text-sm font-medium text-ink-soft outline-none transition focus:border-brand"
                 onChange={(event) => setCategoryFilter(event.target.value)}
                 value={categoryFilter}
               >
@@ -431,7 +431,7 @@ export default function ReportsPage() {
                 ))}
               </select>
               <button
-                className="rounded-[20px] border border-line bg-white px-4 py-3 text-sm font-medium text-slate-600 transition hover:border-brand/30 hover:text-ink"
+                className="rounded-[20px] border border-line bg-paper-strong px-4 py-3 text-sm font-medium text-ink-soft transition hover:border-brand/30 hover:text-ink"
                 onClick={() => {
                   setMonthValue(getInitialMonthValue());
                   setCategoryFilter('all');
@@ -462,7 +462,7 @@ export default function ReportsPage() {
                 <h2 className="mt-2 text-xl font-semibold text-ink">
                   The story should be clear fast.
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">{summaryText}</p>
+                <p className="mt-2 text-sm leading-6 text-ink-soft">{summaryText}</p>
               </div>
               <Button asChild size="sm" variant="secondary">
                 <Link href="/dashboard">
@@ -473,20 +473,20 @@ export default function ReportsPage() {
             </div>
 
             <div className="mt-4 grid gap-3 md:grid-cols-3">
-              <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                   Mode
                 </p>
                 <p className="mt-2 text-lg font-semibold text-ink">{getMonthLabel(month, year)}</p>
               </div>
-              <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                   Export
                 </p>
                 <p className="mt-2 text-lg font-semibold text-ink">CSV + print</p>
               </div>
-              <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                   Focus
                 </p>
                 <p className="mt-2 text-lg font-semibold text-ink">{categoryFocusLabel}</p>
@@ -504,7 +504,7 @@ export default function ReportsPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Current vs previous
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">
+              <p className="mt-1.5 text-sm leading-6 text-ink-soft">
                 Compare category shifts fast.
               </p>
             </div>
@@ -537,7 +537,7 @@ export default function ReportsPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Monthly trend
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">Trend stays close.</p>
+              <p className="mt-1.5 text-sm leading-6 text-ink-soft">Trend stays close.</p>
             </div>
             <Badge variant="neutral">Budget overlay</Badge>
           </div>
@@ -579,7 +579,7 @@ export default function ReportsPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Budget performance
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">
+              <p className="mt-1.5 text-sm leading-6 text-ink-soft">
                 Budget use inside the report.
               </p>
             </div>
@@ -593,7 +593,7 @@ export default function ReportsPage() {
               budgetViews.map((budget) => (
                 <article
                   key={budget.id}
-                  className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                  className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
                 >
                   <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(220px,0.95fr),minmax(260px,1.15fr)] lg:items-center lg:gap-3">
                     <div className="min-w-0">
@@ -615,10 +615,10 @@ export default function ReportsPage() {
                               : 'On track'}
                         </Badge>
                       </div>
-                      <p className="mt-1 text-sm text-slate-500">Monthly budget</p>
+                      <p className="mt-1 text-sm text-ink-soft">Monthly budget</p>
                     </div>
 
-                    <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-3">
+                    <div className="rounded-[16px] border border-line bg-paper px-3 py-3">
                       <ProgressBar
                         helper={`${formatMoney(budget.spent)} of ${formatMoney(budget.limitAmount)}`}
                         size="sm"
@@ -630,8 +630,8 @@ export default function ReportsPage() {
 
                   <div className="mt-3 flex flex-col gap-2.5 border-t border-line/70 pt-3 sm:grid sm:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:justify-between">
                     <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:gap-2.5">
-                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                           Left
                         </p>
                         <p className="mt-1 text-sm font-medium text-ink">
@@ -640,8 +640,8 @@ export default function ReportsPage() {
                             : `-${formatMoney(Math.abs(budget.remaining))}`}
                         </p>
                       </div>
-                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                           Status
                         </p>
                         <p className="mt-1 text-sm font-medium text-ink">
@@ -679,17 +679,17 @@ export default function ReportsPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Export-ready summary
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">Clean and ready to share.</p>
+              <p className="mt-1.5 text-sm leading-6 text-ink-soft">Clean and ready to share.</p>
             </div>
             <Badge variant="info">PDF ready</Badge>
           </div>
 
-          <div className="mt-5 rounded-[26px] border border-white/80 bg-white px-4 py-4 shadow-sm md:px-5 md:py-5">
+          <div className="mt-5 rounded-[26px] border border-line bg-paper-strong px-4 py-4 shadow-sm md:px-5 md:py-5">
             <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
               <div>
                 <p className="text-sm font-semibold tracking-[0.16em] text-brand">SpendWise</p>
                 <h2 className="mt-2 text-2xl font-semibold text-ink">Monthly summary</h2>
-                <p className="mt-2 text-sm text-slate-500">{getMonthLabel(month, year)}</p>
+                <p className="mt-2 text-sm text-ink-soft">{getMonthLabel(month, year)}</p>
               </div>
               <FileText className="h-5 w-5 text-brand" />
             </div>
@@ -701,7 +701,7 @@ export default function ReportsPage() {
                 ['Change', `${periodSpendDelta >= 0 ? '+' : ''}${periodSpendDelta}%`],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-[20px] bg-sage/30 px-3.5 py-4 md:px-4">
-                  <p className="text-sm leading-6 text-slate-500">{label}</p>
+                  <p className="text-sm leading-6 text-ink-soft">{label}</p>
                   <p className="mt-2 break-words text-[1.45rem] font-semibold leading-tight text-ink md:text-xl">
                     {value}
                   </p>
@@ -709,9 +709,9 @@ export default function ReportsPage() {
               ))}
             </div>
 
-            <div className="mt-5 rounded-[22px] border border-white/80 bg-slate-50 px-4 py-5 md:px-5">
+            <div className="mt-5 rounded-[22px] border border-line bg-surface-muted px-4 py-5 md:px-5">
               <p className="font-semibold text-ink">Summary</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{summaryText}</p>
+              <p className="mt-2 text-sm leading-6 text-ink-soft">{summaryText}</p>
             </div>
           </div>
         </SurfaceCard>

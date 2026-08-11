@@ -26,7 +26,7 @@ export default function OnboardingSetupPage() {
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                     index === 0
                       ? 'bg-brand text-white'
-                      : 'border border-line bg-white text-slate-600 hover:border-brand hover:text-brand'
+                      : 'border border-line bg-paper-strong text-ink-soft hover:border-brand hover:text-brand'
                   }`}
                   type="button"
                 >
@@ -38,7 +38,7 @@ export default function OnboardingSetupPage() {
 
           <div className="mt-8 grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-600" htmlFor="monthly-income">
+              <label className="text-sm font-medium text-ink-soft" htmlFor="monthly-income">
                 Monthly income range
               </label>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -48,7 +48,7 @@ export default function OnboardingSetupPage() {
                     className={`rounded-[22px] border px-4 py-3 text-sm font-semibold ${
                       index === 1
                         ? 'border-brand bg-brand/10 text-brand'
-                        : 'border-line bg-white text-slate-600'
+                        : 'border-line bg-paper-strong text-ink-soft'
                     }`}
                     type="button"
                   >
@@ -59,7 +59,7 @@ export default function OnboardingSetupPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-600" htmlFor="monthly-target">
+              <label className="text-sm font-medium text-ink-soft" htmlFor="monthly-target">
                 Monthly spending target
               </label>
               <Input id="monthly-target" placeholder="$5,800" />
@@ -76,7 +76,7 @@ export default function OnboardingSetupPage() {
                 className={`rounded-[22px] border px-4 py-4 text-left text-sm ${
                   index === 0
                     ? 'border-brand bg-brand/10 text-brand'
-                    : 'border-line bg-white text-slate-600'
+                    : 'border-line bg-paper-strong text-ink-soft'
                 }`}
                 type="button"
               >

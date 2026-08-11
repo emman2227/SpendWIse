@@ -127,14 +127,14 @@ function BudgetEditorModal({
           <div>
             <p className="kicker">Budget</p>
             <h2 className="mt-3 text-2xl font-semibold text-ink">Create or update budget</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
               Budgets are saved per category for {monthLabel}. Saving the same category again will
               update that month&apos;s limit.
             </p>
           </div>
           <button
             aria-label="Close budget editor"
-            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-white text-slate-500 transition hover:border-brand/30 hover:text-ink"
+            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
             onClick={onClose}
             type="button"
           >
@@ -147,7 +147,7 @@ function BudgetEditorModal({
             <span>Category</span>
             <select
               className={cn(
-                'flex h-12 w-full rounded-[20px] border border-line bg-white/80 px-4 text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:bg-white',
+                'flex h-12 w-full rounded-[20px] border border-line bg-paper px-4 text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:bg-paper-strong',
                 fieldErrors.categoryId && 'border-danger',
               )}
               onChange={(event) => onFieldChange('categoryId', event.target.value)}
@@ -480,7 +480,7 @@ export default function BudgetsPage() {
                     'rounded-full px-4 py-2 text-sm font-semibold transition',
                     statusFilter === value
                       ? 'bg-brand text-white shadow-sm'
-                      : 'border border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink',
+                      : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
                   )}
                   onClick={() => setStatusFilter(value as BudgetStatusFilter)}
                   type="button"
@@ -497,7 +497,7 @@ export default function BudgetsPage() {
                   <h2 className="mt-2 text-xl font-semibold text-ink">
                     Budget health at a glance.
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                  <p className="mt-2 text-sm leading-6 text-ink-soft">
                     Totals, current pressure, and next-step signals update with the selected month.
                   </p>
                 </div>
@@ -505,22 +505,22 @@ export default function BudgetsPage() {
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Budgeted
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">
                     {formatMoney(totalBudgeted)}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Spent
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">{formatMoney(totalSpent)}</p>
                 </div>
-                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Next
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">
@@ -539,7 +539,7 @@ export default function BudgetsPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Review budgets fast
               </h2>
-              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-ink-soft">
                 Status, progress, and left stay together.
               </p>
             </div>
@@ -575,7 +575,7 @@ export default function BudgetsPage() {
                 'mt-5 rounded-[22px] px-4 py-4 text-sm',
                 pageMessage.toLowerCase().includes('unable')
                   ? 'border border-danger/20 bg-danger/10 text-danger'
-                  : 'border border-brand/15 bg-brand/10 text-slate-700',
+                  : 'border border-brand/15 bg-brand/10 text-ink',
               )}
             >
               {pageMessage}
@@ -585,10 +585,7 @@ export default function BudgetsPage() {
           {categoriesQuery.isLoading || budgetSummary.isLoading ? (
             <div className="mt-5 space-y-3">
               {Array.from({ length: 4 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
-                >
+                <div key={index} className="rounded-[22px] border border-line bg-paper px-3.5 py-3">
                   <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(220px,0.95fr),minmax(280px,1.15fr)] lg:items-center lg:gap-3">
                     <div className="flex items-center gap-3.5">
                       <Skeleton className="h-11 w-11 rounded-[16px]" />
@@ -597,7 +594,7 @@ export default function BudgetsPage() {
                         <Skeleton className="mt-2 h-3 w-24 rounded-full" />
                       </div>
                     </div>
-                    <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-3">
+                    <div className="rounded-[16px] border border-line bg-paper px-3 py-3">
                       <Skeleton className="h-3 w-full rounded-full" />
                       <Skeleton className="mt-3 h-2.5 w-full rounded-full" />
                     </div>
@@ -620,7 +617,7 @@ export default function BudgetsPage() {
                 return (
                   <article
                     key={budget.id}
-                    className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                    className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
                   >
                     <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(220px,0.95fr),minmax(280px,1.15fr)] lg:items-center lg:gap-3">
                       <div className="flex min-w-0 items-center gap-3.5">
@@ -652,12 +649,12 @@ export default function BudgetsPage() {
                                   ? 'Near limit'
                                   : 'On track'}
                             </Badge>
-                            <p className="text-sm text-slate-500">{monthLabel} budget</p>
+                            <p className="text-sm text-ink-soft">{monthLabel} budget</p>
                           </div>
                         </div>
                       </div>
 
-                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-3 lg:min-w-0">
+                      <div className="rounded-[16px] border border-line bg-paper px-3 py-3 lg:min-w-0">
                         <ProgressBar
                           helper={`${formatMoney(budget.spent)} of ${formatMoney(budget.limitAmount)}`}
                           size="sm"
@@ -669,8 +666,8 @@ export default function BudgetsPage() {
 
                     <div className="mt-3 flex flex-col gap-2.5 border-t border-line/70 pt-3 lg:flex-row lg:items-center lg:justify-between">
                       <div className="grid gap-2 sm:grid-cols-3 lg:flex lg:items-center lg:gap-2.5">
-                        <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                             Left
                           </p>
                           <p className="mt-1 text-sm font-medium text-ink">
@@ -679,8 +676,8 @@ export default function BudgetsPage() {
                               : `-${formatMoney(Math.abs(budget.remaining))}`}
                           </p>
                         </div>
-                        <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                             Pace
                           </p>
                           <p className="mt-1 text-sm font-medium text-ink">
@@ -691,8 +688,8 @@ export default function BudgetsPage() {
                                 : 'Good'}
                           </p>
                         </div>
-                        <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                             Limit
                           </p>
                           <p className="mt-1 text-sm font-medium text-ink">
@@ -703,7 +700,7 @@ export default function BudgetsPage() {
 
                       <div className="flex flex-wrap gap-2 lg:justify-end">
                         <button
-                          className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
+                          className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
                           onClick={() => openEditBudget(budget)}
                           type="button"
                         >
@@ -713,7 +710,7 @@ export default function BudgetsPage() {
                           </span>
                         </button>
                         <button
-                          className="rounded-full border border-danger/20 bg-white px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
+                          className="rounded-full border border-danger/20 bg-paper-strong px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
                           disabled={deleteTargetId === budget.id}
                           onClick={() => handleDelete(budget.id)}
                           type="button"
@@ -761,7 +758,7 @@ export default function BudgetsPage() {
                 <CircleAlert className="mt-0.5 h-5 w-5 text-warning" />
                 <div>
                   <p className="font-semibold text-ink">Near limit</p>
-                  <p className="mt-1.5 text-sm leading-6 text-slate-600">
+                  <p className="mt-1.5 text-sm leading-6 text-ink-soft">
                     {warningItems[0]
                       ? `${warningItems[0].categoryName} has ${formatMoney(Math.max(warningItems[0].remaining, 0))} left.`
                       : 'No categories are close to their limits right now.'}
@@ -774,7 +771,7 @@ export default function BudgetsPage() {
                 <ShieldAlert className="mt-0.5 h-5 w-5 text-danger" />
                 <div>
                   <p className="font-semibold text-ink">Over budget</p>
-                  <p className="mt-1.5 text-sm leading-6 text-slate-600">
+                  <p className="mt-1.5 text-sm leading-6 text-ink-soft">
                     {overBudgetItems[0]
                       ? `${overBudgetItems[0].categoryName} is ${formatMoney(Math.abs(overBudgetItems[0].remaining))} over.`
                       : 'No categories are over budget right now.'}

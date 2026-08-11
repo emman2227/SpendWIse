@@ -53,12 +53,12 @@ export default function InsightsPage() {
             {insights.slice(0, 2).map((insight) => (
               <div
                 key={insight.id}
-                className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5"
+                className="rounded-[24px] border border-line bg-paper px-5 py-5"
               >
                 <p className="text-sm font-semibold text-ink">Reason</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{insight.why}</p>
+                <p className="mt-2 text-sm leading-6 text-ink-soft">{insight.why}</p>
                 <p className="mt-4 text-sm font-semibold text-ink">Evidence</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{insight.evidence}</p>
+                <p className="mt-2 text-sm leading-6 text-ink-soft">{insight.evidence}</p>
               </div>
             ))}
           </div>
@@ -76,7 +76,7 @@ export default function InsightsPage() {
             {insights.map((insight) => (
               <article
                 key={insight.id}
-                className="rounded-[26px] border border-white/80 bg-white/80 px-5 py-5"
+                className="rounded-[26px] border border-line bg-paper px-5 py-5"
               >
                 <div className="flex flex-wrap items-center gap-3">
                   <Badge
@@ -90,13 +90,13 @@ export default function InsightsPage() {
                   >
                     {insight.label}
                   </Badge>
-                  <span className="text-sm text-slate-400">AI-generated summary</span>
+                  <span className="text-sm text-ink-soft">AI-generated summary</span>
                 </div>
                 <h3 className="mt-4 text-xl font-semibold text-ink">{insight.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{insight.summary}</p>
-                <div className="mt-5 rounded-[22px] border border-white/80 bg-sage/30 px-4 py-4">
+                <p className="mt-3 text-sm leading-7 text-ink-soft">{insight.summary}</p>
+                <div className="mt-5 rounded-[22px] border border-line bg-sage/30 px-4 py-4">
                   <p className="text-sm font-semibold text-ink">Supporting evidence</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{insight.evidence}</p>
+                  <p className="mt-2 text-sm leading-6 text-ink-soft">{insight.evidence}</p>
                 </div>
               </article>
             ))}
@@ -122,12 +122,9 @@ export default function InsightsPage() {
               'Split one-time workspace purchases from normal shopping',
               'Keep weekday dining under two transactions per week',
             ].map((item) => (
-              <div
-                key={item}
-                className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5"
-              >
+              <div key={item} className="rounded-[24px] border border-line bg-paper px-5 py-5">
                 <p className="font-semibold text-ink">{item}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+                <p className="mt-2 text-sm leading-6 text-ink-soft">
                   Show the expected benefit in plain language so the recommendation feels actionable
                   rather than abstract.
                 </p>

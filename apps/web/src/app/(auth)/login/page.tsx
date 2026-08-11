@@ -191,22 +191,22 @@ export default function LoginPage() {
 
   return (
     <motion.main
-      className="min-h-screen bg-[linear-gradient(180deg,#f7f2ea_0%,#f4efe7_100%)] px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden"
+      className="min-h-screen bg-cream px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden"
       initial="hidden"
       animate="visible"
       exit="exit"
       variants={pageTransition}
     >
-      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-white shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
+      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-paper-strong shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
         <motion.section
-          className="relative overflow-hidden bg-[#dbe6e1] px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]"
+          className="relative overflow-hidden bg-mint px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]"
           variants={slideInFromLeft}
         >
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute left-[-4rem] top-[-3rem] h-40 w-48 rounded-full bg-white/26 blur-sm" />
-            <div className="absolute right-[8%] top-[10%] h-48 w-48 rounded-full bg-[#efe9d9] opacity-95" />
+            <div className="absolute right-[8%] top-[10%] h-48 w-48 rounded-full bg-surface-muted opacity-95" />
             <div className="absolute left-[8%] top-[16%] h-60 w-56 rounded-[38%_62%_56%_44%/48%_37%_63%_52%] border border-white/35 bg-white/12" />
-            <div className="absolute left-[-6%] bottom-[-10%] h-48 w-56 rounded-[46%_54%_52%_48%/40%_30%_70%_60%] bg-[#f1e4d1]" />
+            <div className="absolute left-[-6%] bottom-[-10%] h-48 w-56 rounded-[46%_54%_52%_48%/40%_30%_70%_60%] bg-surface-muted" />
             <div className="absolute right-[-7%] bottom-[-12%] h-56 w-56 rounded-[58%_42%_61%_39%/44%_55%_45%_56%] bg-white/30" />
             <div className="absolute left-[16%] top-[26%] h-36 w-64 rounded-full bg-[linear-gradient(90deg,rgba(18,40,33,0.92),rgba(16,77,72,0.8),rgba(188,220,206,0.2))] opacity-90 blur-[1px]" />
             <div className="absolute left-[24%] top-[34%] h-28 w-48 rounded-full border border-white/35 bg-white/12" />
@@ -224,11 +224,11 @@ export default function LoginPage() {
               <div className="mt-5 max-w-[310px] rounded-[22px] border border-white/45 bg-white/52 p-4 shadow-[0_14px_28px_rgba(18,35,47,0.08)] backdrop-blur">
                 <div className="flex items-center gap-2">
                   <span className="h-2.5 w-2.5 rounded-full bg-brand" />
-                  <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-slate-400">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-ink-soft">
                     Curated Signal
                   </span>
                 </div>
-                <p className="mt-3 max-w-[22ch] text-[13px] font-semibold leading-5 text-slate-700">
+                <p className="mt-3 max-w-[22ch] text-[13px] font-semibold leading-5 text-ink">
                   Money clarity is calmer when the signal is designed to feel human.
                 </p>
               </div>
@@ -242,7 +242,7 @@ export default function LoginPage() {
                   <div className="mt-2 h-2 w-14 rounded-full bg-slate-700/10" />
                 </div>
                 <div className="space-y-3">
-                  <div className="rounded-[20px] border border-white/35 bg-[#f4eddf] p-3">
+                  <div className="rounded-[20px] border border-white/35 bg-surface-muted p-3">
                     <div className="h-10 rounded-[14px] bg-[linear-gradient(135deg,rgba(15,123,113,0.2),rgba(255,255,255,0.6))]" />
                   </div>
                   <div className="rounded-[20px] border border-white/35 bg-white/32 p-3 backdrop-blur">
@@ -254,7 +254,7 @@ export default function LoginPage() {
 
               <div className="max-w-[295px]">
                 <h1
-                  className="text-[1.95rem] font-semibold leading-[0.96] tracking-[-0.05em] text-[#13281f] md:text-[2.2rem]"
+                  className="text-[1.95rem] font-semibold leading-[0.96] tracking-[-0.05em] text-ink md:text-[2.2rem]"
                   style={{ fontFamily: 'var(--font-fraunces)' }}
                 >
                   Financial intelligence, <span className="text-brand">refined.</span>
@@ -265,22 +265,22 @@ export default function LoginPage() {
         </motion.section>
 
         <motion.section
-          className="min-h-0 overflow-y-auto bg-white px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5"
+          className="min-h-0 overflow-y-auto bg-paper-strong px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5"
           variants={slideInFromRight}
         >
           <div className="mx-auto flex h-full max-w-[360px] flex-col">
             <div className="space-y-2">
-              <h2 className="text-[1.45rem] font-semibold tracking-[-0.04em] text-slate-900 md:text-[1.55rem]">
+              <h2 className="text-[1.45rem] font-semibold tracking-[-0.04em] text-ink md:text-[1.55rem]">
                 Welcome Back
               </h2>
-              <p className="text-[13px] leading-5 text-slate-500">
+              <p className="text-[13px] leading-5 text-ink-soft">
                 Log in to access your dashboard, insights, and premium planning tools.
               </p>
             </div>
 
             <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
               <motion.button
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[#ebe6df] bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand/30 hover:text-brand"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-line bg-paper-strong px-4 text-sm font-semibold text-ink transition hover:border-brand/30 hover:text-brand"
                 type="button"
                 variants={tapScale}
                 whileTap="whileTap"
@@ -289,24 +289,24 @@ export default function LoginPage() {
                 Google
               </motion.button>
               <motion.button
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[#ebe6df] bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand/30 hover:text-brand"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-line bg-paper-strong px-4 text-sm font-semibold text-ink transition hover:border-brand/30 hover:text-brand"
                 type="button"
                 variants={tapScale}
                 whileTap="whileTap"
               >
-                <AppleMark className="h-3.5 w-3.5 shrink-0 text-slate-900" />
+                <AppleMark className="h-3.5 w-3.5 shrink-0 text-ink" />
                 Apple
               </motion.button>
             </div>
 
-            <div className="mt-3.5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-              <span className="h-px flex-1 bg-[#ece7df]" />
+            <div className="mt-3.5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
+              <span className="h-px flex-1 bg-line" />
               Or email
-              <span className="h-px flex-1 bg-[#ece7df]" />
+              <span className="h-px flex-1 bg-line" />
             </div>
 
             {sessionMessage ? (
-              <div className="mt-3.5 rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-slate-700">
+              <div className="mt-3.5 rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-ink">
                 {sessionMessage}
               </div>
             ) : null}
@@ -314,7 +314,7 @@ export default function LoginPage() {
             <form className="mt-3.5 space-y-3" noValidate onSubmit={handleSubmit}>
               <div className="space-y-1">
                 <label
-                  className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                  className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                   htmlFor="email"
                 >
                   Email Address
@@ -324,7 +324,7 @@ export default function LoginPage() {
                   aria-invalid={Boolean(errors.email)}
                   autoComplete="email"
                   className={cn(
-                    'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
+                    'h-10 rounded-[14px] border border-transparent bg-surface-muted text-sm shadow-none placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
                     errors.email && 'border-[var(--danger)]',
                   )}
                   disabled={isSubmitting}
@@ -351,7 +351,7 @@ export default function LoginPage() {
               <div className="space-y-1">
                 <div className="flex items-center justify-between gap-3">
                   <label
-                    className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                    className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                     htmlFor="password"
                   >
                     Password
@@ -366,7 +366,7 @@ export default function LoginPage() {
                     aria-invalid={Boolean(errors.password)}
                     autoComplete="current-password"
                     className={cn(
-                      'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] pr-11 text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
+                      'h-10 rounded-[14px] border border-transparent bg-surface-muted pr-11 text-sm shadow-none placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
                       errors.password && 'border-[var(--danger)]',
                     )}
                     disabled={isSubmitting}
@@ -380,7 +380,7 @@ export default function LoginPage() {
                   />
                   <button
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-slate-400 transition hover:text-slate-700"
+                    className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-ink-soft transition hover:text-ink"
                     type="button"
                     onClick={() => setShowPassword((currentValue) => !currentValue)}
                   >
@@ -394,7 +394,7 @@ export default function LoginPage() {
                 <p
                   className={cn(
                     'min-h-[0.75rem] text-[10px] leading-4',
-                    errors.password ? 'text-[var(--danger)]' : 'text-slate-400',
+                    errors.password ? 'text-[var(--danger)]' : 'text-ink-soft',
                   )}
                   id="password-error"
                   role="alert"
@@ -409,7 +409,7 @@ export default function LoginPage() {
                 </div>
               ) : null}
 
-              <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-slate-700">
+              <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-ink">
                 Need to finish setup?{' '}
                 <Link className="font-semibold text-brand" href={verifyEmailHref}>
                   Enter your verification code
@@ -429,7 +429,7 @@ export default function LoginPage() {
                 </Button>
               </motion.div>
 
-              <p className="text-center text-[12px] text-slate-500">
+              <p className="text-center text-[12px] text-ink-soft">
                 Don&apos;t have an account?{' '}
                 <Link className="font-semibold text-brand" href="/register">
                   Create one

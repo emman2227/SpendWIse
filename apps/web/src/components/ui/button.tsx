@@ -11,10 +11,10 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-ink text-white shadow-sm hover:-translate-y-0.5 hover:bg-slate-900',
         secondary: 'bg-brand text-white shadow-sm hover:-translate-y-0.5 hover:bg-[#0b645b]',
-        soft: 'border border-white/70 bg-white/90 text-ink shadow-sm hover:border-line hover:bg-white',
+        soft: 'border border-line bg-paper text-ink shadow-sm hover:border-line hover:bg-paper-strong',
         outline:
-          'border border-line bg-transparent text-ink hover:border-brand hover:bg-white/60 hover:text-brand',
-        ghost: 'text-slate-700 hover:bg-white/60',
+          'border border-line bg-transparent text-ink hover:border-brand hover:bg-paper-strong hover:text-brand',
+        ghost: 'text-ink hover:bg-paper-strong',
         danger: 'bg-danger text-white hover:bg-[#b85f4c]',
       },
       size: {

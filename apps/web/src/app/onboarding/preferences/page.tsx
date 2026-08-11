@@ -39,7 +39,7 @@ export default function OnboardingPreferencesPage() {
                 className={`rounded-full px-4 py-2 text-sm font-semibold ${
                   index < 4
                     ? 'bg-brand/10 text-brand'
-                    : 'border border-line bg-white text-slate-600'
+                    : 'border border-line bg-paper-strong text-ink-soft'
                 }`}
                 type="button"
               >
@@ -47,7 +47,7 @@ export default function OnboardingPreferencesPage() {
               </button>
             ))}
           </div>
-          <p className="mt-4 text-sm leading-6 text-slate-500">
+          <p className="mt-4 text-sm leading-6 text-ink-soft">
             Keep selection optional. Suggest defaults, but let the user enter the dashboard quickly.
           </p>
         </SurfaceCard>
@@ -58,11 +58,11 @@ export default function OnboardingPreferencesPage() {
             {preferenceRows.map((item, index) => (
               <div
                 key={item}
-                className="flex items-center justify-between gap-4 rounded-[22px] border border-white/80 bg-white/80 px-4 py-4"
+                className="flex items-center justify-between gap-4 rounded-[22px] border border-line bg-paper px-4 py-4"
               >
                 <div>
                   <p className="font-medium text-ink">{item}</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-ink-soft">
                     {index === 0
                       ? 'Useful for staying ahead of overspending.'
                       : index === 1
@@ -78,7 +78,7 @@ export default function OnboardingPreferencesPage() {
                   }`}
                 >
                   <div
-                    className={`h-5 w-5 rounded-full bg-white transition ${
+                    className={`h-5 w-5 rounded-full bg-paper-strong transition ${
                       index !== 2 ? 'translate-x-5' : ''
                     }`}
                   />

@@ -30,7 +30,7 @@ export default function OnboardingGoalsPage() {
                 className={`rounded-[22px] border px-4 py-4 text-left text-sm ${
                   index < 2
                     ? 'border-brand bg-brand/10 text-brand'
-                    : 'border-line bg-white text-slate-600'
+                    : 'border-line bg-paper-strong text-ink-soft'
                 }`}
                 type="button"
               >
@@ -48,13 +48,13 @@ export default function OnboardingGoalsPage() {
         <SurfaceCard className="rounded-[30px] px-6 py-6">
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-600" htmlFor="goal-amount">
+              <label className="text-sm font-medium text-ink-soft" htmlFor="goal-amount">
                 Target amount
               </label>
               <Input id="goal-amount" placeholder="$3,000" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-600" htmlFor="goal-date">
+              <label className="text-sm font-medium text-ink-soft" htmlFor="goal-date">
                 Target date
               </label>
               <Input id="goal-date" placeholder="September 2026" />

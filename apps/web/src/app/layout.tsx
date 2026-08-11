@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 
 import { AuthSessionManager } from '@/components/providers/auth-session-manager';
 import { QueryProvider } from '@/components/providers/query-provider';
+import { ThemeProvider } from '@/components/providers/theme-provider';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -30,13 +31,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${jakarta.variable} ${fraunces.variable} min-h-screen bg-[var(--bg)] text-[var(--ink)]`}
       >
-        <QueryProvider>
-          <AuthSessionManager>{children}</AuthSessionManager>
-        </QueryProvider>
+        <ThemeProvider
+          attribute="data-theme"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProvider>
+            <AuthSessionManager>{children}</AuthSessionManager>
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

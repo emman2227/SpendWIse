@@ -53,13 +53,13 @@ export default function ProfilePage() {
               {initials}
             </div>
             <h2 className="mt-5 text-2xl font-semibold text-ink">{user?.name ?? 'Loading...'}</h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-ink-soft">
               {user?.email ?? 'Fetching profile details'}
             </p>
 
-            <div className="mt-6 w-full rounded-[24px] border border-white/80 bg-white/80 px-5 py-5 text-left">
+            <div className="mt-6 w-full rounded-[24px] border border-line bg-paper px-5 py-5 text-left">
               <p className="text-sm font-semibold text-ink">Session protections</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-ink-soft">
                 Access tokens expire automatically, refresh tokens rotate, and inactive sessions
                 close after {INACTIVITY_TIMEOUT_MINUTES} minutes.
               </p>
@@ -75,12 +75,12 @@ export default function ProfilePage() {
               return (
                 <div
                   key={item.label}
-                  className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5"
+                  className="rounded-[24px] border border-line bg-paper px-5 py-5"
                 >
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
                     <EntryIcon className="h-5 w-5" />
                   </div>
-                  <p className="mt-4 text-sm text-slate-500">{item.label}</p>
+                  <p className="mt-4 text-sm text-ink-soft">{item.label}</p>
                   <p className="mt-2 font-semibold text-ink">{item.value}</p>
                 </div>
               );

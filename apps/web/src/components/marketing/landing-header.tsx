@@ -21,7 +21,7 @@ export const LandingHeader = ({ items }: LandingHeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-line/70 bg-[rgba(248,245,237,0.92)] backdrop-blur-xl">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-line/70 bg-paper-strong/95 backdrop-blur-xl backdrop-blur-xl">
       <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 md:px-6 md:py-2.5">
         <Link className="flex items-center gap-2" href="/">
           <Image
@@ -40,7 +40,7 @@ export const LandingHeader = ({ items }: LandingHeaderProps) => {
           {items.map((item) => (
             <a
               key={item.href}
-              className="text-[0.86rem] font-medium text-slate-500 transition-colors hover:text-ink"
+              className="text-[0.86rem] font-medium text-ink-soft transition-colors hover:text-ink"
               href={item.href}
             >
               {item.label}
@@ -57,7 +57,7 @@ export const LandingHeader = ({ items }: LandingHeaderProps) => {
           </Button>
           <button
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            className="flex h-9 w-9 items-center justify-center rounded-[12px] border border-line bg-white/80 text-slate-600 transition hover:text-ink md:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-[12px] border border-line bg-paper text-ink-soft transition hover:text-ink md:hidden"
             onClick={() => setMobileMenuOpen((open) => !open)}
             type="button"
           >
@@ -68,7 +68,7 @@ export const LandingHeader = ({ items }: LandingHeaderProps) => {
 
       <div
         className={cn(
-          'overflow-hidden border-t border-line/50 bg-[rgba(248,245,237,0.98)] transition-all duration-300 md:hidden',
+          'overflow-hidden border-t border-line/50 bg-paper-strong/95 backdrop-blur-xl transition-all duration-300 md:hidden',
           mobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0',
         )}
       >
@@ -76,7 +76,7 @@ export const LandingHeader = ({ items }: LandingHeaderProps) => {
           {items.map((item) => (
             <a
               key={item.href}
-              className="rounded-[14px] px-3 py-2.5 text-[0.92rem] font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-ink"
+              className="rounded-[14px] px-3 py-2.5 text-[0.92rem] font-medium text-ink-soft transition-colors hover:bg-paper hover:text-ink"
               href={item.href}
               onClick={() => setMobileMenuOpen(false)}
             >

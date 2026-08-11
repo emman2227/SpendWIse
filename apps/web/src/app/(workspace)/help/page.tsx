@@ -43,10 +43,10 @@ export default function HelpPage() {
             {faqItems.map((item) => (
               <div
                 key={item.question}
-                className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5"
+                className="rounded-[24px] border border-line bg-paper px-5 py-5"
               >
                 <p className="font-semibold text-ink">{item.question}</p>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{item.answer}</p>
+                <p className="mt-3 text-sm leading-6 text-ink-soft">{item.answer}</p>
               </div>
             ))}
           </div>
@@ -63,8 +63,8 @@ export default function HelpPage() {
                 <h2 className="mt-2 text-2xl font-semibold text-ink">Contact support</h2>
               </div>
             </div>
-            <div className="mt-6 rounded-[24px] border border-white/80 bg-white/80 px-5 py-5">
-              <p className="text-sm leading-6 text-slate-600">
+            <div className="mt-6 rounded-[24px] border border-line bg-paper px-5 py-5">
+              <p className="text-sm leading-6 text-ink-soft">
                 Keep support entry points visible in the global shell, and surface relevant help
                 inside insights, alerts, and forecast modules when users need context.
               </p>
@@ -79,10 +79,7 @@ export default function HelpPage() {
                 'Explain anomaly flags beside the action buttons, not in a hidden tooltip',
                 'Offer chart legends and value summaries on smaller screens',
               ].map((item) => (
-                <div
-                  key={item}
-                  className="rounded-[24px] border border-white/80 bg-sage/30 px-5 py-5"
-                >
+                <div key={item} className="rounded-[24px] border border-line bg-sage/30 px-5 py-5">
                   <p className="font-semibold text-ink">{item}</p>
                 </div>
               ))}

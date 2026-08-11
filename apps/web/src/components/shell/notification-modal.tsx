@@ -145,6 +145,7 @@ const getRelativeTime = (value: string) => {
 const buildBudgetNotifications = (
   items: DashboardBudgetSummaryItem[],
   categoryNames: Map<string, string>,
+  formatMoney: (amount: number) => string,
 ) =>
   items
     .map((item): WorkspaceNotification | null => {
@@ -196,7 +197,10 @@ const buildInsightNotifications = (insights: Insight[]) =>
     }),
   );
 
-const buildRecurringNotifications = (expenses: Expense[]) => {
+const buildRecurringNotifications = (
+  expenses: Expense[],
+  formatMoney: (amount: number) => string,
+) => {
   const grouped = new Map<string, Expense[]>();
 
   expenses.forEach((expense) => {
@@ -371,7 +375,7 @@ export const HeaderNotificationModal = () => {
 
     if (analytics) {
       generated.push(
-        ...buildBudgetNotifications(analytics.budgetSummary.items, categoryNames),
+        ...buildBudgetNotifications(analytics.budgetSummary.items, categoryNames, formatMoney),
         ...buildInsightNotifications(analytics.insights),
       );
 
@@ -392,7 +396,7 @@ export const HeaderNotificationModal = () => {
       }
     }
 
-    generated.push(...buildRecurringNotifications(expenses));
+    generated.push(...buildRecurringNotifications(expenses, formatMoney));
 
     const averageAmount =
       expenses.length > 0
@@ -538,7 +542,7 @@ export const HeaderNotificationModal = () => {
                 type="button"
               />
               <div
-                className="absolute flex max-h-[min(680px,calc(100vh-7rem))] flex-col overflow-hidden rounded-[30px] border border-white/80 bg-[rgba(255,253,250,0.98)] shadow-lift backdrop-blur-2xl"
+                className="absolute flex max-h-[min(680px,calc(100vh-7rem))] flex-col overflow-hidden rounded-[30px] border border-line bg-[rgba(255,253,250,0.98)] shadow-lift backdrop-blur-2xl"
                 style={{
                   left: panelPosition.left,
                   top: panelPosition.top,
@@ -550,7 +554,7 @@ export const HeaderNotificationModal = () => {
                     <div>
                       <p className="kicker">Notifications</p>
                       <h2 className="mt-2 text-xl font-semibold text-ink">Live workspace alerts</h2>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-ink-soft">
                         {unreadCount
                           ? `${unreadCount} unread item${unreadCount === 1 ? '' : 's'}`
                           : 'All caught up'}
@@ -558,7 +562,7 @@ export const HeaderNotificationModal = () => {
                     </div>
                     <button
                       aria-label="Close notifications"
-                      className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-line bg-white text-slate-500 transition hover:border-brand/30 hover:text-ink"
+                      className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
                       onClick={() => setIsOpen(false)}
                       type="button"
                     >
@@ -604,7 +608,7 @@ export const HeaderNotificationModal = () => {
 
                 <div className="sidebar-scroll min-h-0 flex-1 overflow-y-auto px-4 py-4">
                   {isLoading ? (
-                    <div className="rounded-[22px] border border-line bg-white/80 px-4 py-8 text-center text-sm text-slate-500">
+                    <div className="rounded-[22px] border border-line bg-paper px-4 py-8 text-center text-sm text-ink-soft">
                       Loading notifications...
                     </div>
                   ) : visibleNotifications.length > 0 ? (
@@ -617,7 +621,7 @@ export const HeaderNotificationModal = () => {
                             key={notification.id}
                             className={cn(
                               'rounded-[22px] border px-4 py-4 transition',
-                              unread ? 'border-brand/25 bg-brand/5' : 'border-white/80 bg-white/80',
+                              unread ? 'border-brand/25 bg-brand/5' : 'border-line bg-paper',
                             )}
                           >
                             <div className="flex items-start justify-between gap-3">
@@ -633,7 +637,7 @@ export const HeaderNotificationModal = () => {
                                     {notification.title}
                                   </p>
                                 </div>
-                                <p className="mt-2 text-sm leading-6 text-slate-600">
+                                <p className="mt-2 text-sm leading-6 text-ink-soft">
                                   {notification.detail}
                                 </p>
                               </div>
@@ -649,14 +653,14 @@ export const HeaderNotificationModal = () => {
                                 <Badge variant={categoryBadgeVariant[notification.category]}>
                                   {notification.category}
                                 </Badge>
-                                <span className="text-xs font-medium text-slate-400">
+                                <span className="text-xs font-medium text-ink-soft">
                                   {getRelativeTime(notification.createdAt)}
                                 </span>
                               </div>
                               <div className="flex flex-wrap gap-2">
                                 {unread ? (
                                   <button
-                                    className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
+                                    className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
                                     onClick={() => markRead(notification.id)}
                                     type="button"
                                   >
@@ -677,10 +681,10 @@ export const HeaderNotificationModal = () => {
                       })}
                     </div>
                   ) : (
-                    <div className="rounded-[22px] border border-dashed border-line bg-white/70 px-4 py-8 text-center">
+                    <div className="rounded-[22px] border border-dashed border-line bg-paper px-4 py-8 text-center">
                       <Bell className="mx-auto h-6 w-6 text-brand" />
                       <p className="mt-3 font-semibold text-ink">No notifications yet</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                      <p className="mt-2 text-sm leading-6 text-ink-soft">
                         Budget, goal, recurring, and insight alerts will appear here automatically.
                       </p>
                     </div>
@@ -701,7 +705,7 @@ export const HeaderNotificationModal = () => {
                 onClick={() => setIsAllModalOpen(false)}
                 type="button"
               />
-              <div className="absolute left-1/2 top-1/2 flex max-h-[min(760px,calc(100vh-3rem))] w-[min(92vw,760px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[34px] border border-white/80 bg-[rgba(255,253,250,0.98)] shadow-lift">
+              <div className="absolute left-1/2 top-1/2 flex max-h-[min(760px,calc(100vh-3rem))] w-[min(92vw,760px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[34px] border border-line bg-[rgba(255,253,250,0.98)] shadow-lift">
                 <div className="border-b border-line/80 px-6 py-6">
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div>
@@ -718,7 +722,7 @@ export const HeaderNotificationModal = () => {
                     </div>
                     <button
                       aria-label="Close all notifications"
-                      className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-line bg-white text-slate-500 transition hover:border-brand/30 hover:text-ink"
+                      className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
                       onClick={() => setIsAllModalOpen(false)}
                       type="button"
                     >
@@ -750,7 +754,7 @@ export const HeaderNotificationModal = () => {
 
                 <div className="sidebar-scroll min-h-0 flex-1 overflow-y-auto px-5 py-5 md:px-6">
                   {isLoading ? (
-                    <div className="rounded-[24px] border border-line bg-white/80 px-5 py-10 text-center text-sm text-slate-500">
+                    <div className="rounded-[24px] border border-line bg-paper px-5 py-10 text-center text-sm text-ink-soft">
                       Loading notifications...
                     </div>
                   ) : notifications.length > 0 ? (
@@ -762,7 +766,7 @@ export const HeaderNotificationModal = () => {
                           <article
                             className={cn(
                               'rounded-[24px] border px-5 py-5 transition',
-                              unread ? 'border-brand/25 bg-brand/5' : 'border-white/80 bg-white/85',
+                              unread ? 'border-brand/25 bg-brand/5' : 'border-line bg-paper',
                             )}
                             key={notification.id}
                           >
@@ -779,7 +783,7 @@ export const HeaderNotificationModal = () => {
                                     {notification.title}
                                   </h3>
                                 </div>
-                                <p className="mt-2 text-sm leading-6 text-slate-600">
+                                <p className="mt-2 text-sm leading-6 text-ink-soft">
                                   {notification.detail}
                                 </p>
                               </div>
@@ -802,7 +806,7 @@ export const HeaderNotificationModal = () => {
                             </div>
 
                             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                              <span className="text-xs font-medium text-slate-400">
+                              <span className="text-xs font-medium text-ink-soft">
                                 {getRelativeTime(notification.createdAt)}
                               </span>
                               <div className="flex flex-wrap gap-2">
@@ -830,10 +834,10 @@ export const HeaderNotificationModal = () => {
                       })}
                     </div>
                   ) : (
-                    <div className="rounded-[26px] border border-dashed border-line bg-white/70 px-5 py-12 text-center">
+                    <div className="rounded-[26px] border border-dashed border-line bg-paper px-5 py-12 text-center">
                       <Bell className="mx-auto h-7 w-7 text-brand" />
                       <p className="mt-4 text-lg font-semibold text-ink">No notifications yet</p>
-                      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+                      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-ink-soft">
                         Budget, goal, recurring, and insight alerts will appear here automatically.
                       </p>
                     </div>

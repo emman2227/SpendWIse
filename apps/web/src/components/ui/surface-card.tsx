@@ -7,10 +7,10 @@ interface SurfaceCardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const toneClasses: Record<NonNullable<SurfaceCardProps['tone']>, string> = {
-  default: 'panel-surface bg-white/90',
+  default: 'panel-surface bg-paper',
   muted: 'panel-surface bg-[var(--surface-muted)]',
   mint: 'panel-surface mint-gradient',
-  inverse: 'rounded-[28px] border border-white/10 bg-ink text-white shadow-lift',
+  inverse: 'rounded-[28px] border border-line bg-ink text-white shadow-lift',
 };
 
 export const SurfaceCard = ({ className, tone = 'default', ...props }: SurfaceCardProps) => (

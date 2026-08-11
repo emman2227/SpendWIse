@@ -18,7 +18,7 @@ export default function OnboardingCompletePage() {
             <CheckCircle2 className="h-7 w-7" />
           </div>
           <h2 className="mt-5 text-2xl font-semibold text-ink">Setup complete</h2>
-          <p className="mt-2 max-w-xl text-sm leading-7 text-slate-600">
+          <p className="mt-2 max-w-xl text-sm leading-7 text-ink-soft">
             SpendWise is ready with your preferred currency, budget rhythm, top categories, and
             first savings goal. The dashboard should now greet the user with immediate value.
           </p>
@@ -32,7 +32,7 @@ export default function OnboardingCompletePage() {
           ].map((item) => (
             <SurfaceCard key={item} className="px-5 py-5">
               <p className="text-lg font-semibold text-ink">{item}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-ink-soft">
                 Keep first actions visible within one or two taps from the dashboard.
               </p>
             </SurfaceCard>

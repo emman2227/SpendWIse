@@ -126,13 +126,13 @@ function GoalEditorModal({
             <h2 className="mt-3 text-2xl font-semibold text-ink">
               {mode === 'create' ? 'Create goal' : 'Update goal'}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
               Save the target, current progress, and deadline so the workspace can track momentum.
             </p>
           </div>
           <button
             aria-label="Close goal editor"
-            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-white text-slate-500 transition hover:border-brand/30 hover:text-ink"
+            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
             onClick={onClose}
             type="button"
           >
@@ -144,7 +144,7 @@ function GoalEditorModal({
           {goalPresets.map((preset) => (
             <button
               key={preset.title}
-              className="rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
+              className="rounded-full border border-line bg-paper-strong px-3.5 py-2 text-sm font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
               onClick={() => onPresetSelect(preset.title)}
               type="button"
             >
@@ -277,13 +277,13 @@ function FundGoalModal({
           <div>
             <p className="kicker">Fund goal</p>
             <h2 className="mt-3 text-2xl font-semibold text-ink">{goalTitle}</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
               Add a contribution and the saved total will update immediately.
             </p>
           </div>
           <button
             aria-label="Close fund goal modal"
-            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-white text-slate-500 transition hover:border-brand/30 hover:text-ink"
+            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
             onClick={onClose}
             type="button"
           >
@@ -657,7 +657,7 @@ export default function GoalsPage() {
                     'rounded-full px-4 py-2 text-sm font-semibold transition',
                     goalFilter === value
                       ? 'bg-brand text-white shadow-sm'
-                      : 'border border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink',
+                      : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
                   )}
                   onClick={() => setGoalFilter(value as GoalFilter)}
                   type="button"
@@ -668,16 +668,16 @@ export default function GoalsPage() {
             </div>
 
             <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
-              <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <div className="rounded-[24px] border border-line bg-paper px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                   Top
                 </p>
                 <p className="mt-2 text-lg font-semibold leading-tight text-ink">
                   {leadingGoal?.title ?? 'No goals yet'}
                 </p>
               </div>
-              <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <div className="rounded-[24px] border border-line bg-paper px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                   Progress
                 </p>
                 <p className="mt-2 text-lg font-semibold leading-tight text-ink">
@@ -686,8 +686,8 @@ export default function GoalsPage() {
                     : '0% funded'}
                 </p>
               </div>
-              <div className="rounded-[24px] border border-white/80 bg-white/80 px-4 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <div className="rounded-[24px] border border-line bg-paper px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                   Next
                 </p>
                 <p className="mt-2 text-lg font-semibold leading-tight text-ink">
@@ -706,7 +706,7 @@ export default function GoalsPage() {
                 <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                   Review goals fast
                 </h2>
-                <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+                <p className="mt-1.5 max-w-2xl text-sm leading-6 text-ink-soft">
                   Progress, deadline, and next step stay together.
                 </p>
               </div>
@@ -732,7 +732,7 @@ export default function GoalsPage() {
                   pageMessage.toLowerCase().includes('unable') ||
                     pageMessage.toLowerCase().includes('valid')
                     ? 'border border-danger/20 bg-danger/10 text-danger'
-                    : 'border border-brand/15 bg-brand/10 text-slate-700',
+                    : 'border border-brand/15 bg-brand/10 text-ink',
                 )}
               >
                 {pageMessage}
@@ -744,7 +744,7 @@ export default function GoalsPage() {
                 {Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={index}
-                    className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                    className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
                   >
                     <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(240px,0.95fr),minmax(280px,1.15fr)] lg:items-center lg:gap-3">
                       <div className="flex items-center gap-3.5">
@@ -754,7 +754,7 @@ export default function GoalsPage() {
                           <Skeleton className="mt-2 h-3 w-24 rounded-full" />
                         </div>
                       </div>
-                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-3">
+                      <div className="rounded-[16px] border border-line bg-paper px-3 py-3">
                         <Skeleton className="h-3 w-full rounded-full" />
                         <Skeleton className="mt-3 h-2.5 w-full rounded-full" />
                       </div>
@@ -767,7 +767,7 @@ export default function GoalsPage() {
                 {visibleGoals.map((goal) => (
                   <article
                     key={goal.id}
-                    className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                    className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
                   >
                     <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(240px,0.95fr),minmax(280px,1.15fr)] lg:items-center lg:gap-3">
                       <div className="flex min-w-0 items-center gap-3.5">
@@ -793,13 +793,13 @@ export default function GoalsPage() {
                                   : 'Active'}
                             </Badge>
                           </div>
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="mt-1 text-sm text-ink-soft">
                             Target by {formatShortDate(goal.targetDate)}
                           </p>
                         </div>
                       </div>
 
-                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-3">
+                      <div className="rounded-[16px] border border-line bg-paper px-3 py-3">
                         <ProgressBar
                           helper={`${formatMoney(goal.currentAmount)} of ${formatMoney(goal.targetAmount)}`}
                           size="sm"
@@ -811,16 +811,16 @@ export default function GoalsPage() {
 
                     <div className="mt-3 border-t border-line/70 pt-3">
                       <div className="grid gap-2.5 lg:grid-cols-[132px,minmax(0,1fr),auto] lg:items-start">
-                        <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                             Done
                           </p>
                           <p className="mt-1 text-sm font-medium text-ink">
                             {Math.round(goal.progress)}%
                           </p>
                         </div>
-                        <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                             Next step
                           </p>
                           <p className="mt-1 text-sm font-medium leading-6 text-ink">
@@ -832,7 +832,7 @@ export default function GoalsPage() {
 
                         <div className="flex flex-wrap gap-2 lg:justify-end">
                           <button
-                            className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
+                            className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
                             onClick={() => openEditEditor(goal)}
                             type="button"
                           >
@@ -842,14 +842,14 @@ export default function GoalsPage() {
                             </span>
                           </button>
                           <button
-                            className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
+                            className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
                             onClick={() => openFundModal(goal)}
                             type="button"
                           >
                             Fund
                           </button>
                           <button
-                            className="rounded-full border border-danger/20 bg-white px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
+                            className="rounded-full border border-danger/20 bg-paper-strong px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
                             disabled={deleteTargetId === goal.id}
                             onClick={() => handleDelete(goal.id)}
                             type="button"
@@ -904,17 +904,17 @@ export default function GoalsPage() {
               ).map((item) => (
                 <article
                   key={item}
-                  className="rounded-[22px] border border-white/80 bg-white/88 px-4 py-3"
+                  className="rounded-[22px] border border-line bg-paper px-4 py-3"
                 >
                   <p className="font-semibold text-ink">{item}</p>
-                  <p className="mt-1.5 text-sm leading-6 text-slate-600">Tie it to a goal.</p>
+                  <p className="mt-1.5 text-sm leading-6 text-ink-soft">Tie it to a goal.</p>
                 </article>
               ))}
             </div>
 
             <div className="mt-5 rounded-[22px] border border-brand/15 bg-brand/5 px-4 py-4">
               <p className="font-semibold text-ink">Why it helps</p>
-              <p className="mt-1.5 text-sm leading-6 text-slate-600">
+              <p className="mt-1.5 text-sm leading-6 text-ink-soft">
                 Each suggestion is based on what is left to save and how much time remains.
               </p>
             </div>

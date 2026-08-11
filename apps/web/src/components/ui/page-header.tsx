@@ -22,7 +22,7 @@ export const PageHeader = ({
   return (
     <header
       className={cn(
-        'module-card-enter flex flex-col gap-6 rounded-[32px] border border-white/70 bg-white/70 px-6 py-6 shadow-soft backdrop-blur-xl md:px-8 md:py-7',
+        'module-card-enter flex flex-col gap-6 rounded-[32px] border border-line bg-paper px-6 py-6 shadow-soft backdrop-blur-xl md:px-8 md:py-7',
         className,
       )}
     >
@@ -33,7 +33,7 @@ export const PageHeader = ({
             <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-[2.35rem]">
               {title}
             </h1>
-            <p className="max-w-2xl text-sm leading-7 text-slate-600 md:text-[15px]">
+            <p className="max-w-2xl text-sm leading-7 text-ink-soft md:text-[15px]">
               {description}
             </p>
           </div>

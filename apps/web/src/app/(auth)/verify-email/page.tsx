@@ -148,15 +148,15 @@ function VerifyEmailPageContent() {
       : 'Check your inbox and spam folder for the latest verification code.';
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#f7f2ea_0%,#f4efe7_100%)] px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden">
-      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-white shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
-        <section className="relative overflow-hidden bg-[#dbe6e0] px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]">
+    <main className="min-h-screen bg-cream px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden">
+      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-paper-strong shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
+        <section className="relative overflow-hidden bg-mint px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -left-10 top-0 h-40 w-56 rounded-full bg-white/28 blur-sm" />
-            <div className="absolute right-[8%] top-[11%] h-44 w-44 rounded-full bg-[#f2eadb] opacity-95" />
+            <div className="absolute right-[8%] top-[11%] h-44 w-44 rounded-full bg-surface-muted opacity-95" />
             <div className="absolute left-[10%] top-[18%] h-52 w-52 rounded-[38%_62%_58%_42%/49%_41%_59%_51%] border border-white/30 bg-white/12" />
             <div className="absolute left-[18%] top-[32%] h-10 w-60 rounded-full bg-[linear-gradient(90deg,rgba(17,43,38,0.9),rgba(15,123,113,0.62),rgba(255,255,255,0.08))] opacity-90 blur-[1px]" />
-            <div className="absolute -left-16 bottom-7 h-44 w-54 rounded-[46%_54%_57%_43%/44%_34%_66%_56%] bg-[#f3e3cf]" />
+            <div className="absolute -left-16 bottom-7 h-44 w-54 rounded-[46%_54%_57%_43%/44%_34%_66%_56%] bg-surface-muted" />
             <div className="absolute right-[-10%] bottom-[-10%] h-48 w-52 rounded-[58%_42%_61%_39%/44%_55%_45%_56%] bg-white/28" />
           </div>
 
@@ -171,11 +171,11 @@ function VerifyEmailPageContent() {
             <div className="mt-6 max-w-[316px] rounded-[24px] border border-white/40 bg-white/38 p-4 shadow-[0_12px_24px_rgba(18,35,47,0.07)] backdrop-blur-sm">
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-brand" />
-                <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-slate-400">
+                <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-ink-soft">
                   Verification Note
                 </span>
               </div>
-              <p className="mt-3 max-w-[24ch] text-[13px] font-semibold leading-5 text-slate-700">
+              <p className="mt-3 max-w-[24ch] text-[13px] font-semibold leading-5 text-ink">
                 One short code keeps the signup flow secure without slowing down the next step.
               </p>
             </div>
@@ -189,13 +189,13 @@ function VerifyEmailPageContent() {
                     </div>
                     <div className="h-3 w-16 rounded-full bg-brand/24" />
                   </div>
-                  <div className="mt-5 flex h-14 items-center justify-center rounded-[20px] border border-white/35 bg-white/18 px-4 text-[1.1rem] font-bold tracking-[0.35em] text-[#13281f]">
+                  <div className="mt-5 flex h-14 items-center justify-center rounded-[20px] border border-white/35 bg-white/18 px-4 text-[1.1rem] font-bold tracking-[0.35em] text-ink">
                     {code.padEnd(AUTH_EMAIL_VERIFICATION_CODE_LENGTH, '*')}
                   </div>
-                  <div className="mt-4 h-2 w-20 rounded-full bg-slate-700/14" />
+                  <div className="mt-4 h-2 w-20 rounded-full bg-ink/14" />
                 </div>
                 <div className="space-y-3">
-                  <div className="rounded-[22px] border border-white/35 bg-[#f5ede0] p-3">
+                  <div className="rounded-[22px] border border-white/35 bg-surface-muted p-3">
                     <div className="flex h-14 items-center justify-center rounded-[18px] bg-[linear-gradient(135deg,rgba(15,123,113,0.2),rgba(255,255,255,0.68))] text-brand">
                       <ShieldCheck className="h-5 w-5" />
                     </div>
@@ -211,27 +211,27 @@ function VerifyEmailPageContent() {
 
               <div className="max-w-[320px]">
                 <h1
-                  className="text-[1.95rem] font-semibold leading-[0.96] tracking-[-0.05em] text-[#13281f] md:text-[2.2rem]"
+                  className="text-[1.95rem] font-semibold leading-[0.96] tracking-[-0.05em] text-ink md:text-[2.2rem]"
                   style={{ fontFamily: 'var(--font-fraunces)' }}
                 >
                   Confirm your inbox, <span className="text-brand">unlock your workspace.</span>
                 </h1>
-                <p className="mt-3 text-[13px] leading-6 text-slate-600">{helperText}</p>
+                <p className="mt-3 text-[13px] leading-6 text-ink-soft">{helperText}</p>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="min-h-0 overflow-y-auto bg-white px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5">
+        <section className="min-h-0 overflow-y-auto bg-paper-strong px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5">
           <div className="mx-auto flex h-full max-w-[360px] flex-col">
             <div className="space-y-2">
               <div className="inline-flex items-center rounded-full bg-brand/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
                 Verification
               </div>
-              <h2 className="text-[1.45rem] font-semibold tracking-[-0.04em] text-slate-900 md:text-[1.55rem]">
+              <h2 className="text-[1.45rem] font-semibold tracking-[-0.04em] text-ink md:text-[1.55rem]">
                 Enter Your Code
               </h2>
-              <p className="text-[13px] leading-5 text-slate-500">
+              <p className="text-[13px] leading-5 text-ink-soft">
                 Enter the {AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit code sent to your email to
                 finish creating your SpendWise account.
               </p>
@@ -241,7 +241,7 @@ function VerifyEmailPageContent() {
               <div className="space-y-3">
                 <div className="space-y-1">
                   <label
-                    className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                    className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                     htmlFor="email"
                   >
                     Email Address
@@ -251,7 +251,7 @@ function VerifyEmailPageContent() {
                     aria-invalid={Boolean(emailError)}
                     autoComplete="email"
                     className={cn(
-                      'h-10 rounded-[14px] border border-transparent bg-[#f5f1eb] text-sm shadow-none placeholder:text-slate-400 focus:border-brand focus:bg-white',
+                      'h-10 rounded-[14px] border border-transparent bg-surface-muted text-sm shadow-none placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
                       emailError && 'border-[var(--danger)]',
                     )}
                     disabled={isSubmitting || isResending}
@@ -276,7 +276,7 @@ function VerifyEmailPageContent() {
 
                 <div className="space-y-1">
                   <label
-                    className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"
+                    className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                     htmlFor="code"
                   >
                     Verification Code
@@ -286,7 +286,7 @@ function VerifyEmailPageContent() {
                     aria-invalid={Boolean(codeError)}
                     autoComplete="one-time-code"
                     className={cn(
-                      'h-12 rounded-[16px] border border-transparent bg-[#f5f1eb] text-center font-mono text-lg tracking-[0.4em] shadow-none placeholder:tracking-[0.28em] placeholder:text-slate-400 focus:border-brand focus:bg-white',
+                      'h-12 rounded-[16px] border border-transparent bg-surface-muted text-center font-mono text-lg tracking-[0.4em] shadow-none placeholder:tracking-[0.28em] placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
                       codeError && 'border-[var(--danger)]',
                     )}
                     disabled={isSubmitting}
@@ -301,7 +301,7 @@ function VerifyEmailPageContent() {
                   <p
                     className={cn(
                       'min-h-[0.75rem] text-[10px] leading-4',
-                      codeError ? 'text-[var(--danger)]' : 'text-slate-400',
+                      codeError ? 'text-[var(--danger)]' : 'text-ink-soft',
                     )}
                     id="verification-code-error"
                     role="alert"
@@ -311,7 +311,7 @@ function VerifyEmailPageContent() {
                 </div>
 
                 {deliveryHint === 'log' ? (
-                  <div className="rounded-[18px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] leading-5 text-slate-700">
+                  <div className="rounded-[18px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] leading-5 text-ink">
                     The app is in local log mode right now. Open the API terminal to see the latest
                     verification code while email delivery is unavailable.
                   </div>
@@ -324,7 +324,7 @@ function VerifyEmailPageContent() {
                 ) : null}
 
                 {notice ? (
-                  <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-slate-700">
+                  <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-ink">
                     {notice}
                   </div>
                 ) : null}
@@ -350,7 +350,7 @@ function VerifyEmailPageContent() {
                 >
                   {isResending ? 'Sending...' : 'Resend Code'}
                 </Button>
-                <p className="text-center text-[12px] text-slate-500">
+                <p className="text-center text-[12px] text-ink-soft">
                   Already verified?{' '}
                   <Link className="font-semibold text-brand" href="/login">
                     Back to login

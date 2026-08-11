@@ -12,7 +12,7 @@ export default function WorkspaceError({ reset }: { error: Error; reset: () => v
       <h1 className="mt-4 text-3xl font-semibold text-ink">
         We could not load this workspace view.
       </h1>
-      <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+      <p className="mt-3 max-w-2xl text-sm leading-7 text-ink-soft">
         This error state keeps the tone calm, explains what happened, and gives the user a direct
         recovery action without losing trust.
       </p>

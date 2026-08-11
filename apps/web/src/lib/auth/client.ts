@@ -162,7 +162,7 @@ export const logoutSession = async () => {
   }
 };
 
-export const updateProfile = (input: { name?: string; phone?: string }) =>
+export const updateProfile = (input: { name?: string; phone?: string; currency?: string }) =>
   request<UserProfile>('/api/users/me', {
     method: 'PATCH',
     body: JSON.stringify(input),

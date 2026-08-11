@@ -109,7 +109,7 @@ const recurringHintPattern =
   /(subscription|membership|rent|renewal|bill|utility|mortgage|gym|monthly)/i;
 
 const selectClassName =
-  'flex h-12 w-full rounded-[20px] border border-line bg-white/80 px-4 text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:bg-white';
+  'flex h-12 w-full rounded-[20px] border border-line bg-paper px-4 text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:bg-paper-strong';
 
 const getInitialMonthValue = () => {
   const now = new Date();
@@ -250,7 +250,7 @@ function TransactionEditorModal({
             <h2 className="mt-3 text-2xl font-semibold text-ink">
               {mode === 'create' ? 'Quick add' : 'Update expense'}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
               {mode === 'create'
                 ? 'Save a new transaction with the essentials up front.'
                 : 'Adjust the amount, category, date, or notes and save the change.'}
@@ -258,7 +258,7 @@ function TransactionEditorModal({
           </div>
           <button
             aria-label="Close transaction editor"
-            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-white text-slate-500 transition hover:border-brand/30 hover:text-ink"
+            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
             onClick={onClose}
             type="button"
           >
@@ -270,7 +270,7 @@ function TransactionEditorModal({
           {quickCapturePresets.map((preset) => (
             <button
               key={preset.label}
-              className="rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
+              className="rounded-full border border-line bg-paper-strong px-3.5 py-2 text-sm font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
               onClick={() => onPresetSelect(preset.label)}
               type="button"
             >
@@ -746,7 +746,7 @@ export default function TransactionsPage() {
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr),180px,180px,auto]">
               <div className="relative">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
                 <Input
                   className="pl-11"
                   onChange={(event) => setSearchValue(event.target.value)}
@@ -788,7 +788,7 @@ export default function TransactionsPage() {
                   'rounded-full px-4 py-2 text-sm font-semibold transition',
                   categoryFilter === 'all'
                     ? 'bg-brand text-white shadow-sm'
-                    : 'border border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink',
+                    : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
                 )}
                 onClick={() => setCategoryFilter('all')}
                 type="button"
@@ -802,7 +802,7 @@ export default function TransactionsPage() {
                     'rounded-full px-4 py-2 text-sm font-semibold transition',
                     categoryFilter === category.id
                       ? 'bg-brand text-white shadow-sm'
-                      : 'border border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink',
+                      : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
                   )}
                   onClick={() => setCategoryFilter(category.id)}
                   type="button"
@@ -819,7 +819,7 @@ export default function TransactionsPage() {
                   <h2 className="mt-2 text-xl font-semibold text-ink">
                     Real transactions, faster cleanup.
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                  <p className="mt-2 text-sm leading-6 text-ink-soft">
                     Filter by month, narrow the list, and update expenses without leaving the page.
                   </p>
                 </div>
@@ -827,28 +827,28 @@ export default function TransactionsPage() {
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
-                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Spend
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">{formatMoney(totalVisible)}</p>
                 </div>
-                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Review
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">
                     {flaggedCount} flagged charge{flaggedCount === 1 ? '' : 's'}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Add
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">Live modal</p>
                 </div>
-                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Export
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">Filtered CSV</p>
@@ -865,7 +865,7 @@ export default function TransactionsPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Latest activity
               </h2>
-              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-ink-soft">
                 Every row is editable and backed by the API.
               </p>
             </div>
@@ -911,7 +911,7 @@ export default function TransactionsPage() {
                 'mt-5 rounded-[22px] px-4 py-4 text-sm',
                 listFeedback.toLowerCase().includes('unable')
                   ? 'border border-danger/20 bg-danger/10 text-danger'
-                  : 'border border-brand/15 bg-brand/10 text-slate-700',
+                  : 'border border-brand/15 bg-brand/10 text-ink',
               )}
             >
               {listFeedback}
@@ -930,7 +930,7 @@ export default function TransactionsPage() {
                     {Array.from({ length: 2 }).map((_, itemIndex) => (
                       <div
                         key={itemIndex}
-                        className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                        className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
                       >
                         <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
                           <div className="flex min-w-0 items-center gap-3.5">
@@ -959,19 +959,17 @@ export default function TransactionsPage() {
                 return (
                   <div key={group.key}>
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      <p className="text-sm font-semibold uppercase tracking-[0.16em] text-ink-soft">
                         {group.label}
                       </p>
-                      <p className="text-sm font-medium text-slate-500">
-                        {formatMoney(groupTotal)}
-                      </p>
+                      <p className="text-sm font-medium text-ink-soft">{formatMoney(groupTotal)}</p>
                     </div>
 
                     <div className="mt-3 space-y-2.5">
                       {group.items.map((transaction) => (
                         <article
                           key={transaction.id}
-                          className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                          className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
                         >
                           <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
                             <div className="flex min-w-0 items-center gap-3.5">
@@ -996,31 +994,31 @@ export default function TransactionsPage() {
                                     <Badge variant="danger">Needs review</Badge>
                                   ) : null}
                                 </div>
-                                <p className="mt-1 text-sm text-slate-500">
+                                <p className="mt-1 text-sm text-ink-soft">
                                   {transaction.notes?.trim() || 'No notes added.'}
                                 </p>
                               </div>
                             </div>
 
                             <div className="grid gap-2 sm:grid-cols-3 xl:flex xl:items-center xl:gap-2.5">
-                              <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2 xl:min-w-[112px]">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                              <div className="rounded-[16px] border border-line bg-paper px-3 py-2 xl:min-w-[112px]">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                                   Date
                                 </p>
                                 <p className="mt-1 text-sm font-medium text-ink">
                                   {formatShortDate(transaction.date)}
                                 </p>
                               </div>
-                              <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2 xl:min-w-[156px]">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                              <div className="rounded-[16px] border border-line bg-paper px-3 py-2 xl:min-w-[156px]">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                                   Method
                                 </p>
                                 <p className="mt-1 text-sm font-medium text-ink">
                                   {paymentMethodLabels[transaction.paymentMethod]}
                                 </p>
                               </div>
-                              <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2 xl:min-w-[168px]">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                              <div className="rounded-[16px] border border-line bg-paper px-3 py-2 xl:min-w-[168px]">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                                   Updated
                                 </p>
                                 <p className="mt-1 text-sm font-medium text-ink">
@@ -1034,7 +1032,7 @@ export default function TransactionsPage() {
                                 <p className="text-lg font-semibold text-ink">
                                   {formatMoney(transaction.amount)}
                                 </p>
-                                <p className="mt-1 text-sm text-slate-500">
+                                <p className="mt-1 text-sm text-ink-soft">
                                   {transaction.alert
                                     ? 'Review'
                                     : transaction.recurring
@@ -1045,7 +1043,7 @@ export default function TransactionsPage() {
 
                               <div className="flex flex-wrap gap-2">
                                 <button
-                                  className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
+                                  className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
                                   onClick={() => openEditEditor(transaction)}
                                   type="button"
                                 >
@@ -1055,7 +1053,7 @@ export default function TransactionsPage() {
                                   </span>
                                 </button>
                                 <button
-                                  className="rounded-full border border-danger/20 bg-white px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
+                                  className="rounded-full border border-danger/20 bg-paper-strong px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
                                   disabled={deleteTargetId === transaction.id}
                                   onClick={() => handleDelete(transaction.id)}
                                   type="button"

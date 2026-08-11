@@ -150,7 +150,7 @@ export default function HomePage() {
                 <span className="block text-brand">Intelligent</span>
                 Spending Analysis
               </h1>
-              <p className="mx-auto max-w-3xl text-[0.94rem] leading-6 text-slate-500 md:text-[1.04rem] md:leading-[1.45]">
+              <p className="mx-auto max-w-3xl text-[0.94rem] leading-6 text-ink-soft md:text-[1.04rem] md:leading-[1.45]">
                 Track expenses, understand habits, predict future spending, and get personalized AI
                 recommendations all in one beautifully designed dashboard.
               </p>
@@ -174,7 +174,7 @@ export default function HomePage() {
         </section>
 
         <section className="px-4 pb-14 md:px-6 md:pb-16">
-          <div className="mx-auto max-w-[1220px] rounded-[28px] border border-line/80 bg-white/82 p-4 shadow-soft md:p-6">
+          <div className="mx-auto max-w-[1220px] rounded-[28px] border border-line/80 bg-paper p-4 shadow-soft md:p-6">
             <motion.div
               className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
               initial="hidden"
@@ -185,10 +185,10 @@ export default function HomePage() {
               {topMetrics.map((metric) => (
                 <motion.article
                   key={metric.label}
-                  className="rounded-[20px] bg-gradient-to-br from-[rgba(221,236,231,0.9)] to-[rgba(250,252,249,0.92)] px-4 py-4"
+                  className="rounded-[20px] bg-surface-muted px-4 py-4"
                   variants={staggerItem}
                 >
-                  <p className="text-[0.86rem] font-medium text-slate-500">{metric.label}</p>
+                  <p className="text-[0.86rem] font-medium text-ink-soft">{metric.label}</p>
                   <p className="mt-2 text-[1.65rem] font-semibold tracking-tight text-ink">
                     {metric.value}
                   </p>
@@ -197,9 +197,9 @@ export default function HomePage() {
               ))}
             </motion.div>
 
-            <div className="mt-5 rounded-[22px] bg-gradient-to-br from-[rgba(237,244,241,0.96)] to-[rgba(247,250,248,0.92)] px-5 py-10 md:px-6 md:py-11">
-              <div className="flex items-center justify-center gap-3 text-center text-[0.92rem] text-slate-500 md:text-[1.08rem]">
-                <ChartColumnIncreasing className="h-5 w-5 text-slate-400" />
+            <div className="mt-5 rounded-[22px] bg-surface-muted px-5 py-10 md:px-6 md:py-11">
+              <div className="flex items-center justify-center gap-3 text-center text-[0.92rem] text-ink-soft md:text-[1.08rem]">
+                <ChartColumnIncreasing className="h-5 w-5 text-ink-soft" />
                 <span>Interactive spending charts &amp; AI insights</span>
               </div>
             </div>
@@ -210,7 +210,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl">
             <div className="mx-auto max-w-4xl text-center">
               <h2 className={sectionTitleClasses}>Everything You Need to Take Control</h2>
-              <p className="mt-4 text-base leading-7 text-slate-500 md:text-[1.08rem] md:leading-[1.45]">
+              <p className="mt-4 text-base leading-7 text-ink-soft md:text-[1.08rem] md:leading-[1.45]">
                 Powerful features designed to give you complete visibility and control over your
                 finances.
               </p>
@@ -229,7 +229,7 @@ export default function HomePage() {
                 return (
                   <motion.article
                     key={feature.title}
-                    className="rounded-[22px] border border-line/80 bg-white/88 px-5 py-5 shadow-soft"
+                    className="rounded-[22px] border border-line/80 bg-paper px-5 py-5 shadow-soft"
                     variants={staggerItem}
                   >
                     <div className="flex h-12 w-12 items-center justify-center rounded-[16px] bg-brand text-white">
@@ -238,7 +238,7 @@ export default function HomePage() {
                     <h3 className="mt-5 text-[1.22rem] font-semibold tracking-tight text-ink">
                       {feature.title}
                     </h3>
-                    <p className="mt-3 text-[0.92rem] leading-7 text-slate-500">
+                    <p className="mt-3 text-[0.92rem] leading-7 text-ink-soft">
                       {feature.description}
                     </p>
                   </motion.article>
@@ -249,13 +249,13 @@ export default function HomePage() {
         </section>
 
         <section
-          className="scroll-mt-24 border-y border-white/40 bg-[rgba(220,236,231,0.42)] px-4 py-14 md:px-6 md:py-16"
+          className="scroll-mt-24 border-y border-line bg-surface-muted/40 px-4 py-14 md:px-6 md:py-16"
           id="benefits"
         >
           <div className="mx-auto max-w-7xl">
             <div className="mx-auto max-w-4xl text-center">
               <h2 className={sectionTitleClasses}>Smarter Finance, Simpler Life</h2>
-              <p className="mt-4 text-base leading-7 text-slate-500 md:text-[1.04rem]">
+              <p className="mt-4 text-base leading-7 text-ink-soft md:text-[1.04rem]">
                 Advanced tools wrapped in an intuitive experience.
               </p>
             </div>
@@ -273,17 +273,17 @@ export default function HomePage() {
                 return (
                   <motion.article
                     key={benefit.title}
-                    className="flex gap-4 rounded-[22px] border border-line/80 bg-white/90 px-5 py-5 shadow-soft"
+                    className="flex gap-4 rounded-[22px] border border-line/80 bg-paper px-5 py-5 shadow-soft"
                     variants={staggerItem}
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[rgba(221,236,231,0.72)] text-brand">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-brand/10 text-brand">
                       <Icon className="h-4.5 w-4.5" />
                     </div>
                     <div>
                       <h3 className="text-[1.18rem] font-semibold tracking-tight text-ink">
                         {benefit.title}
                       </h3>
-                      <p className="mt-2 text-[0.92rem] leading-7 text-slate-500">
+                      <p className="mt-2 text-[0.92rem] leading-7 text-ink-soft">
                         {benefit.description}
                       </p>
                     </div>
@@ -298,7 +298,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl">
             <div className="mx-auto max-w-4xl text-center">
               <h2 className={sectionTitleClasses}>Get Started in Minutes</h2>
-              <p className="mt-4 text-base leading-7 text-slate-500 md:text-[1.08rem] md:leading-[1.45]">
+              <p className="mt-4 text-base leading-7 text-ink-soft md:text-[1.08rem] md:leading-[1.45]">
                 Three simple steps to transform the way you manage your money.
               </p>
             </div>
@@ -316,7 +316,7 @@ export default function HomePage() {
                 return (
                   <motion.article
                     key={item.title}
-                    className="relative rounded-[22px] border border-line/80 bg-white/90 px-5 py-6 shadow-soft"
+                    className="relative rounded-[22px] border border-line/80 bg-paper px-5 py-6 shadow-soft"
                     variants={staggerItem}
                   >
                     <span className="text-[0.78rem] font-semibold tracking-widest text-brand/60">
@@ -328,7 +328,7 @@ export default function HomePage() {
                     <h3 className="mt-5 text-[1.22rem] font-semibold tracking-tight text-ink">
                       {item.title}
                     </h3>
-                    <p className="mt-3 text-[0.92rem] leading-7 text-slate-500">
+                    <p className="mt-3 text-[0.92rem] leading-7 text-ink-soft">
                       {item.description}
                     </p>
 
@@ -344,13 +344,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mt-6 bg-ink px-4 py-14 text-white md:px-6 md:py-16">
+        <section className="mt-6 bg-paper-strong px-4 py-14 border-y border-line md:px-6 md:py-16">
           <div className="mx-auto max-w-7xl">
             <div className="text-center">
-              <h2 className="text-[1.75rem] font-semibold tracking-tight sm:text-[2.2rem] md:text-[2.75rem]">
+              <h2 className="text-[1.75rem] font-semibold tracking-tight text-ink sm:text-[2.2rem] md:text-[2.75rem]">
                 Ready to Take Control of Your Finances?
               </h2>
-              <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-white/75 md:text-[1.02rem]">
+              <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-ink-soft md:text-[1.02rem]">
                 Join thousands of users already saving smarter with SpendWise.
               </p>
               <div className="mt-7">
@@ -377,7 +377,7 @@ export default function HomePage() {
                     SpendWise
                   </span>
                 </div>
-                <p className="mt-4 max-w-sm text-[0.92rem] leading-7 text-slate-500">
+                <p className="mt-4 max-w-sm text-[0.92rem] leading-7 text-ink-soft">
                   AI-powered spending analysis for smarter financial decisions.
                 </p>
               </div>
@@ -387,7 +387,7 @@ export default function HomePage() {
                   <h3 className="text-base font-semibold text-ink">{column.title}</h3>
                   <ul className="mt-3 space-y-2.5">
                     {column.links.map((link) => (
-                      <li key={link} className="text-[0.92rem] text-slate-500">
+                      <li key={link} className="text-[0.92rem] text-ink-soft">
                         <a href="#" className="transition-colors hover:text-ink">
                           {link}
                         </a>
@@ -398,7 +398,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <p className="pt-6 text-center text-[0.82rem] text-slate-500">
+            <p className="pt-6 text-center text-[0.82rem] text-ink-soft">
               {'\u00A9'} 2026 SpendWise. All rights reserved.
             </p>
           </div>

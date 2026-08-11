@@ -15,9 +15,9 @@ interface MetricCardProps {
 }
 
 const toneClasses = {
-  default: 'panel-surface bg-white/90',
+  default: 'panel-surface bg-paper',
   mint: 'panel-surface mint-gradient',
-  ink: 'rounded-[28px] border border-white/10 bg-ink text-white shadow-lift',
+  ink: 'rounded-[28px] border border-line bg-ink text-white shadow-lift',
 } as const;
 
 export const MetricCard = ({
@@ -37,7 +37,7 @@ export const MetricCard = ({
         <div
           className={cn(
             'absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-2xl',
-            tone === 'ink' ? 'bg-white/10 text-white' : 'bg-white text-brand',
+            tone === 'ink' ? 'bg-paper text-white' : 'bg-paper-strong text-brand',
           )}
         >
           <Icon className="h-5 w-5" />
@@ -49,7 +49,7 @@ export const MetricCard = ({
           <p
             className={cn(
               'text-sm font-medium',
-              tone === 'ink' ? 'text-white/70' : 'text-slate-500',
+              tone === 'ink' ? 'text-white/70' : 'text-ink-soft',
             )}
           >
             {label}
@@ -68,7 +68,7 @@ export const MetricCard = ({
         <p
           className={cn(
             'min-w-0 truncate text-sm',
-            tone === 'ink' ? 'text-white/70' : 'text-slate-500',
+            tone === 'ink' ? 'text-white/70' : 'text-ink-soft',
           )}
         >
           {helper}

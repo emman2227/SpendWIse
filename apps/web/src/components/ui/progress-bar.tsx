@@ -29,12 +29,12 @@ export const ProgressBar = ({
       {label || helper ? (
         <div className="flex items-center justify-between gap-3 text-sm">
           <span className="font-medium text-ink">{label}</span>
-          <span className="text-slate-500">{helper}</span>
+          <span className="text-ink-soft">{helper}</span>
         </div>
       ) : null}
       <div
         className={cn(
-          'overflow-hidden rounded-full bg-slate-200/70',
+          'overflow-hidden rounded-full bg-surface-muted/70',
           size === 'sm' ? 'h-2.5' : 'h-3',
         )}
       >

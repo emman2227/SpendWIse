@@ -164,13 +164,13 @@ function CategoryEditorModal({
             <h2 className="mt-3 text-2xl font-semibold text-ink">
               {mode === 'create' ? 'Create category' : 'Update category'}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
               Pick a clear name, icon, and color so the category is easy to scan everywhere.
             </p>
           </div>
           <button
             aria-label="Close category editor"
-            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-white text-slate-500 transition hover:border-brand/30 hover:text-ink"
+            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
             onClick={onClose}
             type="button"
           >
@@ -187,7 +187,7 @@ function CategoryEditorModal({
               <PreviewIcon className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-ink-soft">
                 Preview
               </p>
               <p className="mt-1 text-lg font-semibold text-ink">
@@ -223,7 +223,7 @@ function CategoryEditorModal({
                       'flex items-center gap-3 rounded-[22px] border px-4 py-3 text-left transition',
                       isSelected
                         ? 'border-brand bg-brand/10 text-ink'
-                        : 'border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink',
+                        : 'border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
                     )}
                     onClick={() => onFieldChange('icon', option.value)}
                     type="button"
@@ -255,7 +255,7 @@ function CategoryEditorModal({
                       'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition',
                       isSelected
                         ? 'bg-brand text-white'
-                        : 'border border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink',
+                        : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
                     )}
                     onClick={() => onFieldChange('color', token.value)}
                     type="button"
@@ -568,7 +568,7 @@ export default function CategoriesPage() {
           <div className="space-y-5">
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr),180px,auto]">
               <div className="relative">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
                 <Input
                   className="pl-11"
                   onChange={(event) => setSearchValue(event.target.value)}
@@ -601,7 +601,7 @@ export default function CategoriesPage() {
                     'rounded-full px-4 py-2 text-sm font-semibold transition',
                     scopeFilter === value
                       ? 'bg-brand text-white shadow-sm'
-                      : 'border border-line bg-white text-slate-600 hover:border-brand/30 hover:text-ink',
+                      : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
                   )}
                   onClick={() => setScopeFilter(value as CategoryScope)}
                   type="button"
@@ -618,7 +618,7 @@ export default function CategoriesPage() {
                   <h2 className="mt-2 text-xl font-semibold text-ink">
                     Recognition should be instant.
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                  <p className="mt-2 text-sm leading-6 text-ink-soft">
                     Names, icons, colors, and monthly activity all stay in the same row.
                   </p>
                 </div>
@@ -626,24 +626,24 @@ export default function CategoriesPage() {
               </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-3">
-                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Top
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">
                     {highestSpendCategory?.name ?? 'No spend yet'}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Active
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">
                     {activeCategoryCount} categories
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Add
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">Live modal</p>
@@ -660,7 +660,7 @@ export default function CategoriesPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Review categories fast
               </h2>
-              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-ink-soft">
                 Each row shows type, color, spend, and whether it is safe to edit.
               </p>
             </div>
@@ -697,7 +697,7 @@ export default function CategoriesPage() {
                   pageMessage.toLowerCase().includes('linked') ||
                   pageMessage.toLowerCase().includes('cannot')
                   ? 'border border-danger/20 bg-danger/10 text-danger'
-                  : 'border border-brand/15 bg-brand/10 text-slate-700',
+                  : 'border border-brand/15 bg-brand/10 text-ink',
               )}
             >
               {pageMessage}
@@ -707,10 +707,7 @@ export default function CategoriesPage() {
           {categoriesQuery.isLoading || expensesQuery.isLoading ? (
             <div className="mt-5 space-y-3">
               {Array.from({ length: 4 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
-                >
+                <div key={index} className="rounded-[22px] border border-line bg-paper px-3.5 py-3">
                   <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(260px,1fr),minmax(260px,0.9fr),auto] lg:items-center lg:gap-3">
                     <div className="flex items-center gap-3.5">
                       <Skeleton className="h-11 w-11 rounded-[16px]" />
@@ -723,7 +720,7 @@ export default function CategoriesPage() {
                       {Array.from({ length: 3 }).map((_, statIndex) => (
                         <div
                           key={statIndex}
-                          className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2"
+                          className="rounded-[16px] border border-line bg-paper px-3 py-2"
                         >
                           <Skeleton className="h-3 w-14 rounded-full" />
                           <Skeleton className="mt-2 h-4 w-16 rounded-full" />
@@ -744,7 +741,7 @@ export default function CategoriesPage() {
                 return (
                   <article
                     key={category.id}
-                    className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                    className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
                   >
                     <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(260px,1fr),minmax(260px,0.9fr),auto] lg:items-center lg:gap-3">
                       <div className="flex min-w-0 items-center gap-3.5">
@@ -764,7 +761,7 @@ export default function CategoriesPage() {
                               <Badge variant="success">Active</Badge>
                             ) : null}
                           </div>
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="mt-1 text-sm text-ink-soft">
                             {category.isSystemDefined
                               ? 'System category available across the workspace.'
                               : 'Custom category you can rename or remove if nothing is linked.'}
@@ -773,24 +770,24 @@ export default function CategoriesPage() {
                       </div>
 
                       <div className="grid gap-2 sm:grid-cols-3">
-                        <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                             Spend
                           </p>
                           <p className="mt-1 text-sm font-medium text-ink">
                             {formatMoney(category.spend)}
                           </p>
                         </div>
-                        <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                             Txns
                           </p>
                           <p className="mt-1 text-sm font-medium text-ink">
                             {category.transactionCount}
                           </p>
                         </div>
-                        <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                             Color
                           </p>
                           <div className="mt-1 flex items-center gap-2">
@@ -807,7 +804,7 @@ export default function CategoriesPage() {
                         {canManage ? (
                           <>
                             <button
-                              className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand/30 hover:text-ink"
+                              className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
                               onClick={() => openEditEditor(category)}
                               type="button"
                             >
@@ -817,7 +814,7 @@ export default function CategoriesPage() {
                               </span>
                             </button>
                             <button
-                              className="rounded-full border border-danger/20 bg-white px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
+                              className="rounded-full border border-danger/20 bg-paper-strong px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
                               disabled={deleteTargetId === category.id}
                               onClick={() => handleDelete(category)}
                               type="button"
@@ -862,13 +859,13 @@ export default function CategoriesPage() {
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             <div className="rounded-[24px] border border-brand/15 bg-brand/5 px-4 py-4">
               <p className="font-semibold text-ink">Defaults stay protected</p>
-              <p className="mt-1.5 text-sm leading-6 text-slate-600">
+              <p className="mt-1.5 text-sm leading-6 text-ink-soft">
                 System categories cannot be renamed or deleted, which keeps shared reporting stable.
               </p>
             </div>
-            <div className="rounded-[24px] border border-slate-200/80 bg-white/75 px-4 py-4">
+            <div className="rounded-[24px] border border-line/80 bg-paper px-4 py-4">
               <p className="font-semibold text-ink">Delete only when clean</p>
-              <p className="mt-1.5 text-sm leading-6 text-slate-600">
+              <p className="mt-1.5 text-sm leading-6 text-ink-soft">
                 Custom categories must be unlinked from expenses and budgets before removal.
               </p>
             </div>

@@ -32,12 +32,12 @@ const ChartTooltip = ({ active, label, payload }: TooltipProps<number, string>) 
   }
 
   return (
-    <div className="rounded-2xl border border-white/80 bg-white/95 px-4 py-3 shadow-soft">
+    <div className="rounded-2xl border border-line bg-paper px-4 py-3 shadow-soft">
       <p className="text-sm font-semibold text-ink">{label}</p>
       <div className="mt-2 space-y-2">
         {payload.map((item) => (
           <div key={item.dataKey ?? item.name} className="flex items-center justify-between gap-6">
-            <span className="flex items-center gap-2 text-xs font-medium text-slate-500">
+            <span className="flex items-center gap-2 text-xs font-medium text-ink-soft">
               <span
                 className="h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: item.color ?? '#0F7B71' }}
@@ -130,7 +130,7 @@ export const ForecastProjectionChart = ({ data }: { data: TrendPoint[] }) => {
         />
         <YAxis axisLine={false} tick={false} tickLine={false} width={20} />
         <Tooltip content={<ChartTooltip />} />
-        <Legend formatter={(value) => <span className="text-sm text-slate-500">{value}</span>} />
+        <Legend formatter={(value) => <span className="text-sm text-ink-soft">{value}</span>} />
         <Line
           dataKey="spend"
           dot={{ fill: '#13263F', r: 3 }}
@@ -170,7 +170,7 @@ export const CategoryComparisonChart = ({
         />
         <YAxis axisLine={false} tick={false} tickLine={false} width={20} />
         <Tooltip content={<ChartTooltip />} />
-        <Legend formatter={(value) => <span className="text-sm text-slate-500">{value}</span>} />
+        <Legend formatter={(value) => <span className="text-sm text-ink-soft">{value}</span>} />
         <Bar dataKey="previous" fill="#D7EAE4" name="Previous period" radius={[10, 10, 0, 0]} />
         <Bar dataKey="current" fill="#0F7B71" name="Current period" radius={[10, 10, 0, 0]} />
       </BarChart>

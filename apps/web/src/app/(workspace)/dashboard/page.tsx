@@ -321,7 +321,7 @@ export default function DashboardPage() {
       />
 
       {pageMessage ? (
-        <div className="rounded-[22px] border border-brand/15 bg-brand/10 px-4 py-4 text-sm text-slate-700">
+        <div className="rounded-[22px] border border-brand/15 bg-brand/10 px-4 py-4 text-sm text-ink">
           {pageMessage}
         </div>
       ) : null}
@@ -388,10 +388,7 @@ export default function DashboardPage() {
               <Skeleton className="h-[260px] w-full rounded-[24px]" />
               <div className="grid gap-3 sm:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3"
-                  >
+                  <div key={index} className="rounded-[20px] border border-line bg-paper px-4 py-3">
                     <Skeleton className="h-3 w-16 rounded-full" />
                     <Skeleton className="mt-3 h-6 w-24 rounded-full" />
                   </div>
@@ -404,14 +401,14 @@ export default function DashboardPage() {
                 <SpendingOverviewChart data={spendingTrend} />
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[20px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Spend
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">{formatMoney(totalSpent)}</p>
                 </div>
-                <div className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[20px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Left
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">
@@ -420,8 +417,8 @@ export default function DashboardPage() {
                       : `-${formatMoney(Math.abs(remainingBudget))}`}
                   </p>
                 </div>
-                <div className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[20px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Forecast
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">
@@ -463,16 +460,16 @@ export default function DashboardPage() {
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[20px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Top
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">
                     {topCategory?.name ?? 'No category'}
                   </p>
                 </div>
-                <div className="rounded-[20px] border border-white/80 bg-white/78 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="rounded-[20px] border border-line bg-paper px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                     Share
                   </p>
                   <p className="mt-2 text-lg font-semibold text-ink">{topCategory?.share ?? 0}%</p>
@@ -489,7 +486,7 @@ export default function DashboardPage() {
                       />
                       <span className="font-medium text-ink">{category.name}</span>
                     </div>
-                    <span className="text-slate-500">
+                    <span className="text-ink-soft">
                       {formatMoney(category.amount)} / {category.share}%
                     </span>
                   </div>
@@ -520,7 +517,7 @@ export default function DashboardPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Budget pressure
               </h2>
-              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-ink-soft">
                 Risk first, details close.
               </p>
             </div>
@@ -534,7 +531,7 @@ export default function DashboardPage() {
               budgetViews.map((budget) => (
                 <article
                   key={budget.id}
-                  className="rounded-[22px] border border-white/80 bg-white/88 px-3.5 py-3"
+                  className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
                 >
                   <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(220px,0.95fr),minmax(260px,1.15fr)] lg:items-center lg:gap-3">
                     <div className="min-w-0">
@@ -556,10 +553,10 @@ export default function DashboardPage() {
                               : 'On track'}
                         </Badge>
                       </div>
-                      <p className="mt-1 text-sm text-slate-500">Monthly budget</p>
+                      <p className="mt-1 text-sm text-ink-soft">Monthly budget</p>
                     </div>
 
-                    <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-3">
+                    <div className="rounded-[16px] border border-line bg-paper px-3 py-3">
                       <ProgressBar
                         helper={`${formatMoney(budget.spent)} of ${formatMoney(budget.limitAmount)}`}
                         size="sm"
@@ -571,8 +568,8 @@ export default function DashboardPage() {
 
                   <div className="mt-3 flex flex-col gap-2.5 border-t border-line/70 pt-3 sm:grid sm:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:justify-between">
                     <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:gap-2.5">
-                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                           Left
                         </p>
                         <p className="mt-1 text-sm font-medium text-ink">
@@ -581,8 +578,8 @@ export default function DashboardPage() {
                             : `-${formatMoney(Math.abs(budget.remaining))}`}
                         </p>
                       </div>
-                      <div className="rounded-[16px] border border-white/80 bg-white/70 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                           Pace
                         </p>
                         <p className="mt-1 text-sm font-medium text-ink">
@@ -628,7 +625,7 @@ export default function DashboardPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 What changed
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">Short, useful summaries.</p>
+              <p className="mt-1.5 text-sm leading-6 text-ink-soft">Short, useful summaries.</p>
             </div>
             <Button
               disabled={isGenerating}
@@ -652,7 +649,7 @@ export default function DashboardPage() {
                 return (
                   <article
                     key={insight.id}
-                    className="rounded-[22px] border border-white/80 bg-white/88 px-4 py-3"
+                    className="rounded-[22px] border border-line bg-paper px-4 py-3"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <Badge variant={badge.variant}>{badge.label}</Badge>
@@ -661,7 +658,7 @@ export default function DashboardPage() {
                     <h3 className="mt-2 text-base font-semibold leading-snug text-ink">
                       {insight.title}
                     </h3>
-                    <p className="mt-1.5 text-sm leading-6 text-slate-600">{insight.message}</p>
+                    <p className="mt-1.5 text-sm leading-6 text-ink-soft">{insight.message}</p>
                   </article>
                 );
               })
@@ -692,7 +689,7 @@ export default function DashboardPage() {
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Recent activity
               </h2>
-              <p className="mt-1.5 text-sm leading-6 text-slate-500">Latest charges, trimmed.</p>
+              <p className="mt-1.5 text-sm leading-6 text-ink-soft">Latest charges, trimmed.</p>
             </div>
             <Button asChild size="sm" variant="soft">
               <Link href="/transactions">View all</Link>
@@ -704,7 +701,7 @@ export default function DashboardPage() {
               recentTransactions.slice(0, 4).map((transaction) => (
                 <article
                   key={transaction.id}
-                  className="rounded-[22px] border border-white/80 bg-white/88 px-4 py-3"
+                  className="rounded-[22px] border border-line bg-paper px-4 py-3"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
@@ -712,14 +709,14 @@ export default function DashboardPage() {
                         <p className="font-semibold text-ink">{transaction.description}</p>
                         <Badge variant="neutral">{transaction.categoryName}</Badge>
                       </div>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-ink-soft">
                         {formatShortDate(transaction.date)} /{' '}
                         {paymentMethodLabels[transaction.paymentMethod]}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-ink">{formatMoney(transaction.amount)}</p>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-ink-soft">
                         {transaction.notes ?? 'Expense logged'}
                       </p>
                     </div>

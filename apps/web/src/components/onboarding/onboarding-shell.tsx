@@ -35,7 +35,7 @@ export const OnboardingShell = ({
           <div className="space-y-3">
             <Link
               href="/register"
-              className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-ink"
+              className="inline-flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to account setup
@@ -60,27 +60,27 @@ export const OnboardingShell = ({
                         ? 'border-brand bg-brand text-white'
                         : active
                           ? 'border-brand bg-brand/10 text-brand'
-                          : 'border-line bg-white text-slate-400',
+                          : 'border-line bg-paper-strong text-ink-soft',
                     )}
                   >
                     {complete ? <Check className="h-4 w-4" /> : index + 1}
                   </div>
                   <div>
-                    <p className={cn('font-semibold', active ? 'text-ink' : 'text-slate-500')}>
+                    <p className={cn('font-semibold', active ? 'text-ink' : 'text-ink-soft')}>
                       {step.label}
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-slate-500">{step.caption}</p>
+                    <p className="mt-1 text-sm leading-6 text-ink-soft">{step.caption}</p>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <div className="rounded-[24px] border border-white/80 bg-gradient-to-br from-mint to-white px-5 py-5">
+          <div className="rounded-[24px] border border-line bg-gradient-to-br from-mint to-white px-5 py-5">
             <p className="text-sm font-semibold text-ink">What users unlock immediately</p>
             <ul className="mt-4 space-y-3">
               {onboardingBenefits.map((benefit) => (
-                <li key={benefit} className="flex gap-3 text-sm leading-6 text-slate-600">
+                <li key={benefit} className="flex gap-3 text-sm leading-6 text-ink-soft">
                   <span className="mt-1 h-2.5 w-2.5 rounded-full bg-brand" />
                   <span>{benefit}</span>
                 </li>
@@ -90,7 +90,7 @@ export const OnboardingShell = ({
         </aside>
 
         <div className="space-y-4 lg:space-y-0">
-          <div className="flex items-center justify-between gap-3 rounded-[20px] border border-line/80 bg-white/80 px-4 py-3 lg:hidden">
+          <div className="flex items-center justify-between gap-3 rounded-[20px] border border-line/80 bg-paper px-4 py-3 lg:hidden">
             <div className="flex items-center gap-3">
               {steps.map((step, index) => {
                 const complete = index < activeIndex;
@@ -105,13 +105,13 @@ export const OnboardingShell = ({
                         ? 'bg-brand'
                         : active
                           ? 'bg-brand/50 ring-2 ring-brand/25'
-                          : 'bg-slate-200',
+                          : 'bg-surface-muted',
                     )}
                   />
                 );
               })}
             </div>
-            <p className="text-sm font-medium text-slate-500">
+            <p className="text-sm font-medium text-ink-soft">
               Step {activeIndex + 1}: {steps[activeIndex]?.label}
             </p>
           </div>
@@ -124,7 +124,7 @@ export const OnboardingShell = ({
               <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl">
                 {title}
               </h1>
-              <p className="max-w-2xl text-sm leading-7 text-slate-600 md:text-[15px]">
+              <p className="max-w-2xl text-sm leading-7 text-ink-soft md:text-[15px]">
                 {description}
               </p>
             </div>

@@ -22,7 +22,7 @@ export const DashboardShell = () => {
             <h1 className="text-4xl font-semibold tracking-tight text-ink">
               See how your money behaves, not just where it went.
             </h1>
-            <p className="text-base leading-7 text-slate-600">
+            <p className="text-base leading-7 text-ink-soft">
               The starter dashboard highlights monthly totals, category pressure, and early AI-based
               signals so you can grow SpendWise into a full personal finance product.
             </p>
@@ -54,11 +54,11 @@ export const DashboardShell = () => {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
-        <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-soft">
+        <article className="rounded-[28px] border border-line bg-paper-strong p-6 shadow-soft">
           <div className="mb-5 flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold text-ink">Recent transactions</h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-ink-soft">
                 Starter data shared across the repo for fast UI iteration.
               </p>
             </div>
@@ -67,11 +67,11 @@ export const DashboardShell = () => {
             {sampleExpenses.map((expense) => (
               <div
                 key={expense.id}
-                className="flex items-center justify-between rounded-2xl border border-slate-100 px-4 py-4"
+                className="flex items-center justify-between rounded-2xl border border-line px-4 py-4"
               >
                 <div>
                   <p className="font-medium text-ink">{expense.description}</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-ink-soft">
                     {expense.categoryId} / {formatShortDate(expense.date)}
                   </p>
                 </div>
@@ -82,16 +82,16 @@ export const DashboardShell = () => {
         </article>
 
         <div className="space-y-6">
-          <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-soft">
+          <article className="rounded-[28px] border border-line bg-paper-strong p-6 shadow-soft">
             <h2 className="text-xl font-semibold text-ink">Category breakdown</h2>
             <div className="mt-5 space-y-4">
               {categoryBreakdown.map((category) => (
                 <div key={category.name}>
-                  <div className="mb-2 flex items-center justify-between text-sm text-slate-500">
+                  <div className="mb-2 flex items-center justify-between text-sm text-ink-soft">
                     <span>{category.name}</span>
                     <span>{formatCurrency(category.amount)}</span>
                   </div>
-                  <div className="h-3 rounded-full bg-slate-100">
+                  <div className="h-3 rounded-full bg-surface-muted">
                     <div
                       className="h-3 rounded-full bg-gradient-to-r from-brand to-accent"
                       style={{ width: `${Math.min(100, (category.amount / totalSpent) * 100)}%` }}
@@ -102,16 +102,16 @@ export const DashboardShell = () => {
             </div>
           </article>
 
-          <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-soft">
+          <article className="rounded-[28px] border border-line bg-paper-strong p-6 shadow-soft">
             <h2 className="text-xl font-semibold text-ink">AI insights</h2>
             <div className="mt-5 space-y-4">
               {sampleInsights.map((insight) => (
-                <div key={insight.id} className="rounded-2xl bg-slate-50 p-4">
+                <div key={insight.id} className="rounded-2xl bg-surface-muted p-4">
                   <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand">
                     {insight.type}
                   </p>
                   <p className="mt-2 font-semibold text-ink">{insight.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{insight.message}</p>
+                  <p className="mt-2 text-sm leading-6 text-ink-soft">{insight.message}</p>
                 </div>
               ))}
             </div>

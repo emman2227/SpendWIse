@@ -42,7 +42,7 @@ export default function OnboardingWelcomePage() {
                   <Icon className="h-5 w-5" />
                 </div>
                 <h2 className="mt-5 text-xl font-semibold text-ink">{card.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{card.description}</p>
+                <p className="mt-2 text-sm leading-6 text-ink-soft">{card.description}</p>
               </SurfaceCard>
             );
           })}
@@ -54,7 +54,7 @@ export default function OnboardingWelcomePage() {
             {onboardingBenefits.map((benefit) => (
               <div
                 key={benefit}
-                className="rounded-[22px] border border-white/80 bg-sage/30 px-4 py-4 text-sm text-slate-600"
+                className="rounded-[22px] border border-line bg-sage/30 px-4 py-4 text-sm text-ink-soft"
               >
                 {benefit}
               </div>

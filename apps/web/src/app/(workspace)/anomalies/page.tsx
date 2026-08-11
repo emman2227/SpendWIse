@@ -54,10 +54,7 @@ export default function AnomaliesPage() {
 
           <div className="mt-6 space-y-4">
             {alerts.map((alert) => (
-              <div
-                key={alert.id}
-                className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5"
-              >
+              <div key={alert.id} className="rounded-[24px] border border-line bg-paper px-5 py-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-warning/15 text-warning">
@@ -65,7 +62,7 @@ export default function AnomaliesPage() {
                     </div>
                     <div>
                       <p className="font-semibold text-ink">{alert.merchant}</p>
-                      <p className="text-sm text-slate-500">{alert.category}</p>
+                      <p className="text-sm text-ink-soft">{alert.category}</p>
                     </div>
                   </div>
                   <Badge
@@ -80,7 +77,7 @@ export default function AnomaliesPage() {
                     {alert.severity}
                   </Badge>
                 </div>
-                <p className="mt-4 text-sm leading-6 text-slate-600">{alert.reason}</p>
+                <p className="mt-4 text-sm leading-6 text-ink-soft">{alert.reason}</p>
                 <p className="mt-4 font-semibold text-ink">{formatMoney(alert.amount)}</p>
               </div>
             ))}
@@ -90,22 +87,22 @@ export default function AnomaliesPage() {
         <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
           <p className="kicker">Alert detail</p>
           <h2 className="mt-3 text-2xl font-semibold text-ink">{selected.merchant}</h2>
-          <p className="mt-2 text-sm text-slate-500">{selected.category} anomaly</p>
+          <p className="mt-2 text-sm text-ink-soft">{selected.category} anomaly</p>
 
           <div className="mt-6 space-y-4">
             <div className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
               <p className="text-sm font-semibold text-ink">Reason for flagging</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{selected.reason}</p>
+              <p className="mt-2 text-sm leading-6 text-ink-soft">{selected.reason}</p>
             </div>
 
-            <div className="rounded-[24px] border border-white/80 bg-white/80 px-5 py-5">
+            <div className="rounded-[24px] border border-line bg-paper px-5 py-5">
               <p className="text-sm font-semibold text-ink">Suggested action</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{selected.suggestedAction}</p>
+              <p className="mt-2 text-sm leading-6 text-ink-soft">{selected.suggestedAction}</p>
             </div>
 
-            <div className="rounded-[24px] border border-white/80 bg-sage/30 px-5 py-5">
+            <div className="rounded-[24px] border border-line bg-sage/30 px-5 py-5">
               <p className="text-sm font-semibold text-ink">Review guidance</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-ink-soft">
                 Keep confirmation controls close to the explanation so users can mark the alert as
                 expected or important without hunting for next steps.
               </p>
