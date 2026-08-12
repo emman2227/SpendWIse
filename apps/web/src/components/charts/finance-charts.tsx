@@ -14,7 +14,6 @@ import {
   PieChart,
   ResponsiveContainer,
   Tooltip,
-  type TooltipProps,
   XAxis,
   YAxis,
 } from 'recharts';
@@ -23,7 +22,8 @@ import { useCurrentUserQuery } from '@/lib/auth/client';
 import type { CategorySlice, TrendPoint } from '@/lib/demo-data';
 import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 
-const ChartTooltip = ({ active, label, payload }: TooltipProps<number, string>) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ChartTooltip = ({ active, label, payload }: any) => {
   const { data: user } = useCurrentUserQuery();
   const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
 
@@ -35,7 +35,8 @@ const ChartTooltip = ({ active, label, payload }: TooltipProps<number, string>) 
     <div className="rounded-2xl border border-line bg-paper px-4 py-3 shadow-soft">
       <p className="text-sm font-semibold text-ink">{label}</p>
       <div className="mt-2 space-y-2">
-        {payload.map((item) => (
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        {payload.map((item: any) => (
           <div key={item.dataKey ?? item.name} className="flex items-center justify-between gap-6">
             <span className="flex items-center gap-2 text-xs font-medium text-ink-soft">
               <span

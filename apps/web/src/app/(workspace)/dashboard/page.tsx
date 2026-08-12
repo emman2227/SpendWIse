@@ -22,7 +22,7 @@ import {
 } from '@/lib/analytics/client';
 import { useCurrentUserQuery } from '@/lib/auth/client';
 import { getBudgetSummary } from '@/lib/budgets/client';
-import { formatDelta, formatMoney as baseFormatMoney } from '@/lib/formatters';
+import { formatConfidence, formatDelta, formatMoney as baseFormatMoney } from '@/lib/formatters';
 import { goalsQueryKey, listGoals } from '@/lib/goals/client';
 import {
   listExpenses,
@@ -417,15 +417,44 @@ export default function DashboardPage() {
                       : `-${formatMoney(Math.abs(remainingBudget))}`}
                   </p>
                 </div>
-                <div className="rounded-[20px] border border-line bg-paper px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Forecast
-                  </p>
+                <div className="relative overflow-hidden rounded-[20px] border border-brand/20 bg-gradient-to-br from-brand/5 to-transparent px-4 py-3">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="h-3 w-3 text-brand" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">
+                      AI Forecast
+                    </p>
+                  </div>
                   <p className="mt-2 text-lg font-semibold text-ink">
                     {analytics?.forecast
                       ? formatMoney(analytics.forecast.predictedAmount)
                       : 'Not ready'}
                   </p>
+                  {analytics?.forecast ? (
+                    <div className="mt-2 flex flex-col items-start gap-2">
+                      <Badge
+                        variant={
+                          analytics.forecast.confidence >= 0.7
+                            ? 'success'
+                            : analytics.forecast.confidence >= 0.4
+                              ? 'info'
+                              : 'warning'
+                        }
+                      >
+                        {analytics.forecast.confidence >= 0.7
+                          ? 'High'
+                          : analytics.forecast.confidence >= 0.4
+                            ? 'Moderate'
+                            : 'Low'}{' '}
+                        ({formatConfidence(analytics.forecast.confidence)})
+                      </Badge>
+                      {analytics.forecast.metadata?.reason ? (
+                        <p className="text-xs leading-relaxed text-ink-soft">
+                          <span className="font-medium text-brand">Why:</span>{' '}
+                          {analytics.forecast.metadata.reason}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </>
@@ -649,16 +678,31 @@ export default function DashboardPage() {
                 return (
                   <article
                     key={insight.id}
-                    className="rounded-[22px] border border-line bg-paper px-4 py-3"
+                    className="relative overflow-hidden rounded-[22px] border border-brand/20 bg-gradient-to-br from-brand/5 to-paper px-4 py-4 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <Badge variant={badge.variant}>{badge.label}</Badge>
-                      <Sparkles className="h-4 w-4 shrink-0 text-slate-300" />
+                      <Sparkles className="h-4 w-4 shrink-0 text-brand/60" />
                     </div>
-                    <h3 className="mt-2 text-base font-semibold leading-snug text-ink">
+                    <h3 className="mt-3 bg-gradient-to-r from-ink to-ink-soft bg-clip-text text-base font-semibold leading-snug text-transparent">
                       {insight.title}
                     </h3>
-                    <p className="mt-1.5 text-sm leading-6 text-ink-soft">{insight.message}</p>
+                    <p className="mt-1.5 text-[15px] leading-6 text-ink-soft">{insight.message}</p>
+                    {insight.metadata?.reason ? (
+                      <div className="mt-4 rounded-[16px] border border-brand/15 bg-paper/50 px-3.5 py-3 backdrop-blur-md">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand">
+                          AI Reasoning
+                        </p>
+                        <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
+                          {insight.metadata.reason}
+                        </p>
+                        {insight.metadata.evidence ? (
+                          <p className="mt-1.5 text-xs font-medium text-ink-soft/60">
+                            Data point: {insight.metadata.evidence}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </article>
                 );
               })

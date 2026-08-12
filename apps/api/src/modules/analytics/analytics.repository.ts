@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-
 import type { Forecast, Insight } from '@spendwise/shared';
+import type { Model } from 'mongoose';
 
-import { ForecastModel, type ForecastDocument } from './forecast.schema';
-import { InsightModel, type InsightDocument } from './insight.schema';
+import { type ForecastDocument,ForecastModel } from './forecast.schema';
+import { type InsightDocument,InsightModel } from './insight.schema';
 
 interface ForecastRecordInput {
   userId: string;
@@ -35,12 +34,12 @@ export class AnalyticsRepository {
       .findOneAndUpdate(
         {
           userId: forecast.userId,
-          period: forecast.period
+          period: forecast.period,
         },
         forecast,
         {
           upsert: true,
-          new: true
+          new: true,
         },
       )
       .exec();
@@ -53,7 +52,11 @@ export class AnalyticsRepository {
   }
 
   async getLatestInsights(userId: string) {
-    const documents = await this.insightModel.find({ userId }).sort({ createdAt: -1 }).limit(5).exec();
+    const documents = await this.insightModel
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .exec();
     return documents.map((document) => this.toInsight(document));
   }
 
@@ -69,8 +72,9 @@ export class AnalyticsRepository {
       type: document.type as Insight['type'],
       title: document.title,
       message: document.message,
+      ...(document.metadata ? { metadata: document.metadata } : {}),
       createdAt: document.createdAt.toISOString(),
-      updatedAt: document.updatedAt.toISOString()
+      updatedAt: document.updatedAt.toISOString(),
     };
   }
 
@@ -81,7 +85,7 @@ export class AnalyticsRepository {
       period: document.period as Forecast['period'],
       predictedAmount: document.predictedAmount,
       confidence: document.confidence,
-      generatedAt: document.generatedAt.toISOString()
+      generatedAt: document.generatedAt.toISOString(),
     };
   }
 }

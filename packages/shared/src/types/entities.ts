@@ -68,11 +68,19 @@ export interface Goal extends BaseEntity {
   notes?: string;
 }
 
+export interface InsightMetadata {
+  reason?: string;
+  evidence?: string;
+  promptVersion?: number;
+  [key: string]: unknown;
+}
+
 export interface Insight extends BaseEntity {
   userId: string;
   type: InsightType;
   title: string;
   message: string;
+  metadata?: InsightMetadata;
 }
 
 export interface Forecast {
@@ -82,4 +90,5 @@ export interface Forecast {
   predictedAmount: number;
   confidence: number;
   generatedAt: string;
+  metadata?: InsightMetadata;
 }

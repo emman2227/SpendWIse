@@ -393,6 +393,7 @@ export default function RecurringPage() {
   const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
 
   const [statusFilter, setStatusFilter] = useState<RecurringFilter>('all');
+  const [searchValue, setSearchValue] = useState('');
 
   const expensesQuery = useQuery({
     queryKey: recurringQueryKey,

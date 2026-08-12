@@ -193,6 +193,27 @@ const run = async () => {
   );
   console.log('Seeded demo expenses');
 
+  // Seed Default Prompt Templates
+  const { DEFAULT_PROMPT_TEMPLATES } = await import('@spendwise/ai');
+  const promptCollection = mongoose.connection.collection('prompt_templates');
+
+  for (const template of DEFAULT_PROMPT_TEMPLATES) {
+    await promptCollection.updateOne(
+      { type: template.type },
+      {
+        $set: {
+          type: template.type,
+          version: template.version,
+          template: template.template,
+          createdAt: now,
+          updatedAt: now,
+        },
+      },
+      { upsert: true },
+    );
+  }
+  console.log('Seeded default prompt templates');
+
   await mongoose.disconnect();
 };
 

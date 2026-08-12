@@ -69,8 +69,8 @@ export const hoverElevation = {
 
 export const tapScale = {
   whileTap: {
-    scale: 0.95,
-    transition: { duration: 0.1, ease: 'easeInOut' },
+    scale: 0.98,
+    transition: { duration: 0.1, ease: 'easeOut' as const },
   },
 };
 

@@ -4,7 +4,7 @@ import type { HydratedDocument } from 'mongoose';
 @Schema({
   collection: 'insights',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class InsightModel {
   @Prop({ required: true, index: true })
@@ -18,6 +18,9 @@ export class InsightModel {
 
   @Prop({ required: true })
   message!: string;
+
+  @Prop({ type: Object, required: false })
+  metadata?: Record<string, unknown>;
 
   createdAt!: Date;
   updatedAt!: Date;

@@ -2,10 +2,10 @@
   "name": "@spendwise/ai",
   "version": "0.1.0",
   "private": true,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/ai/src/index.js",
+  "types": "./dist/ai/src/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "set NODE_OPTIONS=--max-old-space-size=4096 && tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
     "test": "vitest run"
@@ -13,7 +13,8 @@
   "dependencies": {
     "@ai-sdk/google": "^3.0.55",
     "@spendwise/shared": "workspace:*",
-    "ai": "^6.0.142"
+    "ai": "^6.0.142",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

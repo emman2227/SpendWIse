@@ -129,6 +129,7 @@ export default function LoginPage() {
       field === 'email'
         ? sanitizeEmailInput(event.target.value)
         : sanitizePasswordInput(event.target.value);
+
     const nextValues = {
       ...values,
       [field]: sanitizedValue,

@@ -1,10 +1,11 @@
+import { GeminiAnalyticsProvider } from '../providers/gemini-provider';
+import { MockAiProvider } from '../providers/mock-ai-provider';
 import type { AnalyticsProvider } from '../types';
 
-import { MockAiProvider } from '../providers/mock-ai-provider';
-
-export const createAnalyticsProvider = (provider = 'mock'): AnalyticsProvider => {
-  // TODO: Add real provider adapters such as Gemini and wire their credentials via env config.
+export const createAnalyticsProvider = (provider = 'mock', apiKey?: string): AnalyticsProvider => {
   switch (provider) {
+    case 'gemini':
+      return new GeminiAnalyticsProvider(apiKey);
     case 'mock':
     default:
       return new MockAiProvider();

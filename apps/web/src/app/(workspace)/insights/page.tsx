@@ -1,136 +1,119 @@
-import { Lightbulb, Sparkles } from 'lucide-react';
+'use client';
 
-import { SpendingOverviewChart } from '@/components/charts/finance-charts';
+import { useQuery } from '@tanstack/react-query';
+import { Sparkles } from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
+import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
-import { insights, spendingTrend } from '@/lib/demo-data';
+import { dashboardAnalyticsQueryKey, getDashboardAnalytics } from '@/lib/analytics/client';
 
 export default function InsightsPage() {
+  const { data: analytics, isLoading } = useQuery({
+    queryKey: dashboardAnalyticsQueryKey,
+    queryFn: getDashboardAnalytics,
+  });
+
+  const insights = analytics?.insights ?? [];
+
   return (
     <div className="space-y-6">
       <PageHeader
-        actions={
-          <>
-            <Button variant="soft">Refresh analysis</Button>
-            <Button variant="secondary">Save recommendation</Button>
-          </>
-        }
-        description="AI insights should read like a thoughtful analyst, not a vague chatbot: concise summary first, supporting data second, and a transparent explanation pattern throughout."
+        description="Explore insights extracted directly from your spending to understand trends and budget feedback."
         eyebrow="AI insights"
-        meta={
-          <>
-            <Badge variant="info">Human-friendly summaries</Badge>
-            <Badge variant="neutral">Why am I seeing this?</Badge>
-          </>
-        }
-        title="Translate spending behavior into clear, trustworthy guidance."
+        meta={<Badge variant="info">Beta</Badge>}
+        title="Spending Insights"
       />
 
-      <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+      <section className="space-y-6">
+        <SurfaceCard className="rounded-[32px] px-6 py-5">
           <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="kicker">Trend context</p>
-              <h2 className="mt-3 text-2xl font-semibold text-ink">
-                Use the chart to support narrative, not replace it
-              </h2>
+            <h2 className="text-lg font-medium text-ink">
+              Do you have any questions about this board?
+            </h2>
+            <Button className="gap-2" variant="default">
+              <Sparkles className="h-4 w-4" />
+              Deep Dive
+            </Button>
+          </div>
+        </SurfaceCard>
+
+        <SurfaceCard className="overflow-hidden rounded-[32px] px-0 py-0">
+          <div className="grid grid-cols-[1.5fr,1fr,2.5fr] gap-4 border-b border-line bg-sage/10 px-8 py-4">
+            <p className="text-xs font-semibold text-ink-soft">Topic</p>
+            <p className="text-xs font-semibold text-ink-soft">Impact</p>
+            <p className="text-xs font-semibold text-ink-soft">Details</p>
+          </div>
+
+          {isLoading ? (
+            <div className="space-y-4 px-8 py-6">
+              <Skeleton className="h-[80px] w-full rounded-2xl" />
+              <Skeleton className="h-[80px] w-full rounded-2xl" />
+              <Skeleton className="h-[80px] w-full rounded-2xl" />
             </div>
-            <Sparkles className="h-6 w-6 text-brand" />
-          </div>
+          ) : insights.length > 0 ? (
+            <div className="divide-y divide-line">
+              {insights.map((insight) => (
+                <div
+                  key={insight.id}
+                  className="grid grid-cols-[1.5fr,1fr,2.5fr] items-start gap-4 px-8 py-6 hover:bg-sage/5"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`h-2 w-2 rounded-full ${
+                          insight.type === 'anomaly' ? 'bg-orange-500' : 'bg-brand'
+                        }`}
+                      />
+                      <p className="font-semibold text-ink">{insight.title}</p>
+                    </div>
+                    <p className="mt-1.5 text-xs text-ink-soft">
+                      {insight.type === 'anomaly' ? 'Anomaly detected' : 'Summary observation'}
+                    </p>
+                  </div>
 
-          <div className="mt-6">
-            <SpendingOverviewChart data={spendingTrend} />
-          </div>
-        </SurfaceCard>
+                  <div>
+                    <Badge variant={insight.type === 'anomaly' ? 'warning' : 'info'}>
+                      {insight.metadata?.evidence ?? 'Active'}
+                    </Badge>
+                  </div>
 
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-          <p className="kicker">Transparency pattern</p>
-          <h2 className="mt-3 text-2xl font-semibold text-ink">Why am I seeing this?</h2>
-
-          <div className="mt-5 space-y-4">
-            {insights.slice(0, 2).map((insight) => (
-              <div
-                key={insight.id}
-                className="rounded-[24px] border border-line bg-paper px-5 py-5"
-              >
-                <p className="text-sm font-semibold text-ink">Reason</p>
-                <p className="mt-2 text-sm leading-6 text-ink-soft">{insight.why}</p>
-                <p className="mt-4 text-sm font-semibold text-ink">Evidence</p>
-                <p className="mt-2 text-sm leading-6 text-ink-soft">{insight.evidence}</p>
-              </div>
-            ))}
-          </div>
-        </SurfaceCard>
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-          <p className="kicker">Insight cards</p>
-          <h2 className="mt-3 text-2xl font-semibold text-ink">
-            Present the most helpful narratives first
-          </h2>
-
-          <div className="mt-6 grid gap-4">
-            {insights.map((insight) => (
-              <article
-                key={insight.id}
-                className="rounded-[26px] border border-line bg-paper px-5 py-5"
-              >
-                <div className="flex flex-wrap items-center gap-3">
-                  <Badge
-                    variant={
-                      insight.tone === 'success'
-                        ? 'success'
-                        : insight.tone === 'warning'
-                          ? 'warning'
-                          : 'info'
-                    }
-                  >
-                    {insight.label}
-                  </Badge>
-                  <span className="text-sm text-ink-soft">AI-generated summary</span>
+                  <div>
+                    <div className="space-y-2">
+                      <p className="text-sm leading-relaxed text-ink">
+                        <span className="font-semibold">Observation:</span> {insight.message}
+                      </p>
+                      {insight.metadata?.reason && (
+                        <p className="text-sm leading-relaxed text-ink-soft">
+                          <span className="font-semibold text-ink">AI Reasoning:</span>{' '}
+                          {insight.metadata.reason}
+                        </p>
+                      )}
+                    </div>
+                    <div className="mt-4 flex items-center justify-between border-t border-line/60 pt-3">
+                      <p className="text-sm text-ink-soft">Do you have any questions about this?</p>
+                      <Button className="h-8 gap-1.5 px-3 text-xs" variant="soft">
+                        <Sparkles className="h-3 w-3" />
+                        Deep Dive
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="mt-4 text-xl font-semibold text-ink">{insight.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-ink-soft">{insight.summary}</p>
-                <div className="mt-5 rounded-[22px] border border-line bg-sage/30 px-4 py-4">
-                  <p className="text-sm font-semibold text-ink">Supporting evidence</p>
-                  <p className="mt-2 text-sm leading-6 text-ink-soft">{insight.evidence}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </SurfaceCard>
-
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-              <Lightbulb className="h-5 w-5" />
+              ))}
             </div>
-            <div>
-              <p className="kicker">Recommendations</p>
-              <h2 className="mt-2 text-2xl font-semibold text-ink">
-                Small changes with clear expected impact
-              </h2>
+          ) : (
+            <div className="px-8 py-10">
+              <EmptyState
+                className="rounded-2xl"
+                description="The analytics engine needs more data to generate insights for you."
+                icon={Sparkles}
+                title="No insights generated"
+              />
             </div>
-          </div>
-
-          <div className="mt-6 space-y-4">
-            {[
-              'Move recurring subscriptions into a fixed-cost group',
-              'Split one-time workspace purchases from normal shopping',
-              'Keep weekday dining under two transactions per week',
-            ].map((item) => (
-              <div key={item} className="rounded-[24px] border border-line bg-paper px-5 py-5">
-                <p className="font-semibold text-ink">{item}</p>
-                <p className="mt-2 text-sm leading-6 text-ink-soft">
-                  Show the expected benefit in plain language so the recommendation feels actionable
-                  rather than abstract.
-                </p>
-              </div>
-            ))}
-          </div>
+          )}
         </SurfaceCard>
       </section>
     </div>

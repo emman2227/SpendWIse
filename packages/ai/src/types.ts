@@ -1,4 +1,11 @@
-import type { Expense, Forecast, ForecastPeriod, Insight, InsightType } from '@spendwise/shared';
+import type {
+  Expense,
+  Forecast,
+  ForecastPeriod,
+  Insight,
+  InsightMetadata,
+  InsightType,
+} from '@spendwise/shared';
 
 export interface AnalyticsContext {
   userId: string;
@@ -14,14 +21,17 @@ export interface AnalyticsProviderInput extends AnalyticsContext {
   period?: ForecastPeriod;
 }
 
+export interface InsightResult {
+  type: Insight['type'];
+  title: string;
+  message: string;
+  metadata?: InsightMetadata;
+}
+
 export interface AnalyticsProvider {
   readonly name: string;
-  summarizeSpending(input: AnalyticsProviderInput): Promise<Pick<Insight, 'type' | 'title' | 'message'>[]>;
-  detectAnomalies(input: AnalyticsProviderInput): Promise<Pick<Insight, 'type' | 'title' | 'message'>[]>;
+  summarizeSpending(input: AnalyticsProviderInput): Promise<InsightResult[]>;
+  detectAnomalies(input: AnalyticsProviderInput): Promise<InsightResult[]>;
   forecast(input: AnalyticsProviderInput): Promise<Omit<Forecast, 'id' | 'generatedAt'>>;
-  generateInsight(
-    type: InsightType,
-    title: string,
-    message: string,
-  ): Promise<Pick<Insight, 'type' | 'title' | 'message'>>;
+  generateInsight(type: InsightType, title: string, message: string): Promise<InsightResult>;
 }

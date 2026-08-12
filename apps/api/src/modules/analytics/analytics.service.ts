@@ -21,7 +21,10 @@ export class AnalyticsService {
     @Inject(ConfigService)
     configService: ConfigService,
   ) {
-    const provider = createAnalyticsProvider(configService.get<string>('AI_PROVIDER'));
+    const provider = createAnalyticsProvider(
+      configService.get<string>('AI_PROVIDER'),
+      configService.get<string>('GEMINI_API_KEY'),
+    );
     this.analyticsEngine = new AiAnalyticsService(provider);
   }
 
@@ -33,12 +36,12 @@ export class AnalyticsService {
     ]);
 
     const timestamp = new Date().toISOString();
-    // TODO: Persist prompt/version metadata alongside generated outputs once real LLM providers are added.
     const insightPayload: Omit<Insight, 'id'>[] = insights.map((insight) => ({
       userId,
       type: insight.type,
       title: insight.title,
       message: insight.message,
+      ...(insight.metadata ? { metadata: insight.metadata } : {}),
       createdAt: timestamp,
       updatedAt: timestamp,
     }));

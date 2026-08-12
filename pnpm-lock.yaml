@@ -331,13 +331,16 @@ importers:
     dependencies:
       '@ai-sdk/google':
         specifier: ^3.0.55
-        version: 3.0.55(zod@4.3.6)
+        version: 3.0.55(zod@3.25.76)
       '@spendwise/shared':
         specifier: workspace:*
         version: link:../shared
       ai:
         specifier: ^6.0.142
-        version: 6.0.142(zod@4.3.6)
+        version: 6.0.142(zod@3.25.76)
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^22.10.2
@@ -1836,7 +1839,7 @@ packages:
 
   '@expo/bunyan@4.0.1':
     resolution: {integrity: sha512-+Lla7nYSiHZirgK+U/uYzsLv/X+HaJienbD5AKX1UQZHYfWaP+9uuQluRB4GrEVWF0GZ7vEVp/jzaOT9k/SQlg==}
-    engines: {node: '>=0.10.0'}
+    engines: {'0': node >=0.10.0}
 
   '@expo/cli@0.22.28':
     resolution: {integrity: sha512-lvt72KNitGuixYD2l3SZmRKVu2G4zJpmg5V7WfUBNpmUU5oODBw/6qmiJ6kSLAlfDozscUk+BBGknBBzxUrwrA==}
@@ -9651,25 +9654,25 @@ snapshots:
     optionalDependencies:
       graphql: 16.13.2
 
-  '@ai-sdk/gateway@3.0.84(zod@4.3.6)':
+  '@ai-sdk/gateway@3.0.84(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
-      '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.21(zod@3.25.76)
       '@vercel/oidc': 3.1.0
-      zod: 4.3.6
+      zod: 3.25.76
 
-  '@ai-sdk/google@3.0.55(zod@4.3.6)':
+  '@ai-sdk/google@3.0.55(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
-      '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
-      zod: 4.3.6
+      '@ai-sdk/provider-utils': 4.0.21(zod@3.25.76)
+      zod: 3.25.76
 
-  '@ai-sdk/provider-utils@4.0.21(zod@4.3.6)':
+  '@ai-sdk/provider-utils@4.0.21(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.6
-      zod: 4.3.6
+      zod: 3.25.76
 
   '@ai-sdk/provider@3.0.8':
     dependencies:
@@ -13692,13 +13695,13 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@6.0.142(zod@4.3.6):
+  ai@6.0.142(zod@3.25.76):
     dependencies:
-      '@ai-sdk/gateway': 3.0.84(zod@4.3.6)
+      '@ai-sdk/gateway': 3.0.84(zod@3.25.76)
       '@ai-sdk/provider': 3.0.8
-      '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.21(zod@3.25.76)
       '@opentelemetry/api': 1.9.0
-      zod: 4.3.6
+      zod: 3.25.76
 
   ajv-formats@2.1.1(ajv@8.12.0):
     optionalDependencies:
