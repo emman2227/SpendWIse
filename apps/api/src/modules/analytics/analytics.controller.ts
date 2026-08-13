@@ -22,4 +22,9 @@ export class AnalyticsController {
   generate(@CurrentUser() user: AuthUser) {
     return this.analyticsService.generate(user.userId);
   }
+
+  @Get('forecast')
+  getForecast(@CurrentUser() user: AuthUser) {
+    return this.analyticsService.getForecastDetails(user.userId);
+  }
 }

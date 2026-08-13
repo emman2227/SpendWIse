@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { BudgetsModule } from '../budgets/budgets.module';
+import { CategoriesModule } from '../categories/categories.module';
 import { ExpensesModule } from '../expenses/expenses.module';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsRepository } from './analytics.repository';
@@ -18,6 +19,7 @@ import { PromptService } from './prompt.service';
     ConfigModule,
     ExpensesModule,
     BudgetsModule,
+    CategoriesModule,
     MongooseModule.forFeature([
       { name: InsightModel.name, schema: InsightSchema },
       { name: ForecastModel.name, schema: ForecastSchema },

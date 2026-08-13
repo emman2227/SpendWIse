@@ -339,6 +339,23 @@ export const forecastCategories = [
   },
 ];
 
+export const forecastComparisons = [
+  { label: 'Food', current: 780, previous: 820 },
+  { label: 'Transport', current: 420, previous: 465 },
+  { label: 'Bills', current: 460, previous: 520 },
+  { label: 'Housing', current: 1800, previous: 1800 },
+  { label: 'Shopping', current: 690, previous: 600 },
+];
+
+export const forecastShare: CategorySlice[] = [
+  { name: 'Housing', amount: 1800, share: 42, color: '#13263F' },
+  { name: 'Food', amount: 820, share: 19, color: '#0F7B71' },
+  { name: 'Shopping', amount: 600, share: 14, color: '#A9CFC4' },
+  { name: 'Bills', amount: 520, share: 12, color: '#D9EAE4' },
+  { name: 'Transport', amount: 465, share: 11, color: '#6DB7A9' },
+  { name: 'Other', amount: 85, share: 2, color: '#E9F1EF' },
+];
+
 export const reportBars = [
   { label: 'Housing', current: 1800, previous: 1760 },
   { label: 'Food', current: 780, previous: 910 },

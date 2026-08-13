@@ -40,6 +40,24 @@ export interface AnalyticsGenerationResult {
   forecast: Forecast;
 }
 
+export interface ForecastDetailsData {
+  metrics: {
+    predictedAmount: number;
+    confidence: number;
+  };
+  comparisons: Array<{
+    label: string;
+    current: number;
+    previous: number;
+  }>;
+  share: Array<{
+    name: string;
+    amount: number;
+    share: number;
+    color: string;
+  }>;
+}
+
 export class AnalyticsClientError extends Error {
   constructor(
     message: string,
@@ -94,6 +112,7 @@ const request = async <T>(path: string, init: RequestInit = {}) => {
 };
 
 export const dashboardAnalyticsQueryKey = ['analytics', 'dashboard'] as const;
+export const forecastDetailsQueryKey = ['analytics', 'forecast'] as const;
 
 export const getDashboardAnalytics = () =>
   request<DashboardAnalyticsData>('/api/analytics/dashboard');
@@ -102,3 +121,5 @@ export const generateAnalytics = () =>
   request<AnalyticsGenerationResult>('/api/analytics/generate', {
     method: 'POST',
   });
+
+export const getForecastDetails = () => request<ForecastDetailsData>('/api/analytics/forecast');

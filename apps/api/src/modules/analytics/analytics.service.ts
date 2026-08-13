@@ -4,6 +4,7 @@ import { AnalyticsService as AiAnalyticsService, createAnalyticsProvider } from 
 import type { Insight } from '@spendwise/shared';
 
 import { BudgetsService } from '../budgets/budgets.service';
+import { CategoriesService } from '../categories/categories.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { AnalyticsRepository } from './analytics.repository';
 
@@ -16,6 +17,8 @@ export class AnalyticsService {
     private readonly expensesService: ExpensesService,
     @Inject(BudgetsService)
     private readonly budgetsService: BudgetsService,
+    @Inject(CategoriesService)
+    private readonly categoriesService: CategoriesService,
     @Inject(AnalyticsRepository)
     private readonly analyticsRepository: AnalyticsRepository,
     @Inject(ConfigService)
@@ -95,6 +98,68 @@ export class AnalyticsService {
       categoryBreakdown,
       insights,
       forecast,
+    };
+  }
+
+  async getForecastDetails(userId: string) {
+    const now = new Date();
+    const currentMonth = now.getUTCMonth() + 1;
+    const currentYear = now.getUTCFullYear();
+
+    const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+    const previousYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+
+    const [categories, currentExpenses, previousExpenses, forecast] = await Promise.all([
+      this.categoriesService.list(userId),
+      this.expensesService.list(userId, { month: currentMonth, year: currentYear }),
+      this.expensesService.list(userId, { month: previousMonth, year: previousYear }),
+      this.analyticsRepository.getLatestForecast(userId, 'monthly'),
+    ]);
+
+    const categoryMap = new Map(categories.map((c) => [c.id, c]));
+
+    // Calculate current vs previous spend per category
+    const currentSpendByCat = currentExpenses.reduce<Record<string, number>>((acc, exp) => {
+      acc[exp.categoryId] = (acc[exp.categoryId] || 0) + exp.amount;
+      return acc;
+    }, {});
+
+    const previousSpendByCat = previousExpenses.reduce<Record<string, number>>((acc, exp) => {
+      acc[exp.categoryId] = (acc[exp.categoryId] || 0) + exp.amount;
+      return acc;
+    }, {});
+
+    const comparisons = Object.entries(currentSpendByCat).map(([categoryId, current]) => {
+      const category = categoryMap.get(categoryId);
+      return {
+        label: category?.name || 'Unknown',
+        current,
+        previous: previousSpendByCat[categoryId] || 0,
+      };
+    });
+
+    // Share computation
+    const totalCurrentSpend = Object.values(currentSpendByCat).reduce((a, b) => a + b, 0);
+    const share = Object.entries(currentSpendByCat).map(([categoryId, amount]) => {
+      const category = categoryMap.get(categoryId);
+      return {
+        name: category?.name || 'Unknown',
+        amount,
+        share: totalCurrentSpend > 0 ? Math.round((amount / totalCurrentSpend) * 100) : 0,
+        color: category?.color || '#0F7B71',
+      };
+    });
+
+    // Sort share to show largest first
+    share.sort((a, b) => b.amount - a.amount);
+
+    return {
+      metrics: {
+        predictedAmount: forecast?.predictedAmount || totalCurrentSpend,
+        confidence: forecast?.confidence || 0.7,
+      },
+      comparisons,
+      share,
     };
   }
 }
