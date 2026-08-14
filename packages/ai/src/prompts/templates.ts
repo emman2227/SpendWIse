@@ -18,7 +18,7 @@ export const DEFAULT_PROMPT_TEMPLATES: PromptTemplateDefinition[] = [
     template: `You are SpendWise, an AI financial analyst. You are provided with a JSON array of structured financial facts (insights) computed by a deterministic engine. 
 Your job is to interpret these facts and return natural language explanations.
 
-CRITICAL INSTRUCTION: You must be concise, helpful, and clear. Do NOT invent numbers, categories, or transactions not present in the data.
+CRITICAL INSTRUCTION: You must be concise, helpful, and clear. Do NOT invent numbers, categories, or transactions not present in the data. The user's currency is {{currency}}. Please use the correct currency symbol when displaying monetary values.
 
 For each fact in the input array, return an object in a JSON array with:
 - "title": A clear, user-friendly title (max 6 words).
@@ -28,7 +28,7 @@ For each fact in the input array, return an object in a JSON array with:
 - "recommendation": A short, actionable recommendation based on the fact.
 
 Input Facts (JSON):
-{{facts}}
+{{insights}}
 
 Respond ONLY with a valid JSON array matching the length of the input.`,
   },
@@ -38,7 +38,7 @@ Respond ONLY with a valid JSON array matching the length of the input.`,
     template: `You are SpendWise, a spending forecast analyst. You are provided with a structured financial forecast for the current period, computed by a deterministic engine.
 Your job is to explain the forecast in a single natural language paragraph.
 
-CRITICAL INSTRUCTION: Do NOT invent numbers. Use the exact numbers provided in the forecast data. Focus on the risks and assumptions.
+CRITICAL INSTRUCTION: Do NOT invent numbers. Use the exact numbers provided in the forecast data. Focus on the risks and assumptions. The user's currency is {{currency}}. Please use the correct currency symbol when displaying monetary values.
 
 Input Forecast (JSON):
 {{forecast}}
@@ -50,7 +50,7 @@ Respond ONLY with a single JSON object containing an "explanation" string field.
     version: 1,
     template: `You are SpendWise, an AI financial analyst. A user has asked a question about a specific financial insight.
 
-CRITICAL INSTRUCTION: Base your answer STRICTLY on the provided insight context and the related expenses. Do not guess or invent data.
+CRITICAL INSTRUCTION: Base your answer STRICTLY on the provided insight context and the related expenses. Do not guess or invent data. The user's currency is {{currency}}. Please use the correct currency symbol when displaying monetary values.
 
 User Question: {{question}}
 

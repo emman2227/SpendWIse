@@ -28,7 +28,13 @@ export interface DeepDiveResponse {
 
 export interface AnalyticsProvider {
   readonly name: string;
-  interpretInsights(facts: StructuredInsightInput[]): Promise<InsightInterpretation[]>;
-  interpretForecast(forecast: StructuredForecastInput): Promise<{ explanation: string }>;
-  deepDive(context: DeepDiveContext): Promise<DeepDiveResponse>;
+  interpretInsights(
+    facts: StructuredInsightInput[],
+    currency: string,
+  ): Promise<InsightInterpretation[]>;
+  interpretForecast(
+    forecast: StructuredForecastInput,
+    currency: string,
+  ): Promise<{ explanation: string }>;
+  deepDive(context: DeepDiveContext & { currency: string }): Promise<DeepDiveResponse>;
 }

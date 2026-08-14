@@ -15,14 +15,19 @@ import {
   LOGOUT_INTENT_STORAGE_KEY,
 } from '@/lib/auth/constants';
 
-const ACTIVITY_EVENTS: Array<keyof WindowEventMap> = ['focus', 'keydown', 'pointerdown', 'touchstart'];
+const ACTIVITY_EVENTS: Array<keyof WindowEventMap> = [
+  'focus',
+  'keydown',
+  'pointerdown',
+  'touchstart',
+];
 const ACTIVITY_WRITE_THROTTLE_MS = 15_000;
 
 export const AuthSessionManager = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { data: user, isFetched, isLoading } = useCurrentUserQuery();
+  const { data: user, isFetched, isLoading, isFetching } = useCurrentUserQuery();
   const logoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastActivityWriteRef = useRef(0);
   const logoutReasonRef = useRef<'inactive' | 'expired' | null>(null);
@@ -99,7 +104,7 @@ export const AuthSessionManager = ({ children }: { children: ReactNode }) => {
   }, [queryClient, router, user]);
 
   useEffect(() => {
-    if (isLoading || !isFetched) {
+    if (isLoading || isFetching || !isFetched) {
       return;
     }
 
@@ -138,7 +143,7 @@ export const AuthSessionManager = ({ children }: { children: ReactNode }) => {
     if (user) {
       logoutReasonRef.current = null;
     }
-  }, [isFetched, isLoading, pathname, queryClient, router, user]);
+  }, [isFetched, isFetching, isLoading, pathname, queryClient, router, user]);
 
   return <>{children}</>;
 };

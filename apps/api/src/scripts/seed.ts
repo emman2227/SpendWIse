@@ -174,23 +174,31 @@ const run = async () => {
     },
   ];
 
-  // Distribute over the last couple of days
-  await expensesCollection.insertMany(
-    demoExpenses.map((e, index) => {
-      const expenseDate = new Date(now.getTime() - index * 24 * 60 * 60 * 1000);
-      return {
+  const generatedExpenses = [];
+  // 6 months is roughly 180 days
+  for (let i = 0; i < 180; i++) {
+    const expenseDate = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    // Add 1 to 3 expenses per day
+    const numExpenses = Math.floor(Math.random() * 3) + 1;
+    for (let j = 0; j < numExpenses; j++) {
+      const template = demoExpenses[Math.floor(Math.random() * demoExpenses.length)]!;
+      // Randomize amount by +/- 20%
+      const amountVariation = 0.8 + Math.random() * 0.4;
+      generatedExpenses.push({
         userId,
-        amount: e.amount,
-        categoryId: categoryMap.get(e.category) ?? categoryMap.values().next().value,
-        description: e.merchant,
-        paymentMethod: e.paymentMethod,
+        amount: Number((template.amount * amountVariation).toFixed(2)),
+        categoryId: categoryMap.get(template.category) ?? categoryMap.values().next().value,
+        description: template.merchant,
+        paymentMethod: template.paymentMethod,
         date: expenseDate,
-        notes: e.note,
+        notes: template.note,
         createdAt: now,
         updatedAt: now,
-      };
-    }),
-  );
+      });
+    }
+  }
+
+  await expensesCollection.insertMany(generatedExpenses);
   console.log('Seeded demo expenses');
 
   // Seed Default Prompt Templates

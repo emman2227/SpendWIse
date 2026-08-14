@@ -6,6 +6,7 @@ import { createAnalyticsProvider } from '@spendwise/ai';
 import { BudgetsService } from '../budgets/budgets.service';
 import { CategoriesService } from '../categories/categories.service';
 import { ExpensesService } from '../expenses/expenses.service';
+import { UsersService } from '../users/users.service';
 import { AnalyticsRepository } from './analytics.repository';
 import { ForecastEngine } from './forecast-engine';
 import { SpendingAnalyzer } from './spending-analyzer';
@@ -21,6 +22,8 @@ export class AnalyticsService {
     private readonly budgetsService: BudgetsService,
     @Inject(CategoriesService)
     private readonly categoriesService: CategoriesService,
+    @Inject(UsersService)
+    private readonly usersService: UsersService,
     @Inject(AnalyticsRepository)
     private readonly analyticsRepository: AnalyticsRepository,
     @Inject(ConfigService)
@@ -28,7 +31,8 @@ export class AnalyticsService {
   ) {
     this.provider = createAnalyticsProvider(
       configService.get<string>('AI_PROVIDER'),
-      configService.get<string>('GEMINI_API_KEY'),
+      configService.get<string>('GEMINI_API_KEY') ||
+        configService.get<string>('GOOGLE_GENERATIVE_AI_API_KEY'),
     );
   }
 
@@ -40,11 +44,14 @@ export class AnalyticsService {
     const budgets = await this.budgetsService.list(userId, currentMonth, currentYear);
     const categories = await this.categoriesService.list(userId);
 
+    const user = await this.usersService.getProfile(userId);
+    const currency = user.currency || 'USD';
+
     // 1. Deterministic Analysis
     const structuredFacts = SpendingAnalyzer.analyze(expenses, budgets, categories);
 
     // 2. AI Interpretation
-    const interpretations = await this.provider.interpretInsights(structuredFacts);
+    const interpretations = await this.provider.interpretInsights(structuredFacts, currency);
 
     // 3. Merge Facts + Interpretation
     const insightPayload = structuredFacts.map((fact, index) => {
@@ -90,11 +97,14 @@ export class AnalyticsService {
     const period = 'monthly';
 
     // 5. AI Forecast Interpretation
-    const forecastInterp = await this.provider.interpretForecast({
-      period,
-      assumptions: [],
-      ...forecastData,
-    });
+    const forecastInterp = await this.provider.interpretForecast(
+      {
+        period,
+        assumptions: [],
+        ...forecastData,
+      },
+      currency,
+    );
 
     const savedForecast = await this.analyticsRepository.saveForecast({
       userId,
@@ -224,11 +234,14 @@ export class AnalyticsService {
     }
 
     const expenses = await this.expensesService.list(userId, {});
+    const user = await this.usersService.getProfile(userId);
+    const currency = user.currency || 'USD';
 
     const response = await this.provider.deepDive({
       insight,
       question,
       expenses,
+      currency,
     });
 
     return response;

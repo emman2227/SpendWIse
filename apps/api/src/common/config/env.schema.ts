@@ -29,6 +29,8 @@ const envSchema = z.object({
   JWT_ACCESS_TTL: z.string().default('15m'),
   JWT_REFRESH_TTL: z.string().default('7d'),
   AI_PROVIDER: z.string().default('mock'),
+  GEMINI_API_KEY: z.string().trim().optional(),
+  GOOGLE_GENERATIVE_AI_API_KEY: z.string().trim().optional(),
   SMTP_HOST: z.string().default('smtp.gmail.com'),
   SMTP_PORT: z.coerce.number().int().positive().default(465),
   SMTP_SECURE: booleanEnvSchema.default(true),

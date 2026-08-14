@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { z } from 'zod';
@@ -37,26 +38,31 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
 
   constructor(apiKey?: string) {
     super();
-    const google = createGoogleGenerativeAI({
-      apiKey: apiKey ?? process.env.GEMINI_API_KEY,
-    });
-    this.model = google('gemini-2.5-flash');
+    const resolvedApiKey =
+      apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+    const config = resolvedApiKey ? { apiKey: resolvedApiKey } : {};
+    const google = createGoogleGenerativeAI(config);
+    this.model = google('gemini-3.5-flash');
   }
 
-  async interpretInsights(facts: StructuredInsightInput[]): Promise<InsightInterpretation[]> {
+  async interpretInsights(
+    facts: StructuredInsightInput[],
+    currency: string,
+  ): Promise<InsightInterpretation[]> {
     if (facts.length === 0) return [];
 
     const template = DEFAULT_PROMPT_TEMPLATES.find((t) => t.type === 'interpret_insights');
     if (!template) return facts.map((f) => ({ title: f.title, message: f.message }));
 
     const prompt = renderPrompt(template.template, {
-      facts: JSON.stringify(facts),
+      insights: JSON.stringify(facts),
+      currency,
     });
 
     try {
       const { object } = await generateObject({
-        model: this.model,
-        schema: insightInterpretationArraySchema,
+        model: this.model as any,
+        schema: insightInterpretationArraySchema as any,
         prompt,
       });
 
@@ -72,18 +78,22 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
     }
   }
 
-  async interpretForecast(forecast: StructuredForecastInput): Promise<{ explanation: string }> {
+  async interpretForecast(
+    forecast: StructuredForecastInput,
+    currency: string,
+  ): Promise<{ explanation: string }> {
     const template = DEFAULT_PROMPT_TEMPLATES.find((t) => t.type === 'interpret_forecast');
     if (!template) return { explanation: 'Provider template not found.' };
 
     const prompt = renderPrompt(template.template, {
       forecast: JSON.stringify(forecast),
+      currency,
     });
 
     try {
       const { object } = await generateObject({
-        model: this.model,
-        schema: forecastExplanationSchema,
+        model: this.model as any,
+        schema: forecastExplanationSchema as any,
         prompt,
       });
 
@@ -96,7 +106,7 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
     }
   }
 
-  async deepDive(context: DeepDiveContext): Promise<DeepDiveResponse> {
+  async deepDive(context: DeepDiveContext & { currency: string }): Promise<DeepDiveResponse> {
     const template = DEFAULT_PROMPT_TEMPLATES.find((t) => t.type === 'deep_dive');
     if (!template) {
       return {
@@ -109,12 +119,13 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
       question: context.question,
       insight: JSON.stringify(context.insight),
       expenses: JSON.stringify(context.expenses.slice(0, 50)),
+      currency: context.currency,
     });
 
     try {
       const { object } = await generateObject({
-        model: this.model,
-        schema: deepDiveResponseSchema,
+        model: this.model as any,
+        schema: deepDiveResponseSchema as any,
         prompt,
       });
 

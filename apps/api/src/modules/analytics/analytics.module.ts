@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BudgetsModule } from '../budgets/budgets.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { ExpensesModule } from '../expenses/expenses.module';
+import { UsersModule } from '../users/users.module';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsRepository } from './analytics.repository';
 import { AnalyticsService } from './analytics.service';
@@ -20,6 +21,7 @@ import { PromptService } from './prompt.service';
     ExpensesModule,
     BudgetsModule,
     CategoriesModule,
+    UsersModule,
     MongooseModule.forFeature([
       { name: InsightModel.name, schema: InsightSchema },
       { name: ForecastModel.name, schema: ForecastSchema },
