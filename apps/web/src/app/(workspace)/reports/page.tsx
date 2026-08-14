@@ -513,7 +513,13 @@ export default function ReportsPage() {
 
           {reportBars.length > 0 ? (
             <div className="mt-5">
-              <CategoryComparisonChart data={reportBars} />
+              <CategoryComparisonChart
+                data={reportBars.map((b) => ({
+                  label: b.label,
+                  current: b.current,
+                  projected: b.previous,
+                }))}
+              />
             </div>
           ) : (
             <EmptyState

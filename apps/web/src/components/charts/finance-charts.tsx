@@ -7,9 +7,9 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  ComposedChart,
   Legend,
   Line,
-  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -118,10 +118,20 @@ export const CategoryShareChart = ({ data }: { data: CategorySlice[] }) => {
   );
 };
 
-export const ForecastProjectionChart = ({ data }: { data: TrendPoint[] }) => {
+export const ForecastProjectionChart = ({
+  data,
+}: {
+  data: { label: string; spend?: number; forecast?: number; range?: [number, number] }[];
+}) => {
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+      <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+        <defs>
+          <linearGradient id="rangeFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#0F7B71" stopOpacity={0.15} />
+            <stop offset="95%" stopColor="#0F7B71" stopOpacity={0.05} />
+          </linearGradient>
+        </defs>
         <CartesianGrid stroke="rgba(92,113,132,0.1)" strokeDasharray="4 8" vertical={false} />
         <XAxis
           axisLine={false}
@@ -132,6 +142,7 @@ export const ForecastProjectionChart = ({ data }: { data: TrendPoint[] }) => {
         <YAxis axisLine={false} tick={false} tickLine={false} width={20} />
         <Tooltip content={<ChartTooltip />} />
         <Legend formatter={(value) => <span className="text-sm text-ink-soft">{value}</span>} />
+        <Area dataKey="range" fill="url(#rangeFill)" stroke="none" name="Forecast Range" />
         <Line
           dataKey="spend"
           dot={{ fill: '#13263F', r: 3 }}
@@ -143,13 +154,13 @@ export const ForecastProjectionChart = ({ data }: { data: TrendPoint[] }) => {
         <Line
           dataKey="forecast"
           dot={{ fill: '#0F7B71', r: 3 }}
-          name="Forecast"
+          name="Forecast Path"
           stroke="#0F7B71"
           strokeDasharray="4 5"
           strokeWidth={2.5}
           type="monotone"
         />
-      </LineChart>
+      </ComposedChart>
     </ResponsiveContainer>
   );
 };
@@ -157,11 +168,11 @@ export const ForecastProjectionChart = ({ data }: { data: TrendPoint[] }) => {
 export const CategoryComparisonChart = ({
   data,
 }: {
-  data: Array<{ label: string; current: number; previous: number }>;
+  data: Array<{ label: string; current: number; projected: number; budget?: number }>;
 }) => {
   return (
     <ResponsiveContainer width="100%" height={290}>
-      <BarChart data={data} barGap={10}>
+      <BarChart data={data} barGap={4}>
         <CartesianGrid stroke="rgba(92,113,132,0.1)" strokeDasharray="4 8" vertical={false} />
         <XAxis
           axisLine={false}
@@ -172,8 +183,9 @@ export const CategoryComparisonChart = ({
         <YAxis axisLine={false} tick={false} tickLine={false} width={20} />
         <Tooltip content={<ChartTooltip />} />
         <Legend formatter={(value) => <span className="text-sm text-ink-soft">{value}</span>} />
-        <Bar dataKey="previous" fill="#D7EAE4" name="Previous period" radius={[10, 10, 0, 0]} />
-        <Bar dataKey="current" fill="#0F7B71" name="Current period" radius={[10, 10, 0, 0]} />
+        <Bar dataKey="current" fill="#D7EAE4" name="Current spend" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="projected" fill="#0F7B71" name="Projected spend" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="budget" fill="#13263F" name="Budget limit" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

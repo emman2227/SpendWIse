@@ -1,38 +1,35 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import type { InsightType } from '@spendwise/shared';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 
 import { DEFAULT_PROMPT_TEMPLATES, renderPrompt } from '../prompts/templates';
-import type { AnalyticsProviderInput, InsightResult } from '../types';
+import type {
+  DeepDiveContext,
+  DeepDiveResponse,
+  InsightInterpretation,
+  StructuredForecastInput,
+  StructuredInsightInput,
+} from '../types';
 import { BaseAnalyticsProvider } from './base';
 
-const insightSchema = z.object({
-  type: z.string(),
+const insightInterpretationSchema = z.object({
   title: z.string(),
   message: z.string(),
-  metadata: z
-    .object({
-      reason: z.string().optional(),
-      evidence: z.string().optional(),
-    })
-    .optional(),
+  reason: z.string().optional(),
+  impact: z.string().optional(),
+  recommendation: z.string().optional(),
 });
 
-const insightArraySchema = z.array(insightSchema);
-type InsightArray = z.infer<typeof insightArraySchema>;
+const insightInterpretationArraySchema = z.array(insightInterpretationSchema);
 
-const forecastSchema = z.object({
-  predictedAmount: z.number(),
-  confidence: z.number().min(0).max(1),
-  metadata: z
-    .object({
-      reason: z.string().optional(),
-      evidence: z.string().optional(),
-    })
-    .optional(),
+const forecastExplanationSchema = z.object({
+  explanation: z.string(),
 });
-type ForecastOutput = z.infer<typeof forecastSchema>;
+
+const deepDiveResponseSchema = z.object({
+  answer: z.string(),
+  suggestedFollowUps: z.array(z.string()),
+});
 
 export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
   readonly name = 'gemini';
@@ -46,150 +43,89 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
     this.model = google('gemini-2.5-flash');
   }
 
-  async summarizeSpending(input: AnalyticsProviderInput): Promise<InsightResult[]> {
-    const template = DEFAULT_PROMPT_TEMPLATES.find((t) => t.type === 'summarize_spending');
+  async interpretInsights(facts: StructuredInsightInput[]): Promise<InsightInterpretation[]> {
+    if (facts.length === 0) return [];
 
-    if (!template) {
-      return [];
-    }
+    const template = DEFAULT_PROMPT_TEMPLATES.find((t) => t.type === 'interpret_insights');
+    if (!template) return facts.map((f) => ({ title: f.title, message: f.message }));
 
     const prompt = renderPrompt(template.template, {
-      expenses: JSON.stringify(input.expenses.slice(0, 50)),
-      categories: input.categories ? JSON.stringify(input.categories) : '',
-      budgets: input.budgets ? JSON.stringify(input.budgets) : '',
+      facts: JSON.stringify(facts),
     });
 
     try {
       const { object } = await generateObject({
         model: this.model,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        schema: insightArraySchema as any,
+        schema: insightInterpretationArraySchema,
         prompt,
       });
 
-      const items = object as InsightArray;
-
-      return items.map((item) => ({
-        type: item.type as InsightResult['type'],
-        title: item.title,
-        message: item.message,
-        metadata: item.metadata
-          ? { reason: item.metadata.reason, evidence: item.metadata.evidence }
-          : undefined,
+      return object as InsightInterpretation[];
+    } catch (error) {
+      console.error('[GeminiProvider] interpretInsights failed:', error);
+      // Fallback: pass through the facts
+      return facts.map((f) => ({
+        title: f.title,
+        message: f.message,
+        reason: 'Provider error',
       }));
-    } catch (error) {
-      console.error('[GeminiProvider] summarizeSpending failed:', error);
-      return [
-        {
-          type: 'summary' as const,
-          title: 'AI summary unavailable',
-          message:
-            'The AI provider could not generate a summary at this time. Please try again later.',
-          metadata: { reason: 'Provider error' },
-        },
-      ];
     }
   }
 
-  async detectAnomalies(input: AnalyticsProviderInput): Promise<InsightResult[]> {
-    const template = DEFAULT_PROMPT_TEMPLATES.find((t) => t.type === 'detect_anomalies');
-
-    if (!template) {
-      return [];
-    }
+  async interpretForecast(forecast: StructuredForecastInput): Promise<{ explanation: string }> {
+    const template = DEFAULT_PROMPT_TEMPLATES.find((t) => t.type === 'interpret_forecast');
+    if (!template) return { explanation: 'Provider template not found.' };
 
     const prompt = renderPrompt(template.template, {
-      expenses: JSON.stringify(input.expenses.slice(0, 50)),
-      categories: input.categories ? JSON.stringify(input.categories) : '',
+      forecast: JSON.stringify(forecast),
     });
 
     try {
       const { object } = await generateObject({
         model: this.model,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        schema: insightArraySchema as any,
+        schema: forecastExplanationSchema,
         prompt,
       });
 
-      const items = object as InsightArray;
-
-      return items.map((item) => ({
-        type: item.type as InsightResult['type'],
-        title: item.title,
-        message: item.message,
-        metadata: item.metadata
-          ? { reason: item.metadata.reason, evidence: item.metadata.evidence }
-          : undefined,
-      }));
+      return object as { explanation: string };
     } catch (error) {
-      console.error('[GeminiProvider] detectAnomalies failed:', error);
-      return [
-        {
-          type: 'trend' as const,
-          title: 'Anomaly detection unavailable',
-          message:
-            'The AI provider could not analyze anomalies at this time. Please try again later.',
-          metadata: { reason: 'Provider error' },
-        },
-      ];
+      console.error('[GeminiProvider] interpretForecast failed:', error);
+      return {
+        explanation: 'Forecast explanation unavailable due to a provider error.',
+      };
     }
   }
 
-  async forecast(input: AnalyticsProviderInput) {
-    const period = input.period ?? 'monthly';
-    const template = DEFAULT_PROMPT_TEMPLATES.find((t) => t.type === 'forecast');
-
+  async deepDive(context: DeepDiveContext): Promise<DeepDiveResponse> {
+    const template = DEFAULT_PROMPT_TEMPLATES.find((t) => t.type === 'deep_dive');
     if (!template) {
       return {
-        userId: input.userId,
-        period,
-        predictedAmount: 0,
-        confidence: 0,
+        answer: 'I am unable to answer that right now.',
+        suggestedFollowUps: [],
       };
     }
 
     const prompt = renderPrompt(template.template, {
-      expenses: JSON.stringify(input.expenses.slice(0, 50)),
-      period,
+      question: context.question,
+      insight: JSON.stringify(context.insight),
+      expenses: JSON.stringify(context.expenses.slice(0, 50)),
     });
 
     try {
       const { object } = await generateObject({
         model: this.model,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        schema: forecastSchema as any,
+        schema: deepDiveResponseSchema,
         prompt,
       });
 
-      const output = object as ForecastOutput;
-
-      return {
-        userId: input.userId,
-        period,
-        predictedAmount: Number(output.predictedAmount.toFixed(2)),
-        confidence: Number(output.confidence.toFixed(2)),
-      };
+      return object as DeepDiveResponse;
     } catch (error) {
-      console.error('[GeminiProvider] forecast failed:', error);
-      // Fallback: simple average-based estimate
-      const total = input.expenses.reduce((sum, e) => sum + e.amount, 0);
-      const avg = input.expenses.length > 0 ? total / input.expenses.length : 0;
-      const multiplier = period === 'weekly' ? 7 : period === 'quarterly' ? 90 : 30;
-
+      console.error('[GeminiProvider] deepDive failed:', error);
       return {
-        userId: input.userId,
-        period,
-        predictedAmount: Number((avg * (multiplier / 3)).toFixed(2)),
-        confidence: 0.3,
+        answer:
+          'I encountered an error trying to analyze this insight. Please try asking your question again later.',
+        suggestedFollowUps: [],
       };
     }
-  }
-
-  async generateInsight(type: InsightType, title: string, message: string): Promise<InsightResult> {
-    return {
-      type,
-      title,
-      message,
-    };
   }
 }

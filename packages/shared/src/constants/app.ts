@@ -23,7 +23,17 @@ export const PAYMENT_METHODS = [
   'bank_transfer',
   'e_wallet',
 ] as const;
-export const INSIGHT_TYPES = ['summary', 'anomaly', 'trend', 'recommendation'] as const;
+export const INSIGHT_TYPES = [
+  'summary',
+  'anomaly',
+  'trend',
+  'budget',
+  'positive',
+  'recurring',
+  'recommendation',
+] as const;
+export const INSIGHT_SEVERITIES = ['info', 'positive', 'warning', 'critical'] as const;
+export const FORECAST_RISK_LEVELS = ['low', 'medium', 'high'] as const;
 export const FORECAST_PERIODS = ['weekly', 'monthly', 'quarterly'] as const;
 
 export const SUPPORTED_CURRENCIES = [

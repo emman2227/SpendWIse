@@ -1,7 +1,8 @@
 'use client';
 
+import type { ForecastRisk } from '@spendwise/shared';
 import { useQuery } from '@tanstack/react-query';
-import { CircleAlert, TrendingUp } from 'lucide-react';
+import { CircleAlert, Info, TrendingUp } from 'lucide-react';
 
 import {
   CategoryComparisonChart,
@@ -16,7 +17,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { forecastDetailsQueryKey, getForecastDetails } from '@/lib/analytics/client';
 import { useCurrentUserQuery } from '@/lib/auth/client';
-import { forecastTrend } from '@/lib/demo-data';
 import { formatConfidence, formatMoney as baseFormatMoney } from '@/lib/formatters';
 
 export default function ForecastsPage() {
@@ -26,6 +26,32 @@ export default function ForecastsPage() {
     queryFn: getForecastDetails,
   });
   const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+
+  // Compute chart data dynamically
+  const projectionData = forecastData?.forecastData
+    ? [
+        {
+          label: 'Current',
+          spend: forecastData.forecastData.currentSpend,
+          forecast: forecastData.forecastData.currentSpend,
+          range: [
+            forecastData.forecastData.currentSpend,
+            forecastData.forecastData.currentSpend,
+          ] as [number, number],
+        },
+        {
+          label: 'End of Month',
+          spend: undefined,
+          forecast: forecastData.forecastData.predictedAmount,
+          range: [forecastData.forecastData.lowerBound, forecastData.forecastData.upperBound] as [
+            number,
+            number,
+          ],
+        },
+      ]
+    : [];
+
+  const risks = forecastData?.forecastData?.risks || [];
 
   return (
     <div className="space-y-6">
@@ -49,26 +75,26 @@ export default function ForecastsPage() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <MetricCard
-          delta={isLoading ? '-' : '+3%'}
+          delta={isLoading ? '-' : ''}
           helper="Predicted total next month"
           icon={TrendingUp}
           label="Projected spend"
           value={isLoading ? '-' : formatMoney(forecastData?.metrics.predictedAmount ?? 0)}
         />
         <MetricCard
-          delta={isLoading ? '-' : '76%'}
-          helper="Model reliability"
+          delta={isLoading ? '-' : ''}
+          helper={forecastData?.forecastData?.confidenceExplanation || 'Model reliability'}
           icon={TrendingUp}
           label="Forecast confidence"
           value={isLoading ? '-' : formatConfidence(forecastData?.metrics.confidence ?? 0)}
         />
         <MetricCard
-          delta="2 risks"
+          delta={isLoading ? '-' : `${risks.length} risks`}
           helper="Needs closer planning"
           icon={CircleAlert}
           label="Potential pressure"
-          tone="mint"
-          value="Transport, Shopping"
+          tone={risks.length > 0 ? 'default' : 'mint'}
+          value={risks.length > 0 ? risks.map((r) => r.category).join(', ') : 'None'}
         />
       </section>
 
@@ -79,7 +105,13 @@ export default function ForecastsPage() {
             Observed spending versus projected month-end path
           </h2>
           <div className="mt-6">
-            <ForecastProjectionChart data={forecastTrend} />
+            {isLoading ? (
+              <div className="flex h-[280px] items-center justify-center">
+                <Skeleton className="h-full w-full rounded-2xl" />
+              </div>
+            ) : (
+              <ForecastProjectionChart data={projectionData} />
+            )}
           </div>
         </SurfaceCard>
 
@@ -117,24 +149,38 @@ export default function ForecastsPage() {
           </div>
         </SurfaceCard>
 
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7 flex flex-col">
           <p className="kicker">Risk indicators</p>
           <h2 className="mt-3 text-2xl font-semibold text-ink">Areas needing attention</h2>
-          <div className="mt-6 space-y-4">
-            <div className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
-              <p className="font-semibold text-ink">Transport may finish above baseline</p>
-              <p className="mt-2 text-sm leading-6 text-ink-soft">
-                The forecast model sees a higher ride-share pace than usual in the middle of the
-                month.
-              </p>
-            </div>
-            <div className="rounded-[24px] border border-line bg-paper px-5 py-5">
-              <p className="font-semibold text-ink">Recurring bills remain stable</p>
-              <p className="mt-2 text-sm leading-6 text-ink-soft">
-                High-confidence fixed costs keep the overall prediction grounded and easier to
-                trust.
-              </p>
-            </div>
+          <div className="mt-6 space-y-4 flex-1">
+            {isLoading ? (
+              <Skeleton className="h-[100px] w-full rounded-2xl" />
+            ) : risks.length === 0 ? (
+              <div className="rounded-[24px] border border-line bg-paper px-5 py-5 h-full flex flex-col justify-center items-center text-center">
+                <Info className="h-8 w-8 text-ink-soft/50 mb-2" />
+                <p className="font-semibold text-ink">No elevated risks detected</p>
+                <p className="mt-2 text-sm leading-6 text-ink-soft">
+                  Your spending is within safe bounds across all categories based on the current
+                  forecast.
+                </p>
+              </div>
+            ) : (
+              risks.map((risk: ForecastRisk, i: number) => (
+                <div
+                  key={i}
+                  className={`rounded-[24px] border px-5 py-5 ${
+                    risk.riskLevel === 'high'
+                      ? 'border-danger/25 bg-danger/10'
+                      : risk.riskLevel === 'medium'
+                        ? 'border-warning/25 bg-warning/10'
+                        : 'border-info/25 bg-info/10'
+                  }`}
+                >
+                  <p className="font-semibold text-ink capitalize">{risk.category} pressure</p>
+                  <p className="mt-2 text-sm leading-6 text-ink-soft">{risk.explanation}</p>
+                </div>
+              ))
+            )}
           </div>
         </SurfaceCard>
       </section>

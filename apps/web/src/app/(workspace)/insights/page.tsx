@@ -1,7 +1,8 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,15 +10,13 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
-import { dashboardAnalyticsQueryKey, getDashboardAnalytics } from '@/lib/analytics/client';
+import { getInsights, insightsQueryKey } from '@/lib/analytics/client';
 
 export default function InsightsPage() {
-  const { data: analytics, isLoading } = useQuery({
-    queryKey: dashboardAnalyticsQueryKey,
-    queryFn: getDashboardAnalytics,
+  const { data: insights = [], isLoading } = useQuery({
+    queryKey: insightsQueryKey,
+    queryFn: getInsights,
   });
-
-  const insights = analytics?.insights ?? [];
 
   return (
     <div className="space-y-6">
@@ -29,18 +28,6 @@ export default function InsightsPage() {
       />
 
       <section className="space-y-6">
-        <SurfaceCard className="rounded-[32px] px-6 py-5">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-medium text-ink">
-              Do you have any questions about this board?
-            </h2>
-            <Button className="gap-2" variant="default">
-              <Sparkles className="h-4 w-4" />
-              Deep Dive
-            </Button>
-          </div>
-        </SurfaceCard>
-
         <SurfaceCard className="overflow-hidden rounded-[32px] px-0 py-0">
           <div className="grid grid-cols-[1.5fr,1fr,2.5fr] gap-4 border-b border-line bg-sage/10 px-8 py-4">
             <p className="text-xs font-semibold text-ink-soft">Topic</p>
@@ -65,40 +52,59 @@ export default function InsightsPage() {
                     <div className="flex items-center gap-2">
                       <div
                         className={`h-2 w-2 rounded-full ${
-                          insight.type === 'anomaly' ? 'bg-orange-500' : 'bg-brand'
+                          insight.severity === 'critical'
+                            ? 'bg-danger'
+                            : insight.severity === 'warning'
+                              ? 'bg-warning'
+                              : 'bg-info'
                         }`}
                       />
                       <p className="font-semibold text-ink">{insight.title}</p>
                     </div>
-                    <p className="mt-1.5 text-xs text-ink-soft">
-                      {insight.type === 'anomaly' ? 'Anomaly detected' : 'Summary observation'}
+                    <p className="mt-1.5 text-xs text-ink-soft capitalize">
+                      {insight.type.replace('_', ' ')}
                     </p>
                   </div>
 
                   <div>
-                    <Badge variant={insight.type === 'anomaly' ? 'warning' : 'info'}>
-                      {insight.metadata?.evidence ?? 'Active'}
+                    <Badge
+                      variant={
+                        insight.severity === 'critical'
+                          ? 'danger'
+                          : insight.severity === 'warning'
+                            ? 'warning'
+                            : 'info'
+                      }
+                    >
+                      {insight.impact ? 'Monitored' : 'Active'}
                     </Badge>
                   </div>
 
                   <div>
                     <div className="space-y-2">
-                      <p className="text-sm leading-relaxed text-ink">
-                        <span className="font-semibold">Observation:</span> {insight.message}
-                      </p>
-                      {insight.metadata?.reason && (
+                      <p className="text-sm leading-relaxed text-ink">{insight.message}</p>
+                      {insight.reason && (
                         <p className="text-sm leading-relaxed text-ink-soft">
                           <span className="font-semibold text-ink">AI Reasoning:</span>{' '}
-                          {insight.metadata.reason}
+                          {insight.reason}
+                        </p>
+                      )}
+                      {insight.recommendation && (
+                        <p className="text-sm leading-relaxed text-brand font-medium">
+                          <span className="font-semibold text-ink">Recommendation:</span>{' '}
+                          {insight.recommendation}
                         </p>
                       )}
                     </div>
                     <div className="mt-4 flex items-center justify-between border-t border-line/60 pt-3">
-                      <p className="text-sm text-ink-soft">Do you have any questions about this?</p>
-                      <Button className="h-8 gap-1.5 px-3 text-xs" variant="soft">
-                        <Sparkles className="h-3 w-3" />
-                        Deep Dive
-                      </Button>
+                      <p className="text-sm text-ink-soft">Do you want to know more about this?</p>
+                      <Link href={`/insights/${insight.id}`}>
+                        <Button className="h-8 gap-1.5 px-3 text-xs" variant="soft">
+                          <Sparkles className="h-3 w-3" />
+                          Deep Dive
+                          <ArrowRight className="h-3 w-3" />
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </div>

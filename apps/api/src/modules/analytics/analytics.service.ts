@@ -1,16 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AnalyticsService as AiAnalyticsService, createAnalyticsProvider } from '@spendwise/ai';
-import type { Insight } from '@spendwise/shared';
+import type { AnalyticsProvider } from '@spendwise/ai';
+import { createAnalyticsProvider } from '@spendwise/ai';
 
 import { BudgetsService } from '../budgets/budgets.service';
 import { CategoriesService } from '../categories/categories.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { AnalyticsRepository } from './analytics.repository';
+import { ForecastEngine } from './forecast-engine';
+import { SpendingAnalyzer } from './spending-analyzer';
 
 @Injectable()
 export class AnalyticsService {
-  private readonly analyticsEngine: AiAnalyticsService;
+  private readonly provider: AnalyticsProvider;
 
   constructor(
     @Inject(ExpensesService)
@@ -24,39 +26,89 @@ export class AnalyticsService {
     @Inject(ConfigService)
     configService: ConfigService,
   ) {
-    const provider = createAnalyticsProvider(
+    this.provider = createAnalyticsProvider(
       configService.get<string>('AI_PROVIDER'),
       configService.get<string>('GEMINI_API_KEY'),
     );
-    this.analyticsEngine = new AiAnalyticsService(provider);
   }
 
   async generate(userId: string) {
-    const expenses = await this.expensesService.list(userId, {});
-    const [insights, forecast] = await Promise.all([
-      this.analyticsEngine.buildInsights(userId, expenses),
-      this.analyticsEngine.forecast(userId, expenses, 'monthly'),
-    ]);
+    const currentMonth = new Date().getUTCMonth();
+    const currentYear = new Date().getUTCFullYear();
 
-    const timestamp = new Date().toISOString();
-    const insightPayload: Omit<Insight, 'id'>[] = insights.map((insight) => ({
-      userId,
-      type: insight.type,
-      title: insight.title,
-      message: insight.message,
-      ...(insight.metadata ? { metadata: insight.metadata } : {}),
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    }));
+    const expenses = await this.expensesService.list(userId, {});
+    const budgets = await this.budgetsService.list(userId, currentMonth, currentYear);
+    const categories = await this.categoriesService.list(userId);
+
+    // 1. Deterministic Analysis
+    const structuredFacts = SpendingAnalyzer.analyze(expenses, budgets, categories);
+
+    // 2. AI Interpretation
+    const interpretations = await this.provider.interpretInsights(structuredFacts);
+
+    // 3. Merge Facts + Interpretation
+    const insightPayload = structuredFacts.map((fact, index) => {
+      const interp = interpretations[index] || {
+        title: fact.title,
+        message: fact.message,
+      };
+
+      return {
+        userId,
+        type: fact.type,
+        severity: fact.severity,
+        category: fact.category,
+        title: interp.title || fact.title,
+        message: interp.message || fact.message,
+        reason: interp.reason,
+        evidence: fact.evidence,
+        impact: interp.impact,
+        recommendation: interp.recommendation,
+      };
+    });
 
     const savedInsights = await this.analyticsRepository.replaceInsights(userId, insightPayload);
 
+    // 4. Forecast Engine
+
+    const currentExpenses = expenses.filter((e) => {
+      const d = new Date(e.date);
+      return d.getUTCMonth() === currentMonth && d.getUTCFullYear() === currentYear;
+    });
+
+    const historicalExpenses = expenses.filter((e) => {
+      const d = new Date(e.date);
+      return d.getUTCMonth() !== currentMonth || d.getUTCFullYear() !== currentYear;
+    });
+
+    const forecastData = ForecastEngine.computeForecast(
+      currentExpenses,
+      historicalExpenses,
+      budgets,
+      categories,
+    );
+    const period = 'monthly';
+
+    // 5. AI Forecast Interpretation
+    const forecastInterp = await this.provider.interpretForecast({
+      period,
+      assumptions: [],
+      ...forecastData,
+    });
+
     const savedForecast = await this.analyticsRepository.saveForecast({
       userId,
-      period: forecast.period,
-      predictedAmount: forecast.predictedAmount,
-      confidence: forecast.confidence,
-      generatedAt: new Date(forecast.generatedAt),
+      period,
+      currentSpend: forecastData.currentSpend,
+      predictedAmount: forecastData.predictedAmount,
+      lowerBound: forecastData.lowerBound,
+      upperBound: forecastData.upperBound,
+      confidence: forecastData.confidence,
+      confidenceExplanation: forecastInterp.explanation || forecastData.confidenceExplanation,
+      categoryForecasts: forecastData.categoryForecasts,
+      risks: forecastData.risks,
+      assumptions: [],
+      generatedAt: new Date(),
     });
 
     return {
@@ -106,13 +158,9 @@ export class AnalyticsService {
     const currentMonth = now.getUTCMonth() + 1;
     const currentYear = now.getUTCFullYear();
 
-    const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
-    const previousYear = currentMonth === 1 ? currentYear - 1 : currentYear;
-
-    const [categories, currentExpenses, previousExpenses, forecast] = await Promise.all([
+    const [categories, currentExpenses, forecast] = await Promise.all([
       this.categoriesService.list(userId),
       this.expensesService.list(userId, { month: currentMonth, year: currentYear }),
-      this.expensesService.list(userId, { month: previousMonth, year: previousYear }),
       this.analyticsRepository.getLatestForecast(userId, 'monthly'),
     ]);
 
@@ -124,17 +172,18 @@ export class AnalyticsService {
       return acc;
     }, {});
 
-    const previousSpendByCat = previousExpenses.reduce<Record<string, number>>((acc, exp) => {
-      acc[exp.categoryId] = (acc[exp.categoryId] || 0) + exp.amount;
-      return acc;
-    }, {});
+    const budgets = await this.budgetsService.list(userId, currentMonth, currentYear);
+    const budgetMap = new Map(budgets.map((b) => [b.categoryId, b.limitAmount]));
 
     const comparisons = Object.entries(currentSpendByCat).map(([categoryId, current]) => {
       const category = categoryMap.get(categoryId);
+      const catForecast = forecast?.categoryForecasts?.find((cf) => cf.category === categoryId);
+
       return {
         label: category?.name || 'Unknown',
         current,
-        previous: previousSpendByCat[categoryId] || 0,
+        projected: catForecast?.predictedAmount || current,
+        budget: budgetMap.get(categoryId),
       };
     });
 
@@ -160,6 +209,28 @@ export class AnalyticsService {
       },
       comparisons,
       share,
+      forecastData: forecast,
     };
+  }
+
+  async getInsightDetails(userId: string, insightId: string) {
+    return this.analyticsRepository.getInsightById(insightId, userId);
+  }
+
+  async deepDiveInsight(userId: string, insightId: string, question: string) {
+    const insight = await this.analyticsRepository.getInsightById(insightId, userId);
+    if (!insight) {
+      throw new Error('Insight not found');
+    }
+
+    const expenses = await this.expensesService.list(userId, {});
+
+    const response = await this.provider.deepDive({
+      insight,
+      question,
+      expenses,
+    });
+
+    return response;
   }
 }

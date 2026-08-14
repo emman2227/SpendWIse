@@ -13,78 +13,58 @@ export interface PromptTemplateDefinition {
 
 export const DEFAULT_PROMPT_TEMPLATES: PromptTemplateDefinition[] = [
   {
-    type: 'summarize_spending',
+    type: 'interpret_insights',
     version: 1,
-    template: `You are SpendWise, an AI financial analyst. Given expense data, produce a JSON array of insights.
+    template: `You are SpendWise, an AI financial analyst. You are provided with a JSON array of structured financial facts (insights) computed by a deterministic engine. 
+Your job is to interpret these facts and return natural language explanations.
 
-CRITICAL INSTRUCTION: You must be extremely concise. Do not use filler words. Maximize information density.
+CRITICAL INSTRUCTION: You must be concise, helpful, and clear. Do NOT invent numbers, categories, or transactions not present in the data.
 
-Each insight must have:
-- "type": always "summary"
-- "title": max 5 words.
-- "message": Exactly 1 short sentence.
-- "metadata":
-  - "reason": Exactly 1 short sentence explaining why it matters.
-  - "evidence": Specific numbers/percentages.
+For each fact in the input array, return an object in a JSON array with:
+- "title": A clear, user-friendly title (max 6 words).
+- "message": A 1-2 sentence explanation of what the data means.
+- "reason": A short sentence explaining why this occurred (if deducible from the data) or why it matters.
+- "impact": A short sentence on how this affects their overall financial health.
+- "recommendation": A short, actionable recommendation based on the fact.
 
-Focus on largest categories, shifts, and budget pressure.
+Input Facts (JSON):
+{{facts}}
 
-User expenses (JSON):
-{{expenses}}
-
-{{#if categories}}Categories: {{categories}}{{/if}}
-{{#if budgets}}Budgets: {{budgets}}{{/if}}
-
-Respond ONLY with a valid JSON array.`,
+Respond ONLY with a valid JSON array matching the length of the input.`,
   },
   {
-    type: 'detect_anomalies',
+    type: 'interpret_forecast',
     version: 1,
-    template: `You are SpendWise, an AI anomaly detector. Analyze expenses for unusual transactions.
+    template: `You are SpendWise, a spending forecast analyst. You are provided with a structured financial forecast for the current period, computed by a deterministic engine.
+Your job is to explain the forecast in a single natural language paragraph.
 
-CRITICAL INSTRUCTION: Be extremely concise. No filler words.
+CRITICAL INSTRUCTION: Do NOT invent numbers. Use the exact numbers provided in the forecast data. Focus on the risks and assumptions.
 
-Return a JSON array of anomalies. Each must have:
-- "type": always "anomaly"
-- "title": max 5 words.
-- "message": Exactly 1 short sentence.
-- "metadata":
-  - "reason": Exactly 1 short sentence explaining the flag.
-  - "evidence": Specific amounts compared to typical spend.
+Input Forecast (JSON):
+{{forecast}}
 
-If none, return 1 object: type "trend", title "Routine spending", message "No unusual transactions detected."
-
-User expenses (JSON):
-{{expenses}}
-
-{{#if categories}}Categories: {{categories}}{{/if}}
-
-Respond ONLY with a valid JSON array.`,
+Respond ONLY with a single JSON object containing an "explanation" string field. No markdown, no commentary.`,
   },
   {
-    type: 'forecast',
+    type: 'deep_dive',
     version: 1,
-    template: `You are SpendWise, a spending forecast analyst. Given historical expenses, predict the user's total spending for the {{period}}.
+    template: `You are SpendWise, an AI financial analyst. A user has asked a question about a specific financial insight.
 
-Return a single JSON object with:
-- "predictedAmount": a number representing the predicted total spend
-- "confidence": a number between 0 and 1 indicating your confidence in the prediction
-- "metadata": an object with:
-  - "reason": why you chose this amount (1 sentence)
-  - "evidence": the patterns or data points supporting this forecast
+CRITICAL INSTRUCTION: Base your answer STRICTLY on the provided insight context and the related expenses. Do not guess or invent data.
 
-Consider:
-- Recurring fixed costs (subscriptions, rent, bills)
-- Variable spending trends
-- Seasonal patterns if visible
-- The number of data points available (less data = lower confidence)
+User Question: {{question}}
 
-User expenses (JSON):
+Context (Insight Data):
+{{insight}}
+
+Related Expenses (JSON):
 {{expenses}}
 
-Forecast period: {{period}}
+Return a JSON object with:
+- "answer": Your detailed, helpful response to the user's question (can be multiple paragraphs).
+- "suggestedFollowUps": An array of 2-3 short, relevant follow-up questions the user might want to ask next.
 
-Respond ONLY with a valid JSON object. No markdown, no commentary.`,
+Respond ONLY with a valid JSON object.`,
   },
 ];
 

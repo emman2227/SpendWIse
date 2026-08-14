@@ -48,7 +48,8 @@ export interface ForecastDetailsData {
   comparisons: Array<{
     label: string;
     current: number;
-    previous: number;
+    projected: number;
+    budget?: number;
   }>;
   share: Array<{
     name: string;
@@ -56,6 +57,12 @@ export interface ForecastDetailsData {
     share: number;
     color: string;
   }>;
+  forecastData: Forecast | null;
+}
+
+export interface DeepDiveResult {
+  answer: string;
+  suggestedFollowUps: string[];
 }
 
 export class AnalyticsClientError extends Error {
@@ -113,6 +120,7 @@ const request = async <T>(path: string, init: RequestInit = {}) => {
 
 export const dashboardAnalyticsQueryKey = ['analytics', 'dashboard'] as const;
 export const forecastDetailsQueryKey = ['analytics', 'forecast'] as const;
+export const insightsQueryKey = ['analytics', 'insights'] as const;
 
 export const getDashboardAnalytics = () =>
   request<DashboardAnalyticsData>('/api/analytics/dashboard');
@@ -123,3 +131,13 @@ export const generateAnalytics = () =>
   });
 
 export const getForecastDetails = () => request<ForecastDetailsData>('/api/analytics/forecast');
+
+export const getInsights = () => request<Insight[]>('/api/analytics/insights');
+
+export const getInsightDetails = (id: string) => request<Insight>(`/api/analytics/insights/${id}`);
+
+export const deepDiveInsight = (id: string, question: string) =>
+  request<DeepDiveResult>(`/api/analytics/insights/${id}/deep-dive`, {
+    method: 'POST',
+    body: JSON.stringify({ question }),
+  });

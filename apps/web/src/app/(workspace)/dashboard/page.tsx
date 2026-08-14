@@ -447,10 +447,10 @@ export default function DashboardPage() {
                             : 'Low'}{' '}
                         ({formatConfidence(analytics.forecast.confidence)})
                       </Badge>
-                      {analytics.forecast.metadata?.reason ? (
+                      {analytics.forecast.confidenceExplanation ? (
                         <p className="text-xs leading-relaxed text-ink-soft">
                           <span className="font-medium text-brand">Why:</span>{' '}
-                          {analytics.forecast.metadata.reason}
+                          {analytics.forecast.confidenceExplanation}
                         </p>
                       ) : null}
                     </div>
@@ -688,17 +688,20 @@ export default function DashboardPage() {
                       {insight.title}
                     </h3>
                     <p className="mt-1.5 text-[15px] leading-6 text-ink-soft">{insight.message}</p>
-                    {insight.metadata?.reason ? (
+                    {insight.reason ? (
                       <div className="mt-4 rounded-[16px] border border-brand/15 bg-paper/50 px-3.5 py-3 backdrop-blur-md">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand">
                           AI Reasoning
                         </p>
                         <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
-                          {insight.metadata.reason}
+                          {insight.reason}
                         </p>
-                        {insight.metadata.evidence ? (
+                        {insight.evidence ? (
                           <p className="mt-1.5 text-xs font-medium text-ink-soft/60">
-                            Data point: {insight.metadata.evidence}
+                            Data point:{' '}
+                            {typeof insight.evidence === 'object'
+                              ? JSON.stringify(insight.evidence)
+                              : insight.evidence}
                           </p>
                         ) : null}
                       </div>

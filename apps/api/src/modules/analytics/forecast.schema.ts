@@ -4,7 +4,7 @@ import type { HydratedDocument } from 'mongoose';
 @Schema({
   collection: 'forecasts',
   timestamps: false,
-  versionKey: false
+  versionKey: false,
 })
 export class ForecastModel {
   @Prop({ required: true, index: true })
@@ -17,7 +17,28 @@ export class ForecastModel {
   predictedAmount!: number;
 
   @Prop({ required: true })
+  currentSpend!: number;
+
+  @Prop({ required: true })
+  lowerBound!: number;
+
+  @Prop({ required: true })
+  upperBound!: number;
+
+  @Prop({ required: true })
   confidence!: number;
+
+  @Prop({ required: false })
+  confidenceExplanation?: string;
+
+  @Prop({ type: Array, required: true, default: [] })
+  categoryForecasts!: Record<string, unknown>[];
+
+  @Prop({ type: Array, required: true, default: [] })
+  risks!: Record<string, unknown>[];
+
+  @Prop({ type: [String], required: true, default: [] })
+  assumptions!: string[];
 
   @Prop({ required: true })
   generatedAt!: Date;

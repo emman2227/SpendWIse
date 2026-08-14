@@ -14,13 +14,28 @@ export class InsightModel {
   type!: string;
 
   @Prop({ required: true })
+  severity!: string;
+
+  @Prop({ required: false })
+  category?: string;
+
+  @Prop({ required: true })
   title!: string;
 
   @Prop({ required: true })
   message!: string;
 
+  @Prop({ required: false })
+  reason?: string;
+
   @Prop({ type: Object, required: false })
-  metadata?: Record<string, unknown>;
+  evidence?: Record<string, unknown>;
+
+  @Prop({ required: false })
+  impact?: string;
+
+  @Prop({ required: false })
+  recommendation?: string;
 
   createdAt!: Date;
   updatedAt!: Date;

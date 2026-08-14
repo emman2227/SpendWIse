@@ -1,37 +1,34 @@
-import type {
-  Expense,
-  Forecast,
-  ForecastPeriod,
-  Insight,
-  InsightMetadata,
-  InsightType,
-} from '@spendwise/shared';
+import type { Expense, Forecast, Insight } from '@spendwise/shared';
 
 export interface AnalyticsContext {
   userId: string;
-  expenses: Expense[];
-  categories?: Record<string, string>;
-  budgets?: Array<{
-    categoryId: string;
-    limitAmount: number;
-  }>;
 }
 
-export interface AnalyticsProviderInput extends AnalyticsContext {
-  period?: ForecastPeriod;
-}
+export type StructuredInsightInput = Omit<Insight, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
+export type StructuredForecastInput = Omit<Forecast, 'id' | 'userId' | 'generatedAt'>;
 
-export interface InsightResult {
-  type: Insight['type'];
+export interface InsightInterpretation {
   title: string;
   message: string;
-  metadata?: InsightMetadata;
+  reason?: string;
+  impact?: string;
+  recommendation?: string;
+}
+
+export interface DeepDiveContext {
+  insight: Insight;
+  question: string;
+  expenses: Expense[];
+}
+
+export interface DeepDiveResponse {
+  answer: string;
+  suggestedFollowUps: string[];
 }
 
 export interface AnalyticsProvider {
   readonly name: string;
-  summarizeSpending(input: AnalyticsProviderInput): Promise<InsightResult[]>;
-  detectAnomalies(input: AnalyticsProviderInput): Promise<InsightResult[]>;
-  forecast(input: AnalyticsProviderInput): Promise<Omit<Forecast, 'id' | 'generatedAt'>>;
-  generateInsight(type: InsightType, title: string, message: string): Promise<InsightResult>;
+  interpretInsights(facts: StructuredInsightInput[]): Promise<InsightInterpretation[]>;
+  interpretForecast(forecast: StructuredForecastInput): Promise<{ explanation: string }>;
+  deepDive(context: DeepDiveContext): Promise<DeepDiveResponse>;
 }
