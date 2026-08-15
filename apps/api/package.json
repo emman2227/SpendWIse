@@ -19,6 +19,7 @@
     "@nestjs/mongoose": "^10.1.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.4.15",
+    "@nestjs/schedule": "^6.1.3",
     "@node-rs/bcrypt": "^1.10.7",
     "@spendwise/ai": "workspace:*",
     "@spendwise/shared": "workspace:*",

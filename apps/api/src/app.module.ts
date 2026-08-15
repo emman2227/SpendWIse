@@ -2,6 +2,7 @@ import type { MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ScheduleModule } from '@nestjs/schedule';
 import { resolve } from 'path';
 
 import { validateEnv } from './common/config/env.schema';
@@ -28,6 +29,7 @@ import { UsersModule } from './modules/users/users.module';
         uri: configService.getOrThrow<string>('MONGODB_URI'),
       }),
     }),
+    ScheduleModule.forRoot(),
     HealthModule,
     UsersModule,
     AuthModule,

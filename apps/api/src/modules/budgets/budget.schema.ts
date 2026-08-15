@@ -4,7 +4,7 @@ import type { HydratedDocument } from 'mongoose';
 @Schema({
   collection: 'budgets',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class BudgetModel {
   @Prop({ required: true, index: true })
@@ -19,8 +19,11 @@ export class BudgetModel {
   @Prop({ required: true })
   month!: number;
 
-  @Prop({ required: true })
+  @Prop({ type: Number, required: true })
   year!: number;
+
+  @Prop({ type: [String], default: [] })
+  sharedWithUserIds!: string[];
 
   createdAt!: Date;
   updatedAt!: Date;

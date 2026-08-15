@@ -681,6 +681,22 @@ export default function TransactionsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const handleExportAll = async () => {
+    try {
+      const response = await fetch(`/api/expenses/export`);
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `all-transactions.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setFormError('Failed to export all transactions.');
+    }
+  };
+
   return (
     <>
       <div className="space-y-6">
@@ -694,6 +710,10 @@ export default function TransactionsPage() {
               >
                 <Download className="h-4 w-4" />
                 Export CSV
+              </Button>
+              <Button disabled={expensesQuery.isLoading} onClick={handleExportAll} variant="soft">
+                <Download className="h-4 w-4" />
+                Export All
               </Button>
               <Button
                 disabled={categoriesQuery.isLoading || categories.length === 0}

@@ -66,6 +66,27 @@ Return a JSON object with:
 
 Respond ONLY with a valid JSON object.`,
   },
+  {
+    type: 'recommend_budgets',
+    version: 1,
+    template: `You are SpendWise, an AI financial advisor. Based on a user's past expenses, recommend reasonable monthly budget limits for each category.
+
+CRITICAL INSTRUCTION: Do NOT invent categories that were not provided. The user's currency is {{currency}}.
+For each category in the input, look at the past spending and recommend a limit for the upcoming month. Make it realistic but encourage saving.
+
+Categories (JSON):
+{{categories}}
+
+Expenses (JSON):
+{{expenses}}
+
+Return a JSON array of objects with:
+- "categoryId": The ID of the category (must match one from the input).
+- "recommendedAmount": A numeric value representing the recommended monthly budget (number only, no formatting).
+- "explanation": A short 1-2 sentence explanation of why this amount is recommended based on their spending.
+
+Respond ONLY with a valid JSON array.`,
+  },
 ];
 
 /**

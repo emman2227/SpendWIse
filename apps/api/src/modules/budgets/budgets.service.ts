@@ -44,9 +44,19 @@ export class BudgetsService {
     return budgets.map((budget) => this.budgetsRepository.toDomain(budget));
   }
 
-  async delete(userId: string, budgetId: string) {
-    const budget = await this.budgetsRepository.delete(budgetId, userId);
-    return this.budgetsRepository.toDomain(budget);
+  async delete(userId: string, id: string) {
+    return this.budgetsRepository.delete(id, userId);
+  }
+
+  async shareBudget(userId: string, budgetId: string, targetUserId: string) {
+    const budget = await this.budgetsRepository['budgetModel'].findOne({ _id: budgetId, userId });
+    if (!budget) throw new Error('Budget not found');
+
+    if (!budget.sharedWithUserIds.includes(targetUserId)) {
+      budget.sharedWithUserIds.push(targetUserId);
+      await budget.save();
+    }
+    return budget;
   }
 
   async getSummary(userId: string, month: number, year: number) {

@@ -37,4 +37,9 @@ export interface AnalyticsProvider {
     currency: string,
   ): Promise<{ explanation: string }>;
   deepDive(context: DeepDiveContext & { currency: string }): Promise<DeepDiveResponse>;
+  recommendBudgets(context: {
+    expenses: Expense[];
+    categories: string[];
+    currency: string;
+  }): Promise<Array<{ categoryId: string; recommendedAmount: number; explanation: string }>>;
 }

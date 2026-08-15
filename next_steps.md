@@ -16,10 +16,10 @@ _Goal: Wire up the Next.js web application to the fully functional NestJS API an
 
 _Goal: Move beyond the mock provider and build out the actual AI intelligence layer for the web dashboard._
 
-- [ ] **Gemini Integration**: Build and integrate a Google Gemini provider adapter in `packages/ai` (implementing `BaseAnalyticsProvider`).
-- [ ] **Prompt Management**: Establish a system to store and version prompts for analytics outputs.
-- [ ] **Explainability**: Add metadata to AI insights so users understand _why_ a certain recommendation or anomaly was flagged.
-- [ ] **Confidence Scoring**: Compare forecast confidence across different strategies and display this on the dashboard.
+- [x] **Gemini Integration**: Build and integrate a Google Gemini provider adapter in `packages/ai` (implementing `BaseAnalyticsProvider`).
+- [x] **Prompt Management**: Establish a system to store and version prompts for analytics outputs.
+- [x] **Explainability**: Add metadata to AI insights so users understand _why_ a certain recommendation or anomaly was flagged.
+- [x] **Confidence Scoring**: Compare forecast confidence across different strategies and display this on the dashboard.
 
 ## Phase 3: Core Web Product Expansion
 

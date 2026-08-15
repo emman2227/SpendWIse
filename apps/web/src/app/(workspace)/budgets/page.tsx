@@ -8,6 +8,7 @@ import {
   PencilLine,
   Plus,
   ShieldAlert,
+  Sparkles,
   Target,
   Trash2,
   TrendingUp,
@@ -391,13 +392,46 @@ export default function BudgetsPage() {
     }
   };
 
+  const handleSuggestBudgets = async () => {
+    setIsSubmitting(true);
+    setPageMessage('Asking SpendWise AI for recommendations...');
+    try {
+      const response = await fetch(`/api/analytics/budgets/recommend`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error('Failed to get recommendations');
+      const recommendations = await response.json();
+
+      let count = 0;
+      for (const rec of recommendations) {
+        if (rec.categoryId && rec.recommendedAmount) {
+          await upsertBudget({
+            categoryId: rec.categoryId,
+            limitAmount: rec.recommendedAmount,
+            month: activeMonth.month,
+            year: activeMonth.year,
+          });
+          count++;
+        }
+      }
+      await invalidateBudgets();
+      setPageMessage(`AI suggested and applied ${count} budgets!`);
+    } catch {
+      setPageMessage('Unable to get AI recommendations right now.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <div className="space-y-6">
         <PageHeader
           actions={
             <>
-              <Button variant="soft">Alerts</Button>
+              <Button disabled={isSubmitting} onClick={handleSuggestBudgets} variant="soft">
+                <Sparkles className="mr-2 h-4 w-4" /> Suggest Budgets (AI)
+              </Button>
               <Button
                 disabled={categoriesQuery.isLoading}
                 onClick={openCreateBudget}

@@ -134,6 +134,43 @@ export class MailService {
     });
   }
 
+  async sendOverspendingAlert(input: {
+    to: string;
+    name: string;
+    categoryName: string;
+    amountOver: number;
+    currency: string;
+  }) {
+    if (!this.hasConfiguredMailAuth()) {
+      return this.logCodeFallback({
+        code: '-',
+        label: 'Overspending alert',
+        reason: 'Mail credentials are not configured.',
+        to: input.to,
+      });
+    }
+
+    return this.sendCodeEmailWithFallback({
+      to: input.to,
+      subject: `SpendWise Alert: Overspending in ${input.categoryName}`,
+      logLabel: 'Overspending alert',
+      text: [
+        `Hi ${input.name},`,
+        '',
+        `You have exceeded your budget for ${input.categoryName} by ${input.amountOver.toFixed(2)} ${input.currency}.`,
+        'Please review your budgets in the SpendWise app.',
+      ].join('\n'),
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #1f2937; line-height: 1.6;">
+          <p>Hi ${this.escapeHtml(input.name)},</p>
+          <p>You have exceeded your budget for <strong>${this.escapeHtml(input.categoryName)}</strong> by <strong>${input.amountOver.toFixed(2)} ${input.currency}</strong>.</p>
+          <p>Please review your budgets in the SpendWise app.</p>
+        </div>
+      `,
+      code: '-',
+    });
+  }
+
   private getTransporter() {
     if (!this.transporter) {
       const smtpUser = this.configService.getOrThrow<string>('SMTP_USER').trim();

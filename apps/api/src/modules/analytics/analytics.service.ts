@@ -246,4 +246,27 @@ export class AnalyticsService {
 
     return response;
   }
+
+  async recommendBudgets(userId: string) {
+    const expenses = await this.expensesService.list(userId, {});
+    const categories = await this.categoriesService.list(userId);
+    const user = await this.usersService.getProfile(userId);
+    const currency = user.currency || 'USD';
+
+    // To prevent passing too much data to the LLM, limit the expenses to the last 6 months or simplify them
+    const recentExpenses = expenses.slice(0, 200).map((e) => ({
+      amount: e.amount,
+      categoryId: e.categoryId,
+      date: e.date,
+      description: e.description,
+    }));
+    const categoryInfo = categories.map((c) => c.id + ': ' + c.name);
+
+    return this.provider.recommendBudgets({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expenses: recentExpenses as any,
+      categories: categoryInfo,
+      currency,
+    });
+  }
 }

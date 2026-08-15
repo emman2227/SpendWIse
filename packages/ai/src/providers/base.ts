@@ -14,4 +14,8 @@ export abstract class BaseAnalyticsProvider implements AnalyticsProvider {
   abstract deepDive(
     ...args: Parameters<AnalyticsProvider['deepDive']>
   ): ReturnType<AnalyticsProvider['deepDive']>;
+
+  abstract recommendBudgets(
+    ...args: Parameters<AnalyticsProvider['recommendBudgets']>
+  ): ReturnType<AnalyticsProvider['recommendBudgets']>;
 }

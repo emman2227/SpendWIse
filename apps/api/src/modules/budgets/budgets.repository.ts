@@ -37,7 +37,19 @@ export class BudgetsRepository {
   }
 
   findByMonth(userId: string, month: number, year: number) {
-    return this.budgetModel.find({ userId, month, year }).sort({ categoryId: 1 }).exec();
+    return this.budgetModel
+      .find({
+        $or: [
+          { userId, month, year },
+          { sharedWithUserIds: userId, month, year },
+        ],
+      })
+      .sort({ categoryId: 1 })
+      .exec();
+  }
+
+  findAllByMonth(month: number, year: number) {
+    return this.budgetModel.find({ month, year }).exec();
   }
 
   countByCategoryId(userId: string, categoryId: string) {

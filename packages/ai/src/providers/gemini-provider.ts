@@ -139,4 +139,34 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
       };
     }
   }
+
+  async recommendBudgets(context: { expenses: any[]; categories: string[]; currency: string }) {
+    const template = DEFAULT_PROMPT_TEMPLATES.find((t) => t.type === 'recommend_budgets');
+    if (!template) return [];
+
+    const prompt = renderPrompt(template.template, {
+      expenses: JSON.stringify(context.expenses),
+      categories: JSON.stringify(context.categories),
+      currency: context.currency,
+    });
+
+    try {
+      const { object } = await generateObject({
+        model: this.model as any,
+        schema: z.array(
+          z.object({
+            categoryId: z.string(),
+            recommendedAmount: z.number(),
+            explanation: z.string(),
+          }),
+        ) as any,
+        prompt,
+      });
+
+      return object as any;
+    } catch (error) {
+      console.error('[GeminiProvider] recommendBudgets failed:', error);
+      return [];
+    }
+  }
 }

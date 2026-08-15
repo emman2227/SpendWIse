@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef,Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { BudgetsModule } from '../budgets/budgets.module';
@@ -12,7 +12,7 @@ import { CategoryModel, CategorySchema } from './category.schema';
   imports: [
     MongooseModule.forFeature([{ name: CategoryModel.name, schema: CategorySchema }]),
     ExpensesModule,
-    BudgetsModule,
+    forwardRef(() => BudgetsModule),
   ],
   controllers: [CategoriesController],
   providers: [CategoriesRepository, CategoriesService],

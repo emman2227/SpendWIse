@@ -46,4 +46,9 @@ export class AnalyticsController {
   ) {
     return this.analyticsService.deepDiveInsight(user.userId, id, question);
   }
+
+  @Get('budgets/recommend')
+  recommendBudgets(@CurrentUser() user: AuthUser) {
+    return this.analyticsService.recommendBudgets(user.userId);
+  }
 }
