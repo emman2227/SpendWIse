@@ -98,3 +98,9 @@ export const deleteBudget = (budgetId: string) =>
   request<Budget>(`/api/budgets/${budgetId}`, {
     method: 'DELETE',
   });
+
+export const shareBudget = (budgetId: string, email: string) =>
+  request<Budget>(`/api/budgets/${budgetId}/share`, {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });

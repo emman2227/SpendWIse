@@ -12,6 +12,7 @@ import {
   Target,
   Trash2,
   TrendingUp,
+  Users,
 } from 'lucide-react';
 import { type FormEvent, useMemo, useState } from 'react';
 
@@ -30,6 +31,7 @@ import {
   budgetSummaryQueryKey,
   deleteBudget,
   getBudgetSummary,
+  shareBudget,
   upsertBudget,
 } from '@/lib/budgets/client';
 import { categoriesQueryKey, listCategories } from '@/lib/categories/client';
@@ -199,6 +201,78 @@ function BudgetEditorModal({
   );
 }
 
+function ShareBudgetModal({
+  email,
+  error,
+  isSubmitting,
+  onClose,
+  onEmailChange,
+  onSubmit,
+}: {
+  email: string;
+  error: string;
+  isSubmitting: boolean;
+  onClose: () => void;
+  onEmailChange: (value: string) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  return (
+    <div
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(19,38,63,0.42)] px-4 py-6 backdrop-blur-sm"
+      role="dialog"
+    >
+      <div className="panel-surface-strong max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-[32px] px-5 py-5 md:px-7 md:py-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="kicker">Share Budget</p>
+            <h2 className="mt-3 text-2xl font-semibold text-ink">Invite to budget</h2>
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
+              Enter the email of the person you want to share this budget with.
+            </p>
+          </div>
+          <button
+            aria-label="Close share modal"
+            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
+            onClick={onClose}
+            type="button"
+          >
+            <CircleX className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+          <label className="space-y-2 text-sm font-medium text-ink">
+            <span>Email address</span>
+            <Input
+              className={cn(error && 'border-danger focus:border-danger')}
+              onChange={(event) => onEmailChange(event.target.value)}
+              placeholder="colleague@example.com"
+              type="email"
+              value={email}
+            />
+          </label>
+
+          {error ? (
+            <div className="rounded-[20px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
+              {error}
+            </div>
+          ) : null}
+
+          <div className="flex flex-wrap gap-3">
+            <Button disabled={isSubmitting || !email} type="submit" variant="secondary">
+              {isSubmitting ? 'Sharing...' : 'Share budget'}
+            </Button>
+            <Button disabled={isSubmitting} onClick={onClose} type="button" variant="soft">
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function BudgetsPage() {
   const queryClient = useQueryClient();
   const { data: user } = useCurrentUserQuery();
@@ -206,6 +280,11 @@ export default function BudgetsPage() {
   const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
 
   const [isCreateBudgetOpen, setIsCreateBudgetOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareTargetId, setShareTargetId] = useState<string | null>(null);
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareError, setShareError] = useState('');
+  const [isSharing, setIsSharing] = useState(false);
   const [monthFilter, setMonthFilter] = useState(getInitialMonthValue);
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<BudgetStatusFilter>('all');
@@ -297,6 +376,20 @@ export default function BudgetsPage() {
   const closeBudgetModal = () => {
     setIsCreateBudgetOpen(false);
     resetForm();
+  };
+
+  const openShareBudget = (budget: (typeof budgetViews)[number]) => {
+    setShareTargetId(budget.id);
+    setShareEmail('');
+    setShareError('');
+    setIsShareModalOpen(true);
+  };
+
+  const closeShareModal = () => {
+    setIsShareModalOpen(false);
+    setShareTargetId(null);
+    setShareEmail('');
+    setShareError('');
   };
 
   const handleFieldChange = (field: BudgetField, value: string) => {
@@ -392,6 +485,26 @@ export default function BudgetsPage() {
     }
   };
 
+  const handleShareSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!shareEmail || !shareTargetId) return;
+
+    setIsSharing(true);
+    setShareError('');
+    setPageMessage('');
+
+    try {
+      await shareBudget(shareTargetId, shareEmail);
+      await invalidateBudgets();
+      closeShareModal();
+      setPageMessage(`Budget shared with ${shareEmail}.`);
+    } catch (error) {
+      setShareError(resolveBudgetError(error, 'Unable to share the budget right now.'));
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   const handleSuggestBudgets = async () => {
     setIsSubmitting(true);
     setPageMessage('Asking SpendWise AI for recommendations...');
@@ -451,6 +564,17 @@ export default function BudgetsPage() {
           }
           title="Keep budgets on track."
         />
+
+        {isShareModalOpen ? (
+          <ShareBudgetModal
+            email={shareEmail}
+            error={shareError}
+            isSubmitting={isSharing}
+            onClose={closeShareModal}
+            onEmailChange={setShareEmail}
+            onSubmit={handleShareSubmit}
+          />
+        ) : null}
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <MetricCard
@@ -733,6 +857,16 @@ export default function BudgetsPage() {
                       </div>
 
                       <div className="flex flex-wrap gap-2 lg:justify-end">
+                        <button
+                          className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
+                          onClick={() => openShareBudget(budget)}
+                          type="button"
+                        >
+                          <span className="inline-flex items-center gap-1.5">
+                            <Users className="h-3.5 w-3.5" />
+                            Share
+                          </span>
+                        </button>
                         <button
                           className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
                           onClick={() => openEditBudget(budget)}

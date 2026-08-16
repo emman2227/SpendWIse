@@ -2,6 +2,7 @@ import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common
 import { z } from 'zod';
 
 import { ExpensesService } from '../expenses/expenses.service';
+import { UsersRepository } from '../users/users.repository';
 import { BudgetsRepository } from './budgets.repository';
 
 export const budgetSummaryQuerySchema = z.object({
@@ -16,6 +17,8 @@ export class BudgetsService {
     private readonly budgetsRepository: BudgetsRepository,
     @Inject(ExpensesService)
     private readonly expensesService: ExpensesService,
+    @Inject(UsersRepository)
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async upsert(
@@ -48,12 +51,15 @@ export class BudgetsService {
     return this.budgetsRepository.delete(id, userId);
   }
 
-  async shareBudget(userId: string, budgetId: string, targetUserId: string) {
+  async shareBudgetByEmail(userId: string, budgetId: string, targetEmail: string) {
     const budget = await this.budgetsRepository['budgetModel'].findOne({ _id: budgetId, userId });
     if (!budget) throw new Error('Budget not found');
 
-    if (!budget.sharedWithUserIds.includes(targetUserId)) {
-      budget.sharedWithUserIds.push(targetUserId);
+    const targetUser = await this.usersRepository.findByEmail(targetEmail);
+    if (!targetUser) throw new Error('User not found with this email');
+
+    if (!budget.sharedWithUserIds.includes(targetUser.id)) {
+      budget.sharedWithUserIds.push(targetUser.id);
       await budget.save();
     }
     return budget;

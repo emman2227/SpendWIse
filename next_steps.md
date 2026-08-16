@@ -25,11 +25,11 @@ _Goal: Move beyond the mock provider and build out the actual AI intelligence la
 
 _Goal: Add high-value features for users now that the core flows and AI are operational._
 
-- [ ] **Recurring Expenses**: Support creation and tracking of subscription-like recurring expenses.
-- [ ] **Budget Recommendations**: Use the AI layer to suggest budget limits based on past spending behavior.
-- [ ] **Overspending Alerts**: Implement real-time or daily notifications for nearing or exceeding budget limits.
-- [ ] **Data Export**: Create exportable reports (e.g., CSV, PDF) for users' monthly summaries.
-- [ ] **Shared Budgets**: Support household or shared budget features (multi-user data access).
+- [x] **Recurring Expenses**: Support creation and tracking of subscription-like recurring expenses.
+- [x] **Budget Recommendations**: Use the AI layer to suggest budget limits based on past spending behavior.
+- [x] **Overspending Alerts**: Implement real-time or daily notifications for nearing or exceeding budget limits.
+- [x] **Data Export**: Create exportable reports (e.g., CSV, PDF) for users' monthly summaries.
+- [x] **Shared Budgets**: Support household or shared budget features (multi-user data access).
 
 ## Phase 4: Engineering Hardening & DevOps (Web & API)
 

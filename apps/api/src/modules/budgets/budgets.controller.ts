@@ -59,4 +59,13 @@ export class BudgetsController {
   remove(@CurrentUser() user: AuthUser, @Param('budgetId') budgetId: string) {
     return this.budgetsService.delete(user.userId, budgetId);
   }
+
+  @Post(':budgetId/share')
+  share(
+    @CurrentUser() user: AuthUser,
+    @Param('budgetId') budgetId: string,
+    @Body() body: { email: string },
+  ) {
+    return this.budgetsService.shareBudgetByEmail(user.userId, budgetId, body.email);
+  }
 }
