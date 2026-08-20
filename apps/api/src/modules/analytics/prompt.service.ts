@@ -1,13 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { DEFAULT_PROMPT_TEMPLATES, renderPrompt } from '@spendwise/ai';
 
-import type { PromptRepository } from './prompt.repository';
+import { PromptRepository } from './prompt.repository';
 
 @Injectable()
 export class PromptService {
   private readonly logger = new Logger(PromptService.name);
 
-  constructor(private readonly promptRepository: PromptRepository) {}
+  constructor(@Inject(PromptRepository) private readonly promptRepository: PromptRepository) {}
 
   /**
    * Retrieve a prompt template by type, falling back to the default template

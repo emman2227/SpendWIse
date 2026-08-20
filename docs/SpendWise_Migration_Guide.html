@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SpendWise - New Device Migration & Setup Guide</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --primary-light: #eef2ff;
+      --accent: #06b6d4;
+      --bg: #0f172a;
+      --surface: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --code-bg: #1e293b;
+      --code-text: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text-main);
+      background: #ffffff;
+      line-height: 1.5;
+      font-size: 13px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    @page {
+      size: A4;
+      margin: 15mm 12mm 15mm 12mm;
+    }
+
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+      color: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.2);
+    }
+
+    .header-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: #c7d2fe;
+      max-width: 700px;
+    }
+
+    .meta-strip {
+      display: flex;
+      gap: 16px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 11px;
+      color: #e0e7ff;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Section Styling */
+    .section {
+      margin-bottom: 22px;
+      page-break-inside: avoid;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+
+    .section-title .badge-num {
+      background: var(--primary);
+      color: white;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* Cards */
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .file-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Code Blocks */
+    pre, code {
+      font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 11px;
+      line-height: 1.45;
+      overflow-x: auto;
+      border: 1px solid #334155;
+      position: relative;
+    }
+
+    .code-comment { color: #94a3b8; font-style: italic; }
+    .code-key { color: #38bdf8; font-weight: 600; }
+    .code-val { color: #a5f3fc; }
+    .code-cmd { color: #4ade80; font-weight: 600; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 2px solid var(--border);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #fcfdfe;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .tag-blue { background: #dbeafe; color: #1e40af; }
+    .tag-green { background: #dcfce7; color: #166534; }
+    .tag-purple { background: #f3e8ff; color: #6b21a8; }
+    .tag-orange { background: #ffedd5; color: #9a3412; }
+
+    /* Callouts */
+    .callout {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin: 10px 0;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .callout-warning {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      color: #92400e;
+    }
+
+    .callout-tip {
+      background: #ecfdf5;
+      border-left: 4px solid #10b981;
+      color: #065f46;
+    }
+
+    .callout-info {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      color: #1e40af;
+    }
+
+    /* Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .step-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #ffffff;
+    }
+
+    .step-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .step-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    /* Checklist */
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px dashed #e2e8f0;
+      font-size: 12px;
+    }
+
+    .checkbox {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #94a3b8;
+      border-radius: 3px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge">SpendWise Workspace Migration Manual</div>
+    <h1>Device Transfer & Environment Setup Guide</h1>
+    <p>Complete guide to restoring all git-ignored environment configs, system prerequisites, package dependencies, and development services onto your new laptop.</p>
+    
+    <div class="meta-strip">
+      <div class="meta-item"><strong>Monorepo:</strong> Turborepo + pnpm workspace</div>
+      <div class="meta-item"><strong>Node.js:</strong> &gt;= 20.11.0 (Recommended 22.x LTS)</div>
+      <div class="meta-item"><strong>Package Manager:</strong> pnpm 9.15.4</div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: SYSTEM REQUIREMENTS & PREREQUISITES -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge-num">1</span>
+      System Prerequisites & Tool Installation
+    </div>
+
+    <div class="callout callout-info">
+      <div>
+        <strong>Before installing dependencies:</strong> Make sure Node.js, pnpm, and Git are properly installed and added to your new system's PATH.
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="step-box">
+        <div class="step-num">Step 1.1</div>
+        <div class="step-title">Node.js (v20+ or v22 LTS)</div>
+        <p style="font-size: 11px; color: #64748b; margin-bottom: 6px;">Download from official site or via nvm/winget.</p>
+        <pre><span class="code-cmd">winget install</span> OpenJS.NodeJS.LTS
+<span class="code-comment"># Verify</span>
+<span class="code-cmd">node</span> -v</pre>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">Step 1.2</div>
+        <div class="step-title">pnpm (v9.15.4)</div>
+        <p style="font-size: 11px; color: #64748b; margin-bottom: 6px;">Required monorepo package manager.</p>
+        <pre><span class="code-cmd">npm install -g</span> pnpm@9.15.4
+<span class="code-comment"># Or enable corepack</span>
+<span class="code-cmd">corepack enable</span></pre>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">Step 1.3</div>
+        <div class="step-title">Global CLI Tools (Optional)</div>
+        <p style="font-size: 11px; color: #64748b; margin-bottom: 6px;">NestJS CLI, Turborepo & Expo.</p>
+        <pre><span class="code-cmd">npm install -g</span> turbo @nestjs/cli expo-cli</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: ALL GITIGNORED FILES & EXACT CONTENTS -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge-num">2</span>
+      Restoring Git-Ignored Environment Files (.env)
+    </div>
+
+    <div class="callout callout-warning">
+      <div>
+        <strong>CRITICAL:</strong> Git does not track <code>.env</code> files. You must manually recreate each of the 4 environment files below with their exact keys and values in your new repository folder.
+      </div>
+    </div>
+
+    <!-- FILE 1: ROOT .env -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>Root Workspace Environment</span>
+        </div>
+        <div class="file-path">SpendWise/.env</div>
+      </div>
+      <p style="font-size: 11px; color: #64748b; margin-bottom: 6px;">Contains ports, default base URLs, and Google SMTP configuration for email verification.</p>
+      <pre><span class="code-comment"># Workspace-level defaults</span>
+<span class="code-key">NODE_ENV</span>=<span class="code-val">development</span>
+<span class="code-key">PORT</span>=<span class="code-val">4000</span>
+<span class="code-key">API_PORT</span>=<span class="code-val">4000</span>
+<span class="code-key">WEB_PORT</span>=<span class="code-val">3000</span>
+<span class="code-key">MOBILE_API_URL</span>=<span class="code-val">http://localhost:4000/api/v1</span>
+<span class="code-key">API_BASE_URL</span>=<span class="code-val">http://localhost:4000/api/v1</span>
+
+<span class="code-comment"># Google SMTP Email Verification</span>
+<span class="code-key">SMTP_HOST</span>=<span class="code-val">smtp.gmail.com</span>
+<span class="code-key">SMTP_PORT</span>=<span class="code-val">465</span>
+<span class="code-key">SMTP_SECURE</span>=<span class="code-val">true</span>
+<span class="code-key">SMTP_USER</span>=<span class="code-val">your-email@gmail.com</span>
+<span class="code-key">SMTP_PASS</span>=<span class="code-val">your-gmail-app-password</span>
+<span class="code-key">SMTP_FROM_EMAIL</span>=<span class="code-val">your-email@gmail.com</span>
+<span class="code-key">SMTP_FROM_NAME</span>=<span class="code-val">SpendWise</span>
+<span class="code-key">EMAIL_VERIFICATION_CODE_TTL_MINUTES</span>=<span class="code-val">10</span>
+<span class="code-key">EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS</span>=<span class="code-val">60</span></pre>
+    </div>
+
+    <!-- FILE 2: API .env -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>Backend API Environment</span>
+        </div>
+        <div class="file-path">SpendWise/apps/api/.env</div>
+      </div>
+      <p style="font-size: 11px; color: #64748b; margin-bottom: 6px;">Contains MongoDB Atlas connection string, JWT secrets, and Google Gemini AI API Key.</p>
+      <pre><span class="code-key">NODE_ENV</span>=<span class="code-val">development</span>
+<span class="code-key">PORT</span>=<span class="code-val">4000</span>
+<span class="code-key">MONGODB_URI</span>=<span class="code-val">mongodb+srv://&lt;db_user&gt;:&lt;db_password&gt;@spendwise.c2i5amu.mongodb.net/</span>
+<span class="code-key">JWT_ACCESS_SECRET</span>=<span class="code-val">change-me-access-secret</span>
+<span class="code-key">JWT_REFRESH_SECRET</span>=<span class="code-val">change-me-refresh-secret</span>
+<span class="code-key">JWT_ACCESS_TTL</span>=<span class="code-val">15m</span>
+<span class="code-key">JWT_REFRESH_TTL</span>=<span class="code-val">7d</span>
+<span class="code-key">AI_PROVIDER</span>=<span class="code-val">gemini</span>
+<span class="code-key">GOOGLE_GENERATIVE_AI_API_KEY</span>=<span class="code-val">your-gemini-api-key-here</span></pre>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 2 CONTINUED -->
+  <div class="section">
+    <!-- FILE 3: WEB .env -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>Web Frontend (Next.js) Environment</span>
+        </div>
+        <div class="file-path">SpendWise/apps/web/.env</div>
+      </div>
+      <p style="font-size: 11px; color: #64748b; margin-bottom: 6px;">Contains Next.js API client endpoint, cookie config, and Better Auth settings.</p>
+      <pre><span class="code-key">NEXT_PUBLIC_API_URL</span>=<span class="code-val">http://127.0.0.1:4000/api/v1</span>
+<span class="code-key">NEXT_PUBLIC_APP_NAME</span>=<span class="code-val">SpendWise</span>
+<span class="code-key">AUTH_COOKIE_NAME</span>=<span class="code-val">spendwise_access_token</span>
+<span class="code-key">BETTER_AUTH_SECRET</span>=<span class="code-val">replace-with-a-long-random-string</span>
+<span class="code-key">BETTER_AUTH_URL</span>=<span class="code-val">http://localhost:3000</span>
+<span class="code-key">GOOGLE_GENERATIVE_AI_API_KEY</span>=</pre>
+    </div>
+
+    <!-- FILE 4: MOBILE .env -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>Mobile App (Expo / React Native) Environment</span>
+        </div>
+        <div class="file-path">SpendWise/apps/mobile/.env</div>
+      </div>
+      <p style="font-size: 11px; color: #64748b; margin-bottom: 6px;">Contains Expo public endpoints (use your local machine LAN IP when testing on physical phone).</p>
+      <pre><span class="code-key">EXPO_PUBLIC_API_URL</span>=<span class="code-val">http://localhost:4000/api/v1</span>
+<span class="code-key">EXPO_PUBLIC_APP_NAME</span>=<span class="code-val">SpendWise</span></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 3: STEP-BY-STEP PROJECT RESTORATION -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge-num">3</span>
+      Step-by-Step Installation & Build Instructions
+    </div>
+
+    <table style="margin-top: 4px;">
+      <thead>
+        <tr>
+          <th style="width: 10%;">Step</th>
+          <th style="width: 30%;">Action</th>
+          <th>Command / Script</th>
+          <th style="width: 25%;">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>01</strong></td>
+          <td><strong>Clone & Enter Repo</strong></td>
+          <td><code>git clone &lt;repo_url&gt; SpendWise<br>cd SpendWise</code></td>
+          <td>Pull latest main/dev branch.</td>
+        </tr>
+        <tr>
+          <td><strong>02</strong></td>
+          <td><strong>Create .env Files</strong></td>
+          <td>Place the 4 <code>.env</code> files from Section 2</td>
+          <td>Root, <code>apps/api</code>, <code>apps/web</code>, <code>apps/mobile</code></td>
+        </tr>
+        <tr>
+          <td><strong>03</strong></td>
+          <td><strong>Install Dependencies</strong></td>
+          <td><code>pnpm install</code></td>
+          <td>Installs all monorepo workspace packages and links.</td>
+        </tr>
+        <tr>
+          <td><strong>04</strong></td>
+          <td><strong>Build Internal Packages</strong></td>
+          <td><code>pnpm --filter @spendwise/shared build<br>pnpm --filter @spendwise/ai build</code></td>
+          <td>Compiles shared TypeScript definitions and AI SDK.</td>
+        </tr>
+        <tr>
+          <td><strong>05</strong></td>
+          <td><strong>Run Full Build (Optional)</strong></td>
+          <td><code>pnpm build</code></td>
+          <td>Verifies all packages, API, web, and mobile build without type errors.</td>
+        </tr>
+        <tr>
+          <td><strong>06</strong></td>
+          <td><strong>Seed Database (Optional)</strong></td>
+          <td><code>pnpm --filter @spendwise/api seed</code></td>
+          <td>Populates MongoDB with sample expense categories and dummy data.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 4: RUNNING THE APPLICATIONS -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge-num">4</span>
+      Starting Dev Servers
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="margin-bottom: 0;">
+        <div class="card-title" style="margin-bottom: 6px;">
+          <span class="tag tag-purple">Monorepo All-in-One</span>
+          <span>Start All Services Concurrently</span>
+        </div>
+        <pre><span class="code-cmd">pnpm dev</span></pre>
+        <p style="font-size: 11px; color: #64748b; margin-top: 6px;">Runs Turborepo which launches NestJS API, Next.js web app, and Expo dev server simultaneously.</p>
+      </div>
+
+      <div class="card" style="margin-bottom: 0;">
+        <div class="card-title" style="margin-bottom: 6px;">
+          <span class="tag tag-green">Backend API Only</span>
+          <span>Port 4000 (Swagger/Endpoints)</span>
+        </div>
+        <pre><span class="code-cmd">pnpm --filter @spendwise/api dev</span></pre>
+        <p style="font-size: 11px; color: #64748b; margin-top: 6px;">API live at <code>http://localhost:4000/api/v1</code></p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 10px;">
+      <div class="card" style="margin-bottom: 0;">
+        <div class="card-title" style="margin-bottom: 6px;">
+          <span class="tag tag-blue">Web Frontend Only</span>
+          <span>Port 3000 (Next.js Dashboard)</span>
+        </div>
+        <pre><span class="code-cmd">pnpm --filter @spendwise/web dev</span></pre>
+        <p style="font-size: 11px; color: #64748b; margin-top: 6px;">Dashboard live at <code>http://localhost:3000</code></p>
+      </div>
+
+      <div class="card" style="margin-bottom: 0;">
+        <div class="card-title" style="margin-bottom: 6px;">
+          <span class="tag tag-orange">Mobile App Only</span>
+          <span>Expo DevTools</span>
+        </div>
+        <pre><span class="code-cmd">pnpm --filter @spendwise/mobile dev</span></pre>
+        <p style="font-size: 11px; color: #64748b; margin-top: 6px;">Scan QR code with Expo Go app (iOS / Android).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 5: DEPENDENCIES & LIBRARIES MATRIX -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge-num">5</span>
+      Complete Libraries & Dependencies Matrix
+    </div>
+
+    <p style="font-size: 11.5px; color: #64748b; margin-bottom: 8px;">
+      SpendWise is organized as a Turborepo monorepo with 3 applications and 4 shared internal packages. All dependencies will be automatically installed via <code>pnpm install</code>.
+    </p>
+
+    <!-- BACKEND API DEPENDENCIES -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom: 6px;">
+        <span class="tag tag-green">apps/api</span>
+        <span>Backend Framework & Database Libraries</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 25%;">Package</th>
+            <th style="width: 15%;">Version</th>
+            <th>Category & Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>@nestjs/core, @nestjs/common</code></td><td>^10.4.15</td><td>Core NestJS server architecture</td></tr>
+          <tr><td><code>@nestjs/mongoose, mongoose</code></td><td>^10.1.0 / ^8.9.4</td><td>MongoDB object modeling & database queries</td></tr>
+          <tr><td><code>@nestjs/jwt, passport, passport-jwt</code></td><td>^10.2.0 / ^4.0.1</td><td>JWT user authentication & authorization strategies</td></tr>
+          <tr><td><code>@node-rs/bcrypt</code></td><td>^1.10.7</td><td>High-performance password hashing</td></tr>
+          <tr><td><code>nodemailer</code></td><td>^8.0.4</td><td>SMTP email dispatch (verification codes)</td></tr>
+          <tr><td><code>@nestjs/schedule</code></td><td>^6.1.3</td><td>Cron jobs & automated recurring tasks</td></tr>
+          <tr><td><code>zod</code></td><td>^3.24.1</td><td>Runtime schema validation</td></tr>
+          <tr><td><code>@spendwise/ai, @spendwise/shared</code></td><td>workspace:*</td><td>Internal monorepo shared packages</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- WEB FRONTEND DEPENDENCIES -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom: 6px;">
+        <span class="tag tag-blue">apps/web</span>
+        <span>Frontend Framework & UI Components</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 25%;">Package</th>
+            <th style="width: 15%;">Version</th>
+            <th>Category & Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>next, react, react-dom</code></td><td>^15.1.6 / ^18.3.1</td><td>Next.js 15 App Router & React 18 frontend</td></tr>
+          <tr><td><code>tailwindcss, postcss, autoprefixer</code></td><td>^3.4.16</td><td>Utility-first CSS styling engine</td></tr>
+          <tr><td><code>@tanstack/react-query</code></td><td>^5.62.9</td><td>Server state management & async data caching</td></tr>
+          <tr><td><code>zustand</code></td><td>^5.0.2</td><td>Client global state management (auth, theme, filters)</td></tr>
+          <tr><td><code>lucide-react</code></td><td>^1.7.0</td><td>Modern icon library</td></tr>
+          <tr><td><code>recharts</code></td><td>^3.8.1</td><td>Interactive financial charts and visualizations</td></tr>
+          <tr><td><code>motion</code></td><td>^12.42.2</td><td>Fluid micro-animations and transitions</td></tr>
+          <tr><td><code>@radix-ui/*, @base-ui/react</code></td><td>Latest</td><td>Accessible primitive UI primitives (dialogs, dropdowns)</td></tr>
+          <tr><td><code>better-auth</code></td><td>^1.5.6</td><td>Authentication client adapter</td></tr>
+          <tr><td><code>next-themes</code></td><td>^0.4.6</td><td>Dark / Light mode switching support</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MOBILE & SHARED PACKAGES -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom: 6px;">
+        <span class="tag tag-orange">apps/mobile & packages/*</span>
+        <span>Mobile App, AI Engine & Shared Workspace</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 25%;">Package</th>
+            <th style="width: 15%;">Version</th>
+            <th>Category & Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>expo, react-native</code></td><td>~52.0.20 / 0.76.5</td><td>Cross-platform mobile application runtime</td></tr>
+          <tr><td><code>@ai-sdk/google, ai</code></td><td>^3.0.55 / ^6.0.142</td><td>Vercel AI SDK & Google Gemini models integration</td></tr>
+          <tr><td><code>turbo</code></td><td>^2.3.3</td><td>High-performance monorepo build caching</td></tr>
+          <tr><td><code>typescript</code></td><td>^5.7.2</td><td>End-to-end type safety across fullstack</td></tr>
+          <tr><td><code>eslint, prettier, husky</code></td><td>Latest</td><td>Code formatting, linting, and pre-commit git hooks</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 6: VERIFICATION & CHECKLIST -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge-num">6</span>
+      New Device Migration Checklist
+    </div>
+
+    <div class="card">
+      <div class="checklist-item">
+        <span class="checkbox"></span>
+        <span><strong>1.</strong> Node.js (v20+) and pnpm (v9.15.4) installed and accessible in terminal.</span>
+      </div>
+      <div class="checklist-item">
+        <span class="checkbox"></span>
+        <span><strong>2.</strong> Git repository cloned to local drive.</span>
+      </div>
+      <div class="checklist-item">
+        <span class="checkbox"></span>
+        <span><strong>3.</strong> Created root <code>.env</code> with SMTP credentials.</span>
+      </div>
+      <div class="checklist-item">
+        <span class="checkbox"></span>
+        <span><strong>4.</strong> Created <code>apps/api/.env</code> with MongoDB URI & Gemini API Key.</span>
+      </div>
+      <div class="checklist-item">
+        <span class="checkbox"></span>
+        <span><strong>5.</strong> Created <code>apps/web/.env</code> with API endpoints.</span>
+      </div>
+      <div class="checklist-item">
+        <span class="checkbox"></span>
+        <span><strong>6.</strong> Created <code>apps/mobile/.env</code> with API endpoints.</span>
+      </div>
+      <div class="checklist-item">
+        <span class="checkbox"></span>
+        <span><strong>7.</strong> Ran <code>pnpm install</code> and confirmed all node_modules resolved.</span>
+      </div>
+      <div class="checklist-item">
+        <span class="checkbox"></span>
+        <span><strong>8.</strong> Ran <code>pnpm dev</code> and verified API (port 4000) and Web (port 3000) respond.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

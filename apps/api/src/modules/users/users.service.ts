@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { NotificationPreferences } from '@spendwise/shared';
 
-import type { UsersRepository } from './users.repository';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(@Inject(UsersRepository) private readonly usersRepository: UsersRepository) {}
 
   async getProfile(userId: string) {
     const user = await this.usersRepository.findById(userId);

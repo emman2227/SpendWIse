@@ -1,24 +1,24 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
-import type { CategoriesService } from '../categories/categories.service';
-import type { ExpensesRepository } from '../expenses/expenses.repository';
-import type { MailService } from '../mail/mail.service';
-import type { UsersRepository } from '../users/users.repository';
-import type { BudgetsRepository } from './budgets.repository';
-import type { BudgetsService } from './budgets.service';
+import { CategoriesService } from '../categories/categories.service';
+import { ExpensesRepository } from '../expenses/expenses.repository';
+import { MailService } from '../mail/mail.service';
+import { UsersRepository } from '../users/users.repository';
+import { BudgetsRepository } from './budgets.repository';
+import { BudgetsService } from './budgets.service';
 
 @Injectable()
 export class BudgetAlertsService {
   private readonly logger = new Logger(BudgetAlertsService.name);
 
   constructor(
-    private readonly budgetsService: BudgetsService,
-    private readonly budgetsRepository: BudgetsRepository,
-    private readonly mailService: MailService,
-    private readonly categoriesService: CategoriesService,
-    private readonly usersRepository: UsersRepository,
-    private readonly expensesRepository: ExpensesRepository,
+    @Inject(BudgetsService) private readonly budgetsService: BudgetsService,
+    @Inject(BudgetsRepository) private readonly budgetsRepository: BudgetsRepository,
+    @Inject(MailService) private readonly mailService: MailService,
+    @Inject(CategoriesService) private readonly categoriesService: CategoriesService,
+    @Inject(UsersRepository) private readonly usersRepository: UsersRepository,
+    @Inject(ExpensesRepository) private readonly expensesRepository: ExpensesRepository,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)

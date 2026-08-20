@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Header,
+  Inject,
   Param,
   Patch,
   Post,
@@ -18,7 +19,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { AuthUser } from '../../common/types/auth-user.interface';
-import type { ExpensesService } from './expenses.service';
+import { ExpensesService } from './expenses.service';
 
 @Controller({
   path: 'expenses',
@@ -26,7 +27,7 @@ import type { ExpensesService } from './expenses.service';
 })
 @UseGuards(JwtAuthGuard)
 export class ExpensesController {
-  constructor(private readonly expensesService: ExpensesService) {}
+  constructor(@Inject(ExpensesService) private readonly expensesService: ExpensesService) {}
 
   @Get('export')
   @Header('Content-Type', 'text/csv')

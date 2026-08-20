@@ -35,3 +35,7 @@ apps/web/.next
 
 # Nest
 apps/api/dist
+
+# Generated PDF documentation
+*.pdf
+SpendWise_New_Device_Migration_Guide.pdf

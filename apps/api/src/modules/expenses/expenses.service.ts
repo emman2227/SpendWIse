@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import type { Model } from 'mongoose';
 
-import type { ExpensesRepository } from './expenses.repository';
+import { ExpensesRepository } from './expenses.repository';
 import { RecurringExpenseModel } from './recurring-expense.schema';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class ExpensesService {
   private readonly logger = new Logger(ExpensesService.name);
 
   constructor(
-    private readonly expensesRepository: ExpensesRepository,
+    @Inject(ExpensesRepository) private readonly expensesRepository: ExpensesRepository,
     @InjectModel(RecurringExpenseModel.name)
     private readonly recurringExpenseModel: Model<RecurringExpenseModel>,
   ) {}
