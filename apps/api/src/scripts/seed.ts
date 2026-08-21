@@ -1,7 +1,15 @@
+import dns from 'node:dns';
+
 import { hashSync } from '@node-rs/bcrypt';
 import mongoose from 'mongoose';
 
 import { defaultCategorySeeds } from '../modules/database/seeds/default-categories.seed';
+
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+} catch {
+  // Use system default DNS
+}
 
 const run = async () => {
   const mongoUri = process.env.MONGODB_URI ?? 'mongodb://localhost:27017/spendwise';

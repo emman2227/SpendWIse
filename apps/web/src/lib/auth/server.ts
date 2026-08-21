@@ -282,7 +282,8 @@ export const createErrorResponse = (error: unknown, options: { exposeMessage?: b
   if (error instanceof ApiRouteError) {
     return NextResponse.json(
       {
-        message: options.exposeMessage ? error.message : getGenericErrorMessage(error.status),
+        message:
+          options.exposeMessage === false ? getGenericErrorMessage(error.status) : error.message,
       },
       {
         status: error.status,

@@ -168,4 +168,12 @@ export const updateProfile = (input: { name?: string; phone?: string; currency?:
     body: JSON.stringify(input),
   });
 
-export const getAuthErrorMessage = (_error: unknown, fallback: string) => fallback;
+export const getAuthErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof AuthClientError && error.message) {
+    return error.message;
+  }
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return fallback;
+};
