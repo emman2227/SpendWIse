@@ -501,29 +501,41 @@ export default function DashboardPage() {
                           : 'Not ready'}
                       </p>
                     </div>
-                    {analytics?.forecast?.confidenceExplanation ? (
+                    {analytics?.forecast ? (
                       <div className="mt-2 border-t border-brand/10 pt-1.5">
-                        {showForecastExplanation ? (
-                          <p className="mb-1.5 text-xs leading-relaxed text-ink-soft">
+                        <div className="flex items-center justify-between gap-2">
+                          {analytics.forecast.confidenceExplanation ? (
+                            <button
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand transition-colors hover:text-brand-strong"
+                              onClick={() => setShowForecastExplanation((prev) => !prev)}
+                              type="button"
+                            >
+                              {showForecastExplanation ? (
+                                <>
+                                  View less <ChevronUp className="h-3 w-3" />
+                                </>
+                              ) : (
+                                <>
+                                  View more <ChevronDown className="h-3 w-3" />
+                                </>
+                              )}
+                            </button>
+                          ) : (
+                            <span className="text-[11px] text-ink-soft">Forecast active</span>
+                          )}
+                          <Link
+                            className="text-[11px] font-medium text-ink-soft transition-colors hover:text-brand"
+                            href="/forecasts"
+                          >
+                            Details &rarr;
+                          </Link>
+                        </div>
+                        {showForecastExplanation && analytics.forecast.confidenceExplanation ? (
+                          <p className="mt-1.5 text-xs leading-relaxed text-ink-soft">
                             <span className="font-medium text-brand">Why:</span>{' '}
                             {analytics.forecast.confidenceExplanation}
                           </p>
                         ) : null}
-                        <button
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand transition-colors hover:text-brand-strong"
-                          onClick={() => setShowForecastExplanation((prev) => !prev)}
-                          type="button"
-                        >
-                          {showForecastExplanation ? (
-                            <>
-                              View less <ChevronUp className="h-3 w-3" />
-                            </>
-                          ) : (
-                            <>
-                              View more <ChevronDown className="h-3 w-3" />
-                            </>
-                          )}
-                        </button>
                       </div>
                     ) : null}
                   </div>

@@ -10,17 +10,21 @@ import {
 } from '@spendwise/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Calendar,
   CircleAlert,
   CircleX,
   CreditCard,
+  DollarSign,
   Download,
+  Filter,
   PencilLine,
   ReceiptText,
+  RotateCcw,
   Search,
   Sparkles,
   Trash2,
 } from 'lucide-react';
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,6 +32,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
+import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { Textarea } from '@/components/ui/textarea';
@@ -45,6 +50,10 @@ import {
 import { cn } from '@/lib/utils';
 
 type PaymentMethodFilter = PaymentMethod | 'all';
+type StatusFilter = 'all' | 'alert' | 'recurring' | 'normal';
+type AmountFilter = 'all' | 'under_25' | '25_to_100' | '100_to_500' | 'over_500';
+type SortBy = 'date_desc' | 'date_asc' | 'amount_desc' | 'amount_asc' | 'description_asc';
+type PageSize = 10 | 25 | 50 | 'all';
 type EditorMode = 'create' | 'edit';
 
 interface TransactionFormValues {
@@ -110,6 +119,9 @@ const recurringHintPattern =
 
 const selectClassName =
   'flex h-12 w-full rounded-[20px] border border-line bg-paper px-4 text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:bg-paper-strong';
+
+const compactSelectClassName =
+  'flex h-9 rounded-[16px] border border-line bg-paper px-3 text-xs font-medium text-ink shadow-sm outline-none transition hover:border-brand/40 focus:border-brand focus:bg-paper-strong';
 
 const getInitialMonthValue = () => {
   const now = new Date();
@@ -407,6 +419,12 @@ export default function TransactionsPage() {
   const [searchValue, setSearchValue] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<PaymentMethodFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [amountFilter, setAmountFilter] = useState<AmountFilter>('all');
+  const [sortBy, setSortBy] = useState<SortBy>('date_desc');
+  const [pageSize, setPageSize] = useState<PageSize>(10);
+  const [currentPage, setCurrentPage] = useState(1);
+
   const [formValues, setFormValues] = useState<TransactionFormValues>(getDefaultFormValues());
   const [fieldErrors, setFieldErrors] = useState<TransactionFieldErrors>({});
   const [formError, setFormError] = useState('');
@@ -424,59 +442,152 @@ export default function TransactionsPage() {
     queryFn: () => listExpenses(activeMonth),
   });
 
-  const categories = categoriesQuery.data ?? [];
-  const expenses = expensesQuery.data ?? [];
-  const averageAmount =
-    expenses.length > 0
-      ? expenses.reduce((total, transaction) => total + transaction.amount, 0) / expenses.length
-      : 0;
-  const transactionViews: TransactionView[] = expenses.map((expense) => {
-    const category = categories.find((item) => item.id === expense.categoryId);
-    const recurring = recurringHintPattern.test(`${expense.description} ${expense.notes ?? ''}`);
-    const alert = expense.amount >= Math.max(averageAmount * 2.2, 250);
+  const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data]);
+  const expenses = useMemo(() => expensesQuery.data ?? [], [expensesQuery.data]);
+  const averageAmount = useMemo(
+    () =>
+      expenses.length > 0
+        ? expenses.reduce((total, transaction) => total + transaction.amount, 0) / expenses.length
+        : 0,
+    [expenses],
+  );
 
-    return {
-      ...expense,
-      categoryName: category?.name ?? 'Uncategorized',
-      categoryColor: category?.color ?? '#94A3B8',
-      recurring,
-      alert,
-    };
-  });
+  const transactionViews: TransactionView[] = useMemo(() => {
+    return expenses.map((expense) => {
+      const category = categories.find((item) => item.id === expense.categoryId);
+      const recurring = recurringHintPattern.test(`${expense.description} ${expense.notes ?? ''}`);
+      const alert = expense.amount >= Math.max(averageAmount * 2.2, 250);
 
-  const visibleTransactions = transactionViews.filter((transaction) => {
-    const matchesSearch =
-      !searchValue ||
-      `${transaction.description} ${transaction.notes ?? ''} ${transaction.categoryName} ${paymentMethodLabels[transaction.paymentMethod]}`
-        .toLowerCase()
-        .includes(searchValue.toLowerCase());
-
-    const matchesCategory = categoryFilter === 'all' || transaction.categoryId === categoryFilter;
-    const matchesPayment =
-      paymentMethodFilter === 'all' || transaction.paymentMethod === paymentMethodFilter;
-
-    return matchesSearch && matchesCategory && matchesPayment;
-  });
-
-  const groupedTransactions = visibleTransactions.reduce<
-    Array<{ label: string; key: string; items: TransactionView[] }>
-  >((groups, transaction) => {
-    const key = toDateInputValue(transaction.date);
-    const currentGroup = groups.find((group) => group.key === key);
-
-    if (currentGroup) {
-      currentGroup.items.push(transaction);
-      return groups;
-    }
-
-    groups.push({
-      key,
-      label: getDayLabel(transaction.date),
-      items: [transaction],
+      return {
+        ...expense,
+        categoryName: category?.name ?? 'Uncategorized',
+        categoryColor: category?.color ?? '#94A3B8',
+        recurring,
+        alert,
+      };
     });
+  }, [expenses, categories, averageAmount]);
 
-    return groups;
-  }, []);
+  const visibleTransactions = useMemo(() => {
+    return transactionViews.filter((transaction) => {
+      const matchesSearch =
+        !searchValue ||
+        `${transaction.description} ${transaction.notes ?? ''} ${transaction.categoryName} ${paymentMethodLabels[transaction.paymentMethod]}`
+          .toLowerCase()
+          .includes(searchValue.toLowerCase());
+
+      const matchesCategory = categoryFilter === 'all' || transaction.categoryId === categoryFilter;
+      const matchesPayment =
+        paymentMethodFilter === 'all' || transaction.paymentMethod === paymentMethodFilter;
+
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'alert' && transaction.alert) ||
+        (statusFilter === 'recurring' && transaction.recurring) ||
+        (statusFilter === 'normal' && !transaction.alert && !transaction.recurring);
+
+      const matchesAmount =
+        amountFilter === 'all' ||
+        (amountFilter === 'under_25' && transaction.amount < 25) ||
+        (amountFilter === '25_to_100' && transaction.amount >= 25 && transaction.amount <= 100) ||
+        (amountFilter === '100_to_500' && transaction.amount > 100 && transaction.amount <= 500) ||
+        (amountFilter === 'over_500' && transaction.amount > 500);
+
+      return matchesSearch && matchesCategory && matchesPayment && matchesStatus && matchesAmount;
+    });
+  }, [
+    transactionViews,
+    searchValue,
+    categoryFilter,
+    paymentMethodFilter,
+    statusFilter,
+    amountFilter,
+  ]);
+
+  const sortedTransactions = useMemo(() => {
+    const list = [...visibleTransactions];
+    switch (sortBy) {
+      case 'date_asc':
+        return list.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      case 'amount_desc':
+        return list.sort((a, b) => b.amount - a.amount);
+      case 'amount_asc':
+        return list.sort((a, b) => a.amount - b.amount);
+      case 'description_asc':
+        return list.sort((a, b) => a.description.localeCompare(b.description));
+      case 'date_desc':
+      default:
+        return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
+  }, [visibleTransactions, sortBy]);
+
+  const isFiltered = Boolean(
+    searchValue ||
+    categoryFilter !== 'all' ||
+    paymentMethodFilter !== 'all' ||
+    statusFilter !== 'all' ||
+    amountFilter !== 'all' ||
+    sortBy !== 'date_desc',
+  );
+
+  const handleResetFilters = () => {
+    setSearchValue('');
+    setCategoryFilter('all');
+    setPaymentMethodFilter('all');
+    setStatusFilter('all');
+    setAmountFilter('all');
+    setSortBy('date_desc');
+    setCurrentPage(1);
+  };
+
+  // Reset page when any filter criteria or page size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchValue,
+    categoryFilter,
+    paymentMethodFilter,
+    statusFilter,
+    amountFilter,
+    monthFilter,
+    sortBy,
+    pageSize,
+  ]);
+
+  const totalItems = sortedTransactions.length;
+  const effectivePageSize = pageSize === 'all' ? totalItems || 1 : pageSize;
+  const totalPages =
+    pageSize === 'all' ? 1 : Math.max(1, Math.ceil(totalItems / effectivePageSize));
+
+  const paginatedTransactions = useMemo(() => {
+    if (pageSize === 'all') {
+      return sortedTransactions;
+    }
+    const startIndex = (currentPage - 1) * effectivePageSize;
+    return sortedTransactions.slice(startIndex, startIndex + effectivePageSize);
+  }, [sortedTransactions, currentPage, effectivePageSize, pageSize]);
+
+  const groupedTransactions = useMemo(() => {
+    return paginatedTransactions.reduce<
+      Array<{ label: string; key: string; items: TransactionView[] }>
+    >((groups, transaction) => {
+      const key = toDateInputValue(transaction.date);
+      const currentGroup = groups.find((group) => group.key === key);
+
+      if (currentGroup) {
+        currentGroup.items.push(transaction);
+        return groups;
+      }
+
+      groups.push({
+        key,
+        label: getDayLabel(transaction.date),
+        items: [transaction],
+      });
+
+      return groups;
+    }, []);
+  }, [paginatedTransactions]);
 
   const totalVisible = visibleTransactions.reduce(
     (total, transaction) => total + transaction.amount,
@@ -724,13 +835,13 @@ export default function TransactionsPage() {
               </Button>
             </>
           }
-          description="Search, review, add, edit, and export live transactions."
+          description="Search, review, filter, sort, and paginate live transactions with ease."
           eyebrow="Transactions"
           meta={
             <>
               <Badge variant="info">{formatMonthLabel(monthFilter)}</Badge>
               <Badge variant="neutral">
-                {expensesQuery.isLoading ? 'Syncing' : `${visibleTransactions.length} visible`}
+                {expensesQuery.isLoading ? 'Syncing' : `${totalItems} total`}
               </Badge>
             </>
           }
@@ -762,76 +873,165 @@ export default function TransactionsPage() {
           />
         </section>
 
+        {/* Filter & Controls Surface */}
         <SurfaceCard className="overflow-hidden rounded-[34px] px-5 py-5 md:px-6 md:py-6">
           <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr),180px,180px,auto]">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
-                <Input
-                  className="pl-11"
-                  onChange={(event) => setSearchValue(event.target.value)}
-                  placeholder="Search transactions"
-                  value={searchValue}
-                />
+            {/* Header of Filter Surface */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line/60 pb-3">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-brand" />
+                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-ink">
+                  Search & Filter
+                </h3>
+                {isFiltered ? <Badge variant="info">Filtered active</Badge> : null}
               </div>
-              <Input
-                onChange={(event) => setMonthFilter(event.target.value)}
-                type="month"
-                value={monthFilter}
-              />
-              <select
-                className={selectClassName}
-                onChange={(event) =>
-                  setPaymentMethodFilter(event.target.value as PaymentMethodFilter)
-                }
-                value={paymentMethodFilter}
-              >
-                <option value="all">All methods</option>
-                {PAYMENT_METHODS.map((method) => (
-                  <option key={method} value={method}>
-                    {paymentMethodLabels[method]}
-                  </option>
-                ))}
-              </select>
-              <Button
-                disabled={categoriesQuery.isLoading || categories.length === 0}
-                onClick={openCreateEditor}
-                variant="secondary"
-              >
-                Add expense
-              </Button>
+
+              {isFiltered ? (
+                <button
+                  className="inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand/5 px-3 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand/10"
+                  onClick={handleResetFilters}
+                  type="button"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reset all filters
+                </button>
+              ) : null}
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <button
-                className={cn(
-                  'rounded-full px-4 py-2 text-sm font-semibold transition',
-                  categoryFilter === 'all'
-                    ? 'bg-brand text-white shadow-sm'
-                    : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
-                )}
-                onClick={() => setCategoryFilter('all')}
-                type="button"
-              >
-                All
-              </button>
-              {categories.map((category) => (
+            {/* Labeled Filter Grid */}
+            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+              {/* Search input */}
+              <div className="space-y-1.5 sm:col-span-2 xl:col-span-1">
+                <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                  <Search className="h-3.5 w-3.5 text-brand" />
+                  Search
+                </span>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
+                  <Input
+                    className="pl-11"
+                    onChange={(event) => setSearchValue(event.target.value)}
+                    placeholder="Search note, payee..."
+                    value={searchValue}
+                  />
+                </div>
+              </div>
+
+              {/* Month selector */}
+              <div className="space-y-1.5">
+                <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                  <Calendar className="h-3.5 w-3.5 text-brand" />
+                  Month
+                </span>
+                <Input
+                  aria-label="Filter by month"
+                  onChange={(event) => setMonthFilter(event.target.value)}
+                  type="month"
+                  value={monthFilter}
+                />
+              </div>
+
+              {/* Payment method selector */}
+              <div className="space-y-1.5">
+                <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                  <CreditCard className="h-3.5 w-3.5 text-brand" />
+                  Payment Method
+                </span>
+                <select
+                  aria-label="Filter by payment method"
+                  className={selectClassName}
+                  onChange={(event) =>
+                    setPaymentMethodFilter(event.target.value as PaymentMethodFilter)
+                  }
+                  value={paymentMethodFilter}
+                >
+                  <option value="all">All payment methods</option>
+                  {PAYMENT_METHODS.map((method) => (
+                    <option key={method} value={method}>
+                      {paymentMethodLabels[method]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status / Review Filter */}
+              <div className="space-y-1.5">
+                <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                  <CircleAlert className="h-3.5 w-3.5 text-brand" />
+                  Status
+                </span>
+                <select
+                  aria-label="Filter by status"
+                  className={selectClassName}
+                  onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+                  value={statusFilter}
+                >
+                  <option value="all">All statuses</option>
+                  <option value="alert">Needs review</option>
+                  <option value="recurring">Recurring hints</option>
+                  <option value="normal">Standard</option>
+                </select>
+              </div>
+
+              {/* Amount Range Filter */}
+              <div className="space-y-1.5">
+                <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                  <DollarSign className="h-3.5 w-3.5 text-brand" />
+                  Amount Range
+                </span>
+                <select
+                  aria-label="Filter by amount range"
+                  className={selectClassName}
+                  onChange={(event) => setAmountFilter(event.target.value as AmountFilter)}
+                  value={amountFilter}
+                >
+                  <option value="all">All amounts ($0+)</option>
+                  <option value="under_25">Under $25</option>
+                  <option value="25_to_100">$25 - $100</option>
+                  <option value="100_to_500">$100 - $500</option>
+                  <option value="over_500">Over $500</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Category Pills and Reset Action */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line/50 pt-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="mr-1 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                  <Filter className="h-3.5 w-3.5" />
+                  Category:
+                </span>
                 <button
-                  key={category.id}
                   className={cn(
-                    'rounded-full px-4 py-2 text-sm font-semibold transition',
-                    categoryFilter === category.id
+                    'rounded-full px-3.5 py-1.5 text-xs font-semibold transition',
+                    categoryFilter === 'all'
                       ? 'bg-brand text-white shadow-sm'
                       : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
                   )}
-                  onClick={() => setCategoryFilter(category.id)}
+                  onClick={() => setCategoryFilter('all')}
                   type="button"
                 >
-                  {category.name}
+                  All Categories
                 </button>
-              ))}
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    className={cn(
+                      'rounded-full px-3.5 py-1.5 text-xs font-semibold transition',
+                      categoryFilter === category.id
+                        ? 'bg-brand text-white shadow-sm'
+                        : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
+                    )}
+                    onClick={() => setCategoryFilter(category.id)}
+                    type="button"
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
             </div>
 
+            {/* Overview quick summary banner */}
             <div className="rounded-[28px] border border-brand/10 bg-[linear-gradient(140deg,rgba(15,123,113,0.08),rgba(255,255,255,0.92))] px-5 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="max-w-3xl">
@@ -840,7 +1040,8 @@ export default function TransactionsPage() {
                     Real transactions, faster cleanup.
                   </h2>
                   <p className="mt-2 text-sm leading-6 text-ink-soft">
-                    Filter by month, narrow the list, and update expenses without leaving the page.
+                    Filter by month, narrow the list, sort by amount or date, and paginate through
+                    records effortlessly.
                   </p>
                 </div>
                 <Sparkles className="mt-1 h-5 w-5 shrink-0 text-brand" />
@@ -863,43 +1064,90 @@ export default function TransactionsPage() {
                 </div>
                 <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Add
+                    Active View
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">Live modal</p>
+                  <p className="mt-2 text-lg font-semibold text-ink">
+                    {pageSize === 'all' ? 'All Rows' : `${pageSize} per page`}
+                  </p>
                 </div>
                 <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Export
+                    Filtered
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">Filtered CSV</p>
+                  <p className="mt-2 text-lg font-semibold text-ink">
+                    {totalItems} transaction{totalItems === 1 ? '' : 's'}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </SurfaceCard>
 
+        {/* Transaction List Card */}
         <SurfaceCard className="rounded-[28px] px-4 py-4 md:px-5 md:py-5">
-          <div className="flex flex-col gap-3 border-b border-line/80 pb-4 md:flex-row md:items-end md:justify-between">
+          {/* Header with upgraded View Scope & Rows Per Page Dropdowns */}
+          <div className="flex flex-col gap-4 border-b border-line/80 pb-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="kicker">Transaction list</p>
               <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
                 Latest activity
               </h2>
               <p className="mt-1.5 max-w-2xl text-sm leading-6 text-ink-soft">
-                Every row is editable and backed by the API.
+                Every row is editable, backed by the API, and paginated for optimal performance.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="neutral">{formatMonthLabel(monthFilter)}</Badge>
-              <Badge variant="info">
-                {searchValue || categoryFilter !== 'all' || paymentMethodFilter !== 'all'
-                  ? 'Filtered'
-                  : 'All rows'}
+            {/* Interactive Header Controls */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Sort Order Dropdown */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                  Sort:
+                </span>
+                <select
+                  aria-label="Sort order"
+                  className={compactSelectClassName}
+                  onChange={(event) => setSortBy(event.target.value as SortBy)}
+                  value={sortBy}
+                >
+                  <option value="date_desc">Newest date</option>
+                  <option value="date_asc">Oldest date</option>
+                  <option value="amount_desc">Amount (High to Low)</option>
+                  <option value="amount_asc">Amount (Low to High)</option>
+                  <option value="description_asc">Alphabetical (A-Z)</option>
+                </select>
+              </div>
+
+              {/* Rows Per Page Dropdown */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                  Rows:
+                </span>
+                <select
+                  aria-label="Rows per page"
+                  className={compactSelectClassName}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setPageSize(value === 'all' ? 'all' : (Number(value) as PageSize));
+                  }}
+                  value={pageSize}
+                >
+                  <option value={10}>10 per page</option>
+                  <option value={25}>25 per page</option>
+                  <option value={50}>50 per page</option>
+                  <option value="all">All rows</option>
+                </select>
+              </div>
+
+              {/* Dynamic Status / Count Badge */}
+              <Badge variant={isFiltered ? 'info' : 'neutral'}>
+                {isFiltered ? `Filtered (${totalItems})` : `${totalItems} total`}
               </Badge>
+
               <Button
                 disabled={categoriesQuery.isLoading || categories.length === 0}
                 onClick={openCreateEditor}
+                size="sm"
                 variant="secondary"
               >
                 Add expense
@@ -989,7 +1237,7 @@ export default function TransactionsPage() {
                       {group.items.map((transaction) => (
                         <article
                           key={transaction.id}
-                          className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
+                          className="rounded-[22px] border border-line bg-paper px-3.5 py-3 transition hover:border-brand/30"
                         >
                           <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
                             <div className="flex min-w-0 items-center gap-3.5">
@@ -1092,6 +1340,19 @@ export default function TransactionsPage() {
                   </div>
                 );
               })}
+
+              {/* Bottom Pagination Controls */}
+              {pageSize !== 'all' && totalPages > 1 ? (
+                <div className="border-t border-line/60 pt-4">
+                  <Pagination
+                    currentPage={currentPage}
+                    onPageChange={setCurrentPage}
+                    pageSize={effectivePageSize}
+                    totalItems={totalItems}
+                    totalPages={totalPages}
+                  />
+                </div>
+              ) : null}
             </div>
           ) : (
             <EmptyState
@@ -1106,16 +1367,12 @@ export default function TransactionsPage() {
               }
               className="mt-5 rounded-[24px] px-5 py-6"
               description={
-                searchValue || categoryFilter !== 'all' || paymentMethodFilter !== 'all'
-                  ? 'Try clearing one of the filters or searching with broader terms.'
+                isFiltered
+                  ? 'Try resetting your filters or searching with broader terms.'
                   : `No transactions found for ${formatMonthLabel(monthFilter)} yet.`
               }
               icon={Search}
-              title={
-                searchValue || categoryFilter !== 'all' || paymentMethodFilter !== 'all'
-                  ? 'No transactions match this view'
-                  : 'No transactions yet'
-              }
+              title={isFiltered ? 'No transactions match this view' : 'No transactions yet'}
             />
           )}
         </SurfaceCard>
