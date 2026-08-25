@@ -24,6 +24,7 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { Textarea } from '@/components/ui/textarea';
+import { dashboardAnalyticsQueryKey } from '@/lib/analytics/client';
 import { useCurrentUserQuery } from '@/lib/auth/client';
 import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 import { createGoal, deleteGoal, goalsQueryKey, listGoals, updateGoal } from '@/lib/goals/client';
@@ -503,9 +504,10 @@ export default function GoalsPage() {
   };
 
   const invalidateGoals = async () => {
-    await queryClient.invalidateQueries({
-      queryKey: ['goals'],
-    });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['goals'] }),
+      queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKey }),
+    ]);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {

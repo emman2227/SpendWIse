@@ -25,6 +25,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
+import { dashboardAnalyticsQueryKey } from '@/lib/analytics/client';
 import { useCurrentUserQuery } from '@/lib/auth/client';
 import {
   type BudgetSummaryItem,
@@ -440,9 +441,10 @@ export default function BudgetsPage() {
   };
 
   const invalidateBudgets = async () => {
-    await queryClient.invalidateQueries({
-      queryKey: ['budgets'],
-    });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['budgets'] }),
+      queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKey }),
+    ]);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {

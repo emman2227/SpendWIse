@@ -335,7 +335,7 @@ export default function NotificationsPage() {
   });
 
   const expensesQuery = useQuery({
-    queryKey: ['notifications', 'expenses', month, year] as const,
+    queryKey: ['transactions', 'expenses'] as const,
     queryFn: () => listExpenses({}),
   });
 
@@ -393,6 +393,8 @@ export default function NotificationsPage() {
 
     generatedNotifications.push(...buildRecurringNotifications(expenses, formatMoney));
 
+    const largeExpenseIds = new Set<string>();
+
     expenses
       .filter((expense) => {
         const averageAmount =
@@ -404,12 +406,35 @@ export default function NotificationsPage() {
       })
       .slice(0, 3)
       .forEach((expense) => {
+        largeExpenseIds.add(expense.id);
         generatedNotifications.push({
           id: `transaction-large-${expense.id}-${expense.updatedAt}`,
           title: `${expense.description} looks larger than usual`,
           detail: `${formatMoney(expense.amount)} was logged on ${formatShortDate(expense.date)}.`,
           category: 'Transaction',
           priority: 'medium',
+          createdAt: expense.updatedAt,
+          href: '/transactions',
+          actionLabel: 'Review transaction',
+        });
+      });
+
+    const sortedExpenses = [...expenses].sort(
+      (a, b) =>
+        new Date(b.createdAt || b.date).getTime() - new Date(a.createdAt || a.date).getTime(),
+    );
+
+    sortedExpenses
+      .filter((expense) => !largeExpenseIds.has(expense.id))
+      .slice(0, 4)
+      .forEach((expense) => {
+        const categoryName = categoryNames.get(expense.categoryId) ?? 'General';
+        generatedNotifications.push({
+          id: `transaction-recent-${expense.id}-${expense.updatedAt}`,
+          title: `${expense.description} logged`,
+          detail: `${formatMoney(expense.amount)} recorded for ${categoryName} on ${formatShortDate(expense.date)}.`,
+          category: 'Transaction',
+          priority: 'low',
           createdAt: expense.updatedAt,
           href: '/transactions',
           actionLabel: 'Review transaction',
@@ -531,7 +556,7 @@ export default function NotificationsPage() {
       queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKey }),
       queryClient.invalidateQueries({ queryKey: transactionCategoriesQueryKey }),
       queryClient.invalidateQueries({ queryKey: goalsQueryKey }),
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'expenses', month, year] }),
+      queryClient.invalidateQueries({ queryKey: ['transactions', 'expenses'] }),
     ]);
     setPageMessage('Notifications refreshed from live workspace data.');
   };

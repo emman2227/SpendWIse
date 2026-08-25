@@ -36,6 +36,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { Textarea } from '@/components/ui/textarea';
+import { dashboardAnalyticsQueryKey } from '@/lib/analytics/client';
 import { useCurrentUserQuery } from '@/lib/auth/client';
 import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 import {
@@ -745,9 +746,10 @@ export default function TransactionsPage() {
         setListFeedback('Transaction updated.');
       }
 
-      await queryClient.invalidateQueries({
-        queryKey: ['transactions', 'expenses'],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['transactions', 'expenses'] }),
+        queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKey }),
+      ]);
       closeEditor();
     } catch (error) {
       setFormError(resolveTransactionError(error, 'Unable to save the transaction right now.'));
@@ -762,9 +764,10 @@ export default function TransactionsPage() {
 
     try {
       await deleteExpense(expenseId);
-      await queryClient.invalidateQueries({
-        queryKey: ['transactions', 'expenses'],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['transactions', 'expenses'] }),
+        queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKey }),
+      ]);
       setListFeedback('Transaction deleted.');
     } catch (error) {
       setListFeedback(
