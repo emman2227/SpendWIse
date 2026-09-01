@@ -10,9 +10,11 @@ import {
   Film,
   HeartPulse,
   Home,
+  Lock,
   PencilLine,
   PiggyBank,
   Plus,
+  RotateCcw,
   Search,
   ShoppingBag,
   Sparkles,
@@ -21,6 +23,7 @@ import {
   Trash2,
   Utensils,
   Wallet,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { type FormEvent, useMemo, useState } from 'react';
@@ -31,6 +34,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
+import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { useCurrentUserQuery } from '@/lib/auth/client';
@@ -65,6 +69,8 @@ interface CategoryView extends Category {
   spend: number;
   transactionCount: number;
 }
+
+const PAGE_SIZE = 8;
 
 const iconOptions = [
   { value: 'home', label: 'Home', icon: Home },
@@ -308,6 +314,7 @@ export default function CategoriesPage() {
   const [monthFilter, setMonthFilter] = useState(getInitialMonthValue);
   const [scopeFilter, setScopeFilter] = useState<CategoryScope>('all');
   const [searchValue, setSearchValue] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [formValues, setFormValues] = useState<CategoryFormValues>(getDefaultFormValues());
   const [fieldErrors, setFieldErrors] = useState<CategoryFieldErrors>({});
   const [formError, setFormError] = useState('');
@@ -352,6 +359,16 @@ export default function CategoriesPage() {
     };
   });
 
+  const scopeCounts = useMemo(() => {
+    return {
+      all: categoryViews.length,
+      default: categoryViews.filter((c) => c.isSystemDefined).length,
+      custom: categoryViews.filter((c) => !c.isSystemDefined).length,
+      active: categoryViews.filter((c) => c.transactionCount > 0).length,
+      unused: categoryViews.filter((c) => c.transactionCount === 0).length,
+    };
+  }, [categoryViews]);
+
   const visibleCategories = categoryViews.filter((category) => {
     const matchesSearch =
       !searchValue ||
@@ -373,6 +390,10 @@ export default function CategoriesPage() {
     return matchesSearch && matchesScope;
   });
 
+  const totalPages = Math.max(1, Math.ceil(visibleCategories.length / PAGE_SIZE));
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedCategories = visibleCategories.slice(startIndex, startIndex + PAGE_SIZE);
+
   const totalCategorySpend = visibleCategories.reduce((sum, category) => sum + category.spend, 0);
   const highestSpendCategory =
     visibleCategories.reduce<CategoryView | null>(
@@ -387,6 +408,27 @@ export default function CategoriesPage() {
   const activeCategoryCount = categoryViews.filter(
     (category) => category.transactionCount > 0,
   ).length;
+
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+    setCurrentPage(1);
+  };
+
+  const handleScopeChange = (scope: CategoryScope) => {
+    setScopeFilter(scope);
+    setCurrentPage(1);
+  };
+
+  const handleMonthChange = (month: string) => {
+    setMonthFilter(month);
+    setCurrentPage(1);
+  };
+
+  const resetFilters = () => {
+    setSearchValue('');
+    setScopeFilter('all');
+    setCurrentPage(1);
+  };
 
   const resetEditor = () => {
     setFieldErrors({});
@@ -564,113 +606,111 @@ export default function CategoriesPage() {
           />
         </section>
 
-        <SurfaceCard className="overflow-hidden rounded-[34px] px-5 py-5 md:px-6 md:py-6">
-          <div className="space-y-5">
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr),180px,auto]">
+        {/* Simplified & Streamlined Filter Card */}
+        <SurfaceCard className="rounded-[30px] p-5 md:p-6">
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-[1fr,auto,auto]">
               <div className="relative">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
                 <Input
-                  className="pl-11"
-                  onChange={(event) => setSearchValue(event.target.value)}
-                  placeholder="Search categories"
+                  className="pl-10 pr-9"
+                  onChange={(event) => handleSearchChange(event.target.value)}
+                  placeholder="Search by name, icon, or color..."
                   value={searchValue}
                 />
+                {searchValue ? (
+                  <button
+                    aria-label="Clear search"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft transition hover:text-ink"
+                    onClick={() => handleSearchChange('')}
+                    type="button"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : null}
               </div>
-              <Input
-                onChange={(event) => setMonthFilter(event.target.value)}
-                type="month"
-                value={monthFilter}
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  aria-label="Filter month"
+                  className="w-full sm:w-[170px]"
+                  onChange={(event) => handleMonthChange(event.target.value)}
+                  type="month"
+                  value={monthFilter}
+                />
+              </div>
               <Button onClick={openCreateEditor} variant="secondary">
                 <Plus className="h-4 w-4" />
                 Add category
               </Button>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {[
-                ['all', 'All'],
-                ['default', 'Default'],
-                ['custom', 'Custom'],
-                ['active', 'Active'],
-                ['unused', 'Unused'],
-              ].map(([value, label]) => (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line/60 pt-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { value: 'all' as const, label: 'All', count: scopeCounts.all },
+                  { value: 'default' as const, label: 'Default', count: scopeCounts.default },
+                  { value: 'custom' as const, label: 'Custom', count: scopeCounts.custom },
+                  { value: 'active' as const, label: 'Active', count: scopeCounts.active },
+                  { value: 'unused' as const, label: 'Unused', count: scopeCounts.unused },
+                ].map(({ value, label, count }) => (
+                  <button
+                    key={value}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition',
+                      scopeFilter === value
+                        ? 'bg-brand text-white shadow-sm'
+                        : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
+                    )}
+                    onClick={() => handleScopeChange(value)}
+                    type="button"
+                  >
+                    <span>{label}</span>
+                    <span
+                      className={cn(
+                        'rounded-full px-1.5 py-0.5 text-[10px] font-bold',
+                        scopeFilter === value
+                          ? 'bg-white/20 text-white'
+                          : 'bg-black/5 text-ink-soft dark:bg-white/10',
+                      )}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {searchValue || scopeFilter !== 'all' ? (
                 <button
-                  key={value}
-                  className={cn(
-                    'rounded-full px-4 py-2 text-sm font-semibold transition',
-                    scopeFilter === value
-                      ? 'bg-brand text-white shadow-sm'
-                      : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
-                  )}
-                  onClick={() => setScopeFilter(value as CategoryScope)}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-soft transition hover:text-brand"
+                  onClick={resetFilters}
                   type="button"
                 >
-                  {label}
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reset filters
                 </button>
-              ))}
-            </div>
-
-            <div className="rounded-[28px] border border-brand/10 bg-[linear-gradient(140deg,rgba(15,123,113,0.08),rgba(255,255,255,0.92))] px-5 py-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="max-w-3xl">
-                  <p className="kicker">Category snapshot</p>
-                  <h2 className="mt-2 text-xl font-semibold text-ink">
-                    Recognition should be instant.
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-ink-soft">
-                    Names, icons, colors, and monthly activity all stay in the same row.
-                  </p>
-                </div>
-                <SwatchBook className="mt-1 h-5 w-5 shrink-0 text-brand" />
-              </div>
-
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
-                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Top
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">
-                    {highestSpendCategory?.name ?? 'No spend yet'}
-                  </p>
-                </div>
-                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Active
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">
-                    {activeCategoryCount} categories
-                  </p>
-                </div>
-                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Add
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">Live modal</p>
-                </div>
-              </div>
+              ) : null}
             </div>
           </div>
         </SurfaceCard>
 
-        <SurfaceCard className="rounded-[28px] px-4 py-4 md:px-5 md:py-5">
-          <div className="flex flex-col gap-3 border-b border-line/80 pb-4 md:flex-row md:items-end md:justify-between">
+        {/* Category List Card with Pagination */}
+        <SurfaceCard className="rounded-[28px] p-5 md:p-6">
+          <div className="flex flex-col gap-3 border-b border-line/80 pb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="kicker">Category list</p>
-              <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
-                Review categories fast
+              <h2 className="mt-1 text-xl font-semibold leading-tight text-ink md:text-2xl">
+                Review & manage categories
               </h2>
-              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-ink-soft">
-                Each row shows type, color, spend, and whether it is safe to edit.
+              <p className="mt-1 text-xs text-ink-soft sm:text-sm">
+                {visibleCategories.length === 0
+                  ? 'No categories match the current filter criteria.'
+                  : `Showing ${startIndex + 1}–${Math.min(startIndex + PAGE_SIZE, visibleCategories.length)} of ${visibleCategories.length} categories`}
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Badge variant="neutral">{formatMonthLabel(monthFilter)}</Badge>
-              <Badge variant="info">{scopeFilter}</Badge>
-              <Button onClick={openCreateEditor} variant="secondary">
-                Add category
-              </Button>
+              {scopeFilter !== 'all' ? <Badge variant="info">Scope: {scopeFilter}</Badge> : null}
             </div>
           </div>
 
@@ -732,119 +772,141 @@ export default function CategoriesPage() {
                 </div>
               ))}
             </div>
-          ) : visibleCategories.length > 0 ? (
-            <div className="mt-5 space-y-2.5">
-              {visibleCategories.map((category) => {
-                const Icon = iconMap[category.icon] ?? Wallet;
-                const canManage = !category.isSystemDefined;
+          ) : paginatedCategories.length > 0 ? (
+            <>
+              <div className="mt-5 space-y-2.5">
+                {paginatedCategories.map((category) => {
+                  const Icon = iconMap[category.icon] ?? Wallet;
+                  const canManage = !category.isSystemDefined;
 
-                return (
-                  <article
-                    key={category.id}
-                    className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
-                  >
-                    <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(260px,1fr),minmax(260px,0.9fr),auto] lg:items-center lg:gap-3">
-                      <div className="flex min-w-0 items-center gap-3.5">
-                        <div
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px]"
-                          style={{ backgroundColor: `${category.color}20`, color: category.color }}
-                        >
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-[15px] font-semibold text-ink">{category.name}</p>
-                            <Badge variant={category.isSystemDefined ? 'neutral' : 'info'}>
-                              {category.isSystemDefined ? 'Default' : 'Custom'}
-                            </Badge>
-                            {category.transactionCount > 0 ? (
-                              <Badge variant="success">Active</Badge>
-                            ) : null}
+                  return (
+                    <article
+                      key={category.id}
+                      className="rounded-[22px] border border-line bg-paper px-3.5 py-3 transition hover:border-brand/30"
+                    >
+                      <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(260px,1fr),minmax(260px,0.9fr),auto] lg:items-center lg:gap-3">
+                        <div className="flex min-w-0 items-center gap-3.5">
+                          <div
+                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px]"
+                            style={{
+                              backgroundColor: `${category.color}20`,
+                              color: category.color,
+                            }}
+                          >
+                            <Icon className="h-5 w-5" />
                           </div>
-                          <p className="mt-1 text-sm text-ink-soft">
-                            {category.isSystemDefined
-                              ? 'System category available across the workspace.'
-                              : 'Custom category you can rename or remove if nothing is linked.'}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-2 sm:grid-cols-3">
-                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                            Spend
-                          </p>
-                          <p className="mt-1 text-sm font-medium text-ink">
-                            {formatMoney(category.spend)}
-                          </p>
-                        </div>
-                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                            Txns
-                          </p>
-                          <p className="mt-1 text-sm font-medium text-ink">
-                            {category.transactionCount}
-                          </p>
-                        </div>
-                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                            Color
-                          </p>
-                          <div className="mt-1 flex items-center gap-2">
-                            <span
-                              className="h-3 w-3 rounded-full"
-                              style={{ backgroundColor: category.color }}
-                            />
-                            <p className="text-sm font-medium text-ink">{category.color}</p>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="text-[15px] font-semibold text-ink">{category.name}</p>
+                              <Badge variant={category.isSystemDefined ? 'neutral' : 'info'}>
+                                {category.isSystemDefined ? 'Default' : 'Custom'}
+                              </Badge>
+                              {category.transactionCount > 0 ? (
+                                <Badge variant="success">Active</Badge>
+                              ) : null}
+                            </div>
+                            <p className="mt-1 text-xs text-ink-soft sm:text-sm">
+                              {category.isSystemDefined
+                                ? 'System category available across the workspace.'
+                                : 'Custom category you can rename or remove if nothing is linked.'}
+                            </p>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex flex-wrap gap-2 lg:justify-end">
-                        {canManage ? (
-                          <>
-                            <button
-                              className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
-                              onClick={() => openEditEditor(category)}
-                              type="button"
-                            >
-                              <span className="inline-flex items-center gap-1.5">
+                        <div className="grid gap-2 sm:grid-cols-3">
+                          <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                              Spend
+                            </p>
+                            <p className="mt-1 text-sm font-medium text-ink">
+                              {formatMoney(category.spend)}
+                            </p>
+                          </div>
+                          <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                              Transactions
+                            </p>
+                            <p className="mt-1 text-sm font-medium text-ink">
+                              {category.transactionCount}
+                            </p>
+                          </div>
+                          <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                              Avg / Txn
+                            </p>
+                            <p className="mt-1 text-sm font-medium text-ink">
+                              {category.transactionCount > 0
+                                ? formatMoney(category.spend / category.transactionCount)
+                                : '—'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                          {canManage ? (
+                            <>
+                              <button
+                                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line bg-paper-strong px-3 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
+                                onClick={() => openEditEditor(category)}
+                                type="button"
+                              >
                                 <PencilLine className="h-3.5 w-3.5" />
-                                Edit
-                              </span>
-                            </button>
-                            <button
-                              className="rounded-full border border-danger/20 bg-paper-strong px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
-                              disabled={deleteTargetId === category.id}
-                              onClick={() => handleDelete(category)}
-                              type="button"
-                            >
-                              <span className="inline-flex items-center gap-1.5">
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-danger/20 bg-paper-strong px-3 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
+                                disabled={deleteTargetId === category.id}
+                                onClick={() => handleDelete(category)}
+                                type="button"
+                              >
                                 <Trash2 className="h-3.5 w-3.5" />
-                                {deleteTargetId === category.id ? 'Deleting...' : 'Delete'}
-                              </span>
-                            </button>
-                          </>
-                        ) : (
-                          <Badge variant="neutral">Protected</Badge>
-                        )}
+                                <span>
+                                  {deleteTargetId === category.id ? 'Deleting...' : 'Delete'}
+                                </span>
+                              </button>
+                            </>
+                          ) : (
+                            <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line bg-paper-strong px-3 text-xs font-semibold text-ink-soft">
+                              <Lock className="h-3.5 w-3.5 text-ink-soft" />
+                              <span>System default</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              {totalPages > 1 ? (
+                <div className="mt-5 border-t border-line/60 pt-3">
+                  <Pagination
+                    currentPage={currentPage}
+                    onPageChange={setCurrentPage}
+                    pageSize={PAGE_SIZE}
+                    totalItems={visibleCategories.length}
+                    totalPages={totalPages}
+                  />
+                </div>
+              ) : null}
+            </>
           ) : (
             <EmptyState
               action={
-                <Button onClick={openCreateEditor} variant="soft">
-                  Create custom category
-                </Button>
+                searchValue || scopeFilter !== 'all' ? (
+                  <Button onClick={resetFilters} variant="soft">
+                    Reset filters
+                  </Button>
+                ) : (
+                  <Button onClick={openCreateEditor} variant="soft">
+                    Create custom category
+                  </Button>
+                )
               }
               className="mt-5 rounded-[24px] px-5 py-6"
               description={
                 searchValue || scopeFilter !== 'all'
-                  ? 'Try clearing the search or switching back to a broader filter.'
+                  ? 'No categories match your search or filter settings. Try resetting the filters.'
                   : 'No categories are available yet.'
               }
               icon={Search}
@@ -856,7 +918,7 @@ export default function CategoriesPage() {
             />
           )}
 
-          <div className="mt-5 grid gap-3 md:grid-cols-2">
+          <div className="mt-6 grid gap-3 md:grid-cols-2">
             <div className="rounded-[24px] border border-brand/15 bg-brand/5 px-4 py-4">
               <p className="font-semibold text-ink">Defaults stay protected</p>
               <p className="mt-1.5 text-sm leading-6 text-ink-soft">
