@@ -17,7 +17,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { type FormEvent, useMemo, useState } from 'react';
+import { type FormEvent, useEffect, useMemo, useState } from 'react';
 
 import { useConfirm } from '@/components/providers/confirm-provider';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +26,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
-import { ProgressBar } from '@/components/ui/progress-bar';
+import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { dashboardAnalyticsQueryKey } from '@/lib/analytics/client';
@@ -46,6 +46,11 @@ import { cn } from '@/lib/utils';
 type BudgetStatusFilter = 'all' | 'safe' | 'warning' | 'danger';
 type EditorMode = 'create' | 'edit';
 type BudgetField = 'categoryId' | 'limitAmount';
+type PageSize = 10 | 25 | 50 | 'all';
+const UNBUDGETED_PAGE_SIZE = 6;
+
+const compactSelectClassName =
+  'h-9 rounded-[16px] border border-line bg-paper px-2.5 pr-7 text-xs font-medium text-ink shadow-xs outline-none transition focus:border-brand focus:bg-paper-strong cursor-pointer';
 
 interface BudgetFormValues {
   categoryId: string;
@@ -103,6 +108,71 @@ const parseAmountInput = (value: string) => Number(value.replace(/[^\d.]/g, ''))
 
 const resolveBudgetError = (error: unknown, fallback: string) =>
   error instanceof Error && error.message ? error.message : fallback;
+
+interface CircularGaugeProps {
+  progress: number;
+  status: 'safe' | 'warning' | 'danger';
+  size?: number;
+}
+
+function CircularGauge({ progress, status, size = 42 }: CircularGaugeProps) {
+  const strokeWidth = 3.5;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const clampedProgress = Math.min(Math.max(progress, 0), 100);
+  const strokeDashoffset = circumference - (clampedProgress / 100) * circumference;
+
+  const strokeColorClass =
+    status === 'danger'
+      ? 'stroke-danger'
+      : status === 'warning'
+        ? 'stroke-warning'
+        : 'stroke-brand';
+
+  const textColorClass =
+    status === 'danger' ? 'text-danger' : status === 'warning' ? 'text-warning' : 'text-ink';
+
+  return (
+    <div
+      aria-label={`${Math.round(progress)}% utilized`}
+      className="relative inline-flex shrink-0 items-center justify-center"
+      style={{ height: size, width: size }}
+    >
+      <svg
+        className="-rotate-90 transform"
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        width={size}
+      >
+        {/* Background track ring */}
+        <circle
+          className="stroke-black/5 dark:stroke-white/10"
+          cx={size / 2}
+          cy={size / 2}
+          fill="none"
+          r={radius}
+          strokeWidth={strokeWidth}
+        />
+        {/* Dynamic progress ring */}
+        <circle
+          className={cn('transition-all duration-500 ease-out', strokeColorClass)}
+          cx={size / 2}
+          cy={size / 2}
+          fill="none"
+          r={radius}
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          strokeWidth={strokeWidth}
+        />
+      </svg>
+      {/* Center percentage label */}
+      <span className={cn('absolute text-[10px] font-bold tracking-tight', textColorClass)}>
+        {Math.round(progress)}%
+      </span>
+    </div>
+  );
+}
 
 function BudgetEditorModal({
   categories,
@@ -363,6 +433,20 @@ export default function BudgetsPage() {
     });
   }, [unbudgetedSummary?.items, categoriesQuery.data]);
 
+  const [unbudgetedPage, setUnbudgetedPage] = useState(1);
+
+  // Reset unbudgeted page when month changes
+  useEffect(() => {
+    setUnbudgetedPage(1);
+  }, [monthFilter]);
+
+  const totalUnbudgetedItems = unbudgetedViews.length;
+  const totalUnbudgetedPages = Math.max(1, Math.ceil(totalUnbudgetedItems / UNBUDGETED_PAGE_SIZE));
+  const paginatedUnbudgetedViews = useMemo(() => {
+    const startIndex = (unbudgetedPage - 1) * UNBUDGETED_PAGE_SIZE;
+    return unbudgetedViews.slice(startIndex, startIndex + UNBUDGETED_PAGE_SIZE);
+  }, [unbudgetedViews, unbudgetedPage]);
+
   const statusCounts = useMemo(() => {
     return {
       all: budgetViews.length,
@@ -379,6 +463,28 @@ export default function BudgetsPage() {
 
     return matchesSearch && matchesStatus;
   });
+
+  const isFiltered = searchValue !== '' || statusFilter !== 'all';
+  const totalItems = visibleBudgets.length;
+  const [pageSize, setPageSize] = useState<PageSize>(10);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset page when any filter criteria or page size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchValue, statusFilter, monthFilter, pageSize]);
+
+  const effectivePageSize = pageSize === 'all' ? totalItems || 1 : pageSize;
+  const totalPages =
+    pageSize === 'all' ? 1 : Math.max(1, Math.ceil(totalItems / effectivePageSize));
+
+  const paginatedBudgets = useMemo(() => {
+    if (pageSize === 'all') {
+      return visibleBudgets;
+    }
+    const startIndex = (currentPage - 1) * effectivePageSize;
+    return visibleBudgets.slice(startIndex, startIndex + effectivePageSize);
+  }, [visibleBudgets, currentPage, effectivePageSize, pageSize]);
 
   const totalBudgeted = visibleBudgets.reduce((total, budget) => total + budget.limitAmount, 0);
   const totalSpent = visibleBudgets.reduce((total, budget) => total + budget.spent, 0);
@@ -830,7 +936,7 @@ export default function BudgetsPage() {
             </div>
 
             <div className="mt-4 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
-              {unbudgetedViews.map((item) => (
+              {paginatedUnbudgetedViews.map((item) => (
                 <div
                   key={item.categoryId}
                   className="flex items-center justify-between gap-3 rounded-[20px] border border-line bg-paper px-3.5 py-2.5 transition hover:border-brand/30"
@@ -865,42 +971,89 @@ export default function BudgetsPage() {
                 </div>
               ))}
             </div>
+
+            {/* Compact Pagination for Unbudgeted Spending */}
+            {totalUnbudgetedItems > 0 ? (
+              <div className="mt-3 border-t border-warning/20 pt-2.5">
+                <Pagination
+                  alwaysShow
+                  compact
+                  currentPage={unbudgetedPage}
+                  onPageChange={setUnbudgetedPage}
+                  pageSize={UNBUDGETED_PAGE_SIZE}
+                  totalItems={totalUnbudgetedItems}
+                  totalPages={totalUnbudgetedPages}
+                />
+              </div>
+            ) : null}
           </SurfaceCard>
         ) : null}
 
-        <SurfaceCard className="rounded-[28px] px-4 py-4 md:px-5 md:py-5">
-          <div className="flex flex-col gap-3 border-b border-line/80 pb-4 md:flex-row md:items-end md:justify-between">
-            <div>
+        <SurfaceCard className="rounded-[28px] p-4 md:p-5">
+          <div className="flex flex-col gap-3 border-b border-line/70 pb-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="min-w-0">
               <p className="kicker">Budget list</p>
-              <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
+              <h2 className="mt-0.5 text-xl font-semibold leading-tight text-ink md:text-2xl">
                 Review budgets fast
               </h2>
-              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-ink-soft">
-                Status, progress, and left stay together.
+              <p className="mt-0.5 text-xs text-ink-soft sm:text-sm">
+                Status, progress, and remaining balances for {monthLabel}.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="neutral">Monthly</Badge>
-              <Badge variant="info">{visibleBudgets.length} rows</Badge>
+            {/* Interactive Header Controls Toolbar (Aligned horizontally to the right corner) */}
+            <div className="flex flex-wrap items-center gap-2.5 sm:flex-nowrap sm:justify-end">
+              {/* Rows Per Page Dropdown */}
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                  Rows:
+                </span>
+                <select
+                  aria-label="Rows per page"
+                  className={compactSelectClassName}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setPageSize(value === 'all' ? 'all' : (Number(value) as PageSize));
+                  }}
+                  value={pageSize}
+                >
+                  <option value={10}>10 per page</option>
+                  <option value={25}>25 per page</option>
+                  <option value={50}>50 per page</option>
+                  <option value="all">All rows</option>
+                </select>
+              </div>
+
+              {/* Dynamic Status / Count Badge */}
+              <Badge
+                className="h-9 whitespace-nowrap px-3"
+                variant={isFiltered ? 'info' : 'neutral'}
+              >
+                {isFiltered ? `Filtered (${totalItems})` : `${totalItems} total`}
+              </Badge>
+
+              {/* Add Budget Button (Rightmost element) */}
               <Button
-                disabled={categoriesQuery.isLoading}
+                className="whitespace-nowrap"
+                disabled={categoriesQuery.isLoading || categories.length === 0}
                 onClick={openCreateBudget}
+                size="sm"
                 variant="secondary"
               >
-                Create budget
+                <Plus className="h-4 w-4" />
+                Add budget
               </Button>
             </div>
           </div>
 
           {categoriesQuery.isError ? (
-            <div className="mt-5 rounded-[22px] border border-danger/20 bg-danger/10 px-4 py-4 text-sm text-danger">
+            <div className="mt-4 rounded-[20px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
               {resolveBudgetError(categoriesQuery.error, 'Unable to load categories right now.')}
             </div>
           ) : null}
 
           {budgetSummary.isError ? (
-            <div className="mt-5 rounded-[22px] border border-danger/20 bg-danger/10 px-4 py-4 text-sm text-danger">
+            <div className="mt-4 rounded-[20px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
               {resolveBudgetError(budgetSummary.error, 'Unable to load budgets right now.')}
             </div>
           ) : null}
@@ -908,7 +1061,7 @@ export default function BudgetsPage() {
           {pageMessage ? (
             <div
               className={cn(
-                'mt-5 rounded-[22px] px-4 py-4 text-sm',
+                'mt-4 rounded-[20px] px-4 py-3 text-sm',
                 pageMessage.toLowerCase().includes('unable')
                   ? 'border border-danger/20 bg-danger/10 text-danger'
                   : 'border border-brand/15 bg-brand/10 text-ink',
@@ -919,28 +1072,31 @@ export default function BudgetsPage() {
           ) : null}
 
           {categoriesQuery.isLoading || budgetSummary.isLoading ? (
-            <div className="mt-5 space-y-3">
+            <div className="mt-4 space-y-2.5">
               {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="rounded-[22px] border border-line bg-paper px-3.5 py-3">
-                  <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(220px,0.95fr),minmax(280px,1.15fr)] lg:items-center lg:gap-3">
+                <div
+                  key={index}
+                  className="rounded-[20px] border border-line bg-paper p-3.5 sm:p-4"
+                >
+                  <div className="flex flex-col gap-3.5 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-3.5">
                       <Skeleton className="h-11 w-11 rounded-[16px]" />
-                      <div className="min-w-0 flex-1">
+                      <div>
                         <Skeleton className="h-4 w-32 rounded-full" />
                         <Skeleton className="mt-2 h-3 w-24 rounded-full" />
                       </div>
                     </div>
-                    <div className="rounded-[16px] border border-line bg-paper px-3 py-3">
-                      <Skeleton className="h-3 w-full rounded-full" />
-                      <Skeleton className="mt-3 h-2.5 w-full rounded-full" />
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-10 w-36 rounded-[16px]" />
+                      <Skeleton className="h-8 w-24 rounded-full" />
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          ) : visibleBudgets.length > 0 ? (
-            <div className="mt-5 space-y-2.5">
-              {visibleBudgets.map((budget) => {
+          ) : paginatedBudgets.length > 0 ? (
+            <div className="mt-4 space-y-2.5">
+              {paginatedBudgets.map((budget) => {
                 const progress =
                   budget.limitAmount > 0 ? (budget.spent / budget.limitAmount) * 100 : 0;
                 const toneClass =
@@ -953,23 +1109,27 @@ export default function BudgetsPage() {
                 return (
                   <article
                     key={budget.id}
-                    className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
+                    className="rounded-[20px] border border-line bg-paper p-3.5 transition hover:border-brand/30 sm:p-4"
                   >
-                    <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(220px,0.95fr),minmax(280px,1.15fr)] lg:items-center lg:gap-3">
+                    <div className="flex flex-col gap-3.5 lg:flex-row lg:items-center lg:justify-between">
+                      {/* Left: Category Icon, Name, Status, and Remaining Power */}
                       <div className="flex min-w-0 items-center gap-3.5">
                         <div
                           className={cn(
-                            'flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] text-sm font-semibold',
+                            'flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] text-xs font-semibold',
                             toneClass,
                           )}
                         >
                           {budget.categoryName.slice(0, 2).toUpperCase()}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-[15px] font-semibold text-ink">
-                            {budget.categoryName}
-                          </p>
-                          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p
+                              className="truncate text-[15px] font-semibold text-ink"
+                              title={budget.categoryName}
+                            >
+                              {budget.categoryName}
+                            </p>
                             <Badge
                               variant={
                                 budget.status === 'danger'
@@ -985,92 +1145,83 @@ export default function BudgetsPage() {
                                   ? 'Near limit'
                                   : 'On track'}
                             </Badge>
-                            <p className="text-sm text-ink-soft">{monthLabel} budget</p>
+                          </div>
+                          <p className="mt-0.5 text-xs text-ink-soft">
+                            {budget.remaining >= 0
+                              ? `${formatMoney(budget.remaining)} left to spend`
+                              : `${formatMoney(Math.abs(budget.remaining))} over budget`}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Right: Circular Ring Gauge + Spent Detail + Actions */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line/70 pt-3 sm:flex-nowrap sm:border-0 sm:pt-0 lg:justify-end lg:gap-4">
+                        {/* Gauge + Spending Metric Pill */}
+                        <div className="flex items-center gap-3 rounded-[16px] border border-line/70 bg-paper-strong/80 px-3 py-1.5 shadow-2xs">
+                          <CircularGauge progress={progress} size={42} status={budget.status} />
+                          <div className="min-w-0 text-left">
+                            <p className="text-xs font-semibold text-ink">
+                              {formatMoney(budget.spent)}
+                            </p>
+                            <p className="text-[11px] font-medium text-ink-soft">
+                              of {formatMoney(budget.limitAmount)} limit
+                            </p>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="rounded-[16px] border border-line bg-paper px-3 py-3 lg:min-w-0">
-                        <ProgressBar
-                          helper={`${formatMoney(budget.spent)} of ${formatMoney(budget.limitAmount)}`}
-                          size="sm"
-                          status={budget.status}
-                          value={progress}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-3 flex flex-col gap-2.5 border-t border-line/70 pt-3 lg:flex-row lg:items-center lg:justify-between">
-                      <div className="grid gap-2 sm:grid-cols-3 lg:flex lg:items-center lg:gap-2.5">
-                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                            Left
-                          </p>
-                          <p className="mt-1 text-sm font-medium text-ink">
-                            {budget.remaining >= 0
-                              ? formatMoney(budget.remaining)
-                              : `-${formatMoney(Math.abs(budget.remaining))}`}
-                          </p>
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            className="rounded-full border border-line bg-paper-strong px-2.5 py-1 text-xs font-medium text-ink-soft transition hover:border-brand/30 hover:text-ink"
+                            onClick={() => openShareBudget(budget)}
+                            type="button"
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              <Users className="h-3.5 w-3.5" />
+                              Share
+                            </span>
+                          </button>
+                          <button
+                            className="rounded-full border border-line bg-paper-strong px-2.5 py-1 text-xs font-medium text-ink-soft transition hover:border-brand/30 hover:text-ink"
+                            onClick={() => openEditBudget(budget)}
+                            type="button"
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              <PencilLine className="h-3.5 w-3.5" />
+                              Edit
+                            </span>
+                          </button>
+                          <button
+                            className="rounded-full border border-danger/20 bg-paper-strong px-2.5 py-1 text-xs font-medium text-danger transition hover:border-danger/40 hover:bg-danger/5"
+                            disabled={deleteTargetId === budget.id}
+                            onClick={() => handleDelete(budget)}
+                            type="button"
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              <Trash2 className="h-3.5 w-3.5" />
+                              {deleteTargetId === budget.id ? 'Deleting...' : 'Delete'}
+                            </span>
+                          </button>
                         </div>
-                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                            Pace
-                          </p>
-                          <p className="mt-1 text-sm font-medium text-ink">
-                            {budget.status === 'danger'
-                              ? 'High'
-                              : budget.status === 'warning'
-                                ? 'Watch'
-                                : 'Good'}
-                          </p>
-                        </div>
-                        <div className="rounded-[16px] border border-line bg-paper px-3 py-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                            Limit
-                          </p>
-                          <p className="mt-1 text-sm font-medium text-ink">
-                            {formatMoney(budget.limitAmount)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 lg:justify-end">
-                        <button
-                          className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
-                          onClick={() => openShareBudget(budget)}
-                          type="button"
-                        >
-                          <span className="inline-flex items-center gap-1.5">
-                            <Users className="h-3.5 w-3.5" />
-                            Share
-                          </span>
-                        </button>
-                        <button
-                          className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
-                          onClick={() => openEditBudget(budget)}
-                          type="button"
-                        >
-                          <span className="inline-flex items-center gap-1.5">
-                            <PencilLine className="h-3.5 w-3.5" />
-                            Edit
-                          </span>
-                        </button>
-                        <button
-                          className="rounded-full border border-danger/20 bg-paper-strong px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
-                          disabled={deleteTargetId === budget.id}
-                          onClick={() => handleDelete(budget)}
-                          type="button"
-                        >
-                          <span className="inline-flex items-center gap-1.5">
-                            <Trash2 className="h-3.5 w-3.5" />
-                            {deleteTargetId === budget.id ? 'Deleting...' : 'Delete'}
-                          </span>
-                        </button>
                       </div>
                     </div>
                   </article>
                 );
               })}
+
+              {/* Bottom Pagination Controls */}
+              {pageSize !== 'all' && totalItems > 0 ? (
+                <div className="mt-3.5 border-t border-line/60 pt-3">
+                  <Pagination
+                    alwaysShow
+                    currentPage={currentPage}
+                    onPageChange={setCurrentPage}
+                    pageSize={effectivePageSize}
+                    totalItems={totalItems}
+                    totalPages={totalPages}
+                  />
+                </div>
+              ) : null}
             </div>
           ) : (
             <EmptyState
