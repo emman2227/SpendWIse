@@ -14,16 +14,48 @@ import {
 } from '../src';
 
 describe('shared schemas', () => {
-  it('accepts a valid expense payload', () => {
+  it('accepts a valid expense payload with recent date', () => {
     const payload = createExpenseSchema.parse({
       amount: 275.5,
       categoryId: 'category-1',
       description: 'Weekly groceries',
       paymentMethod: 'debit_card',
-      date: '2026-04-02T10:30:00.000Z',
+      date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     });
 
     expect(payload.description).toBe('Weekly groceries');
+  });
+
+  it('rejects an expense date in the future', () => {
+    const futureDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+    const result = createExpenseSchema.safeParse({
+      amount: 50,
+      categoryId: 'category-1',
+      description: 'Future dinner',
+      paymentMethod: 'credit_card',
+      date: futureDate,
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toMatch(/future/i);
+    }
+  });
+
+  it('rejects an expense date older than 2 years', () => {
+    const ancientDate = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000).toISOString();
+    const result = createExpenseSchema.safeParse({
+      amount: 50,
+      categoryId: 'category-1',
+      description: 'Ancient expense',
+      paymentMethod: 'credit_card',
+      date: ancientDate,
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toMatch(/2 years/i);
+    }
   });
 
   it('rejects an invalid email on login', () => {

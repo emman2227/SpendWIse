@@ -12,6 +12,7 @@ export interface PaginationProps {
   pageSize?: number;
   className?: string;
   compact?: boolean;
+  alwaysShow?: boolean;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
@@ -22,8 +23,9 @@ export const Pagination: React.FC<PaginationProps> = ({
   pageSize,
   className,
   compact = false,
+  alwaysShow = false,
 }) => {
-  if (totalPages <= 1) {
+  if (!alwaysShow && totalPages <= 1) {
     return null;
   }
 

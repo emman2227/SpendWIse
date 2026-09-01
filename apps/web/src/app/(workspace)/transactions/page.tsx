@@ -10,19 +10,18 @@ import {
 } from '@spendwise/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Calendar,
   CircleAlert,
   CircleX,
   CreditCard,
-  DollarSign,
   Download,
   Filter,
   PencilLine,
+  Plus,
   ReceiptText,
   RotateCcw,
   Search,
-  Sparkles,
   Trash2,
+  X,
 } from 'lucide-react';
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 
@@ -119,10 +118,10 @@ const recurringHintPattern =
   /(subscription|membership|rent|renewal|bill|utility|mortgage|gym|monthly)/i;
 
 const selectClassName =
-  'flex h-12 w-full rounded-[20px] border border-line bg-paper px-4 text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:bg-paper-strong';
+  'flex h-12 w-full rounded-[20px] border border-line bg-paper px-3.5 pr-8 text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:bg-paper-strong';
 
 const compactSelectClassName =
-  'flex h-9 rounded-[16px] border border-line bg-paper px-3 text-xs font-medium text-ink shadow-sm outline-none transition hover:border-brand/40 focus:border-brand focus:bg-paper-strong';
+  'flex h-9 rounded-[16px] border border-line bg-paper px-2.5 pr-7 text-xs font-medium text-ink shadow-sm outline-none transition hover:border-brand/40 focus:border-brand focus:bg-paper-strong';
 
 const getInitialMonthValue = () => {
   const now = new Date();
@@ -139,6 +138,14 @@ const getDefaultFormValues = (defaultCategoryId?: string): TransactionFormValues
 });
 
 const toDateInputValue = (value: string) => new Date(value).toISOString().slice(0, 10);
+
+const getMaxExpenseDate = () => new Date().toISOString().slice(0, 10);
+
+const getMinExpenseDate = () => {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - 2);
+  return date.toISOString().slice(0, 10);
+};
 
 const parseMonthValue = (value: string) => {
   const [yearValue, monthValue] = value.split('-');
@@ -328,9 +335,14 @@ function TransactionEditorModal({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="space-y-2 text-sm font-medium text-ink">
-              <span>Date</span>
+              <div className="flex items-center justify-between">
+                <span>Date</span>
+                <span className="text-xs font-normal text-ink-soft">Today or past 2 yrs</span>
+              </div>
               <Input
                 className={cn(fieldErrors.date && 'border-danger focus:border-danger')}
+                max={getMaxExpenseDate()}
+                min={getMinExpenseDate()}
                 onChange={(event) => onFieldChange('date', event.target.value)}
                 type="date"
                 value={formValues.date}
@@ -876,58 +888,37 @@ export default function TransactionsPage() {
           />
         </section>
 
-        {/* Filter & Controls Surface */}
-        <SurfaceCard className="overflow-hidden rounded-[34px] px-5 py-5 md:px-6 md:py-6">
+        {/* Streamlined Filter & Controls Card */}
+        <SurfaceCard className="rounded-[30px] p-5 md:p-6">
           <div className="space-y-4">
-            {/* Header of Filter Surface */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line/60 pb-3">
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-brand" />
-                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-ink">
-                  Search & Filter
-                </h3>
-                {isFiltered ? <Badge variant="info">Filtered active</Badge> : null}
+            {/* Top row: Search, Month, Payment Method, Status, and Amount filters */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Search input (compact & well-proportioned) */}
+              <div className="relative min-w-[200px] flex-1 sm:max-w-xs">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
+                <Input
+                  className="pl-10 pr-9"
+                  onChange={(event) => setSearchValue(event.target.value)}
+                  placeholder="Search payee, note..."
+                  value={searchValue}
+                />
+                {searchValue ? (
+                  <button
+                    aria-label="Clear search"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft transition hover:text-ink"
+                    onClick={() => setSearchValue('')}
+                    type="button"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : null}
               </div>
 
-              {isFiltered ? (
-                <button
-                  className="inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand/5 px-3 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand/10"
-                  onClick={handleResetFilters}
-                  type="button"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  Reset all filters
-                </button>
-              ) : null}
-            </div>
-
-            {/* Labeled Filter Grid */}
-            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
-              {/* Search input */}
-              <div className="space-y-1.5 sm:col-span-2 xl:col-span-1">
-                <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                  <Search className="h-3.5 w-3.5 text-brand" />
-                  Search
-                </span>
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
-                  <Input
-                    className="pl-11"
-                    onChange={(event) => setSearchValue(event.target.value)}
-                    placeholder="Search note, payee..."
-                    value={searchValue}
-                  />
-                </div>
-              </div>
-
-              {/* Month selector */}
-              <div className="space-y-1.5">
-                <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                  <Calendar className="h-3.5 w-3.5 text-brand" />
-                  Month
-                </span>
+              {/* Month selector (ample room for month name + calendar picker button) */}
+              <div className="w-full sm:w-[195px]">
                 <Input
                   aria-label="Filter by month"
+                  className="w-full pr-2"
                   onChange={(event) => setMonthFilter(event.target.value)}
                   type="month"
                   value={monthFilter}
@@ -935,11 +926,7 @@ export default function TransactionsPage() {
               </div>
 
               {/* Payment method selector */}
-              <div className="space-y-1.5">
-                <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                  <CreditCard className="h-3.5 w-3.5 text-brand" />
-                  Payment Method
-                </span>
+              <div className="w-full sm:w-[170px] flex-1 min-w-[150px]">
                 <select
                   aria-label="Filter by payment method"
                   className={selectClassName}
@@ -948,7 +935,7 @@ export default function TransactionsPage() {
                   }
                   value={paymentMethodFilter}
                 >
-                  <option value="all">All payment methods</option>
+                  <option value="all">All methods</option>
                   {PAYMENT_METHODS.map((method) => (
                     <option key={method} value={method}>
                       {paymentMethodLabels[method]}
@@ -958,11 +945,7 @@ export default function TransactionsPage() {
               </div>
 
               {/* Status / Review Filter */}
-              <div className="space-y-1.5">
-                <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                  <CircleAlert className="h-3.5 w-3.5 text-brand" />
-                  Status
-                </span>
+              <div className="w-full sm:w-[160px] flex-1 min-w-[140px]">
                 <select
                   aria-label="Filter by status"
                   className={selectClassName}
@@ -977,18 +960,14 @@ export default function TransactionsPage() {
               </div>
 
               {/* Amount Range Filter */}
-              <div className="space-y-1.5">
-                <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                  <DollarSign className="h-3.5 w-3.5 text-brand" />
-                  Amount Range
-                </span>
+              <div className="w-full sm:w-[160px] flex-1 min-w-[140px]">
                 <select
                   aria-label="Filter by amount range"
                   className={selectClassName}
                   onChange={(event) => setAmountFilter(event.target.value as AmountFilter)}
                   value={amountFilter}
                 >
-                  <option value="all">All amounts ($0+)</option>
+                  <option value="all">All amounts</option>
                   <option value="under_25">Under $25</option>
                   <option value="25_to_100">$25 - $100</option>
                   <option value="100_to_500">$100 - $500</option>
@@ -997,11 +976,11 @@ export default function TransactionsPage() {
               </div>
             </div>
 
-            {/* Category Pills and Reset Action */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line/50 pt-3">
+            {/* Bottom row: Category Pills and Reset Filter Action */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line/60 pt-3">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="mr-1 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                  <Filter className="h-3.5 w-3.5" />
+                  <Filter className="h-3.5 w-3.5 text-brand" />
                   Category:
                 </span>
                 <button
@@ -1032,78 +1011,39 @@ export default function TransactionsPage() {
                   </button>
                 ))}
               </div>
-            </div>
 
-            {/* Overview quick summary banner */}
-            <div className="rounded-[28px] border border-brand/10 bg-[linear-gradient(140deg,rgba(15,123,113,0.08),rgba(255,255,255,0.92))] px-5 py-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="max-w-3xl">
-                  <p className="kicker">Overview</p>
-                  <h2 className="mt-2 text-xl font-semibold text-ink">
-                    Real transactions, faster cleanup.
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-ink-soft">
-                    Filter by month, narrow the list, sort by amount or date, and paginate through
-                    records effortlessly.
-                  </p>
-                </div>
-                <Sparkles className="mt-1 h-5 w-5 shrink-0 text-brand" />
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
-                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Spend
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">{formatMoney(totalVisible)}</p>
-                </div>
-                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Review
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">
-                    {flaggedCount} flagged charge{flaggedCount === 1 ? '' : 's'}
-                  </p>
-                </div>
-                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Active View
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">
-                    {pageSize === 'all' ? 'All Rows' : `${pageSize} per page`}
-                  </p>
-                </div>
-                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Filtered
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">
-                    {totalItems} transaction{totalItems === 1 ? '' : 's'}
-                  </p>
-                </div>
-              </div>
+              {isFiltered ? (
+                <button
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-soft transition hover:text-brand"
+                  onClick={handleResetFilters}
+                  type="button"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reset filters
+                </button>
+              ) : null}
             </div>
           </div>
         </SurfaceCard>
 
         {/* Transaction List Card */}
-        <SurfaceCard className="rounded-[28px] px-4 py-4 md:px-5 md:py-5">
-          {/* Header with upgraded View Scope & Rows Per Page Dropdowns */}
-          <div className="flex flex-col gap-4 border-b border-line/80 pb-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
+        <SurfaceCard className="rounded-[28px] p-4 md:p-5">
+          {/* Header with perfectly aligned title block and right-anchored toolbar */}
+          <div className="flex flex-col gap-3 border-b border-line/70 pb-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="min-w-0">
               <p className="kicker">Transaction list</p>
-              <h2 className="mt-2 text-[1.55rem] font-semibold leading-tight text-ink md:text-[1.75rem]">
+              <h2 className="mt-0.5 text-xl font-semibold leading-tight text-ink md:text-2xl">
                 Latest activity
               </h2>
-              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-ink-soft">
-                Every row is editable, backed by the API, and paginated for optimal performance.
+              <p className="mt-0.5 text-xs text-ink-soft sm:text-sm">
+                Review, edit, and manage your recent expenses.
               </p>
             </div>
 
-            {/* Interactive Header Controls */}
-            <div className="flex flex-wrap items-center gap-2.5">
+            {/* Interactive Header Controls Toolbar (Aligned horizontally to the right corner) */}
+            <div className="flex flex-wrap items-center gap-2.5 sm:flex-nowrap sm:justify-end">
               {/* Sort Order Dropdown */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
                 <span className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
                   Sort:
                 </span>
@@ -1122,7 +1062,7 @@ export default function TransactionsPage() {
               </div>
 
               {/* Rows Per Page Dropdown */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
                 <span className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
                   Rows:
                 </span>
@@ -1143,23 +1083,29 @@ export default function TransactionsPage() {
               </div>
 
               {/* Dynamic Status / Count Badge */}
-              <Badge variant={isFiltered ? 'info' : 'neutral'}>
+              <Badge
+                className="h-9 whitespace-nowrap px-3"
+                variant={isFiltered ? 'info' : 'neutral'}
+              >
                 {isFiltered ? `Filtered (${totalItems})` : `${totalItems} total`}
               </Badge>
 
+              {/* Add Expense Button (Rightmost element) */}
               <Button
+                className="whitespace-nowrap"
                 disabled={categoriesQuery.isLoading || categories.length === 0}
                 onClick={openCreateEditor}
                 size="sm"
                 variant="secondary"
               >
+                <Plus className="h-4 w-4" />
                 Add expense
               </Button>
             </div>
           </div>
 
           {categoriesQuery.isError ? (
-            <div className="mt-5 rounded-[22px] border border-danger/20 bg-danger/10 px-4 py-4 text-sm text-danger">
+            <div className="mt-4 rounded-[20px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
               {resolveTransactionError(
                 categoriesQuery.error,
                 'Unable to load categories right now.',
@@ -1168,7 +1114,7 @@ export default function TransactionsPage() {
           ) : null}
 
           {expensesQuery.isError ? (
-            <div className="mt-5 rounded-[22px] border border-danger/20 bg-danger/10 px-4 py-4 text-sm text-danger">
+            <div className="mt-4 rounded-[20px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
               {resolveTransactionError(
                 expensesQuery.error,
                 'Unable to load transactions right now.',
@@ -1179,7 +1125,7 @@ export default function TransactionsPage() {
           {listFeedback ? (
             <div
               className={cn(
-                'mt-5 rounded-[22px] px-4 py-4 text-sm',
+                'mt-4 rounded-[20px] px-4 py-3 text-sm',
                 listFeedback.toLowerCase().includes('unable')
                   ? 'border border-danger/20 bg-danger/10 text-danger'
                   : 'border border-brand/15 bg-brand/10 text-ink',
@@ -1190,18 +1136,18 @@ export default function TransactionsPage() {
           ) : null}
 
           {expensesQuery.isLoading ? (
-            <div className="mt-5 space-y-6">
+            <div className="mt-4 space-y-5">
               {Array.from({ length: 3 }).map((_, groupIndex) => (
                 <div key={groupIndex}>
                   <div className="flex items-center justify-between gap-3">
                     <Skeleton className="h-3 w-24 rounded-full" />
                     <Skeleton className="h-3 w-16 rounded-full" />
                   </div>
-                  <div className="mt-3 space-y-2.5">
+                  <div className="mt-2.5 space-y-2">
                     {Array.from({ length: 2 }).map((_, itemIndex) => (
                       <div
                         key={itemIndex}
-                        className="rounded-[22px] border border-line bg-paper px-3.5 py-3"
+                        className="rounded-[20px] border border-line bg-paper px-3.5 py-3"
                       >
                         <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
                           <div className="flex min-w-0 items-center gap-3.5">
@@ -1223,7 +1169,7 @@ export default function TransactionsPage() {
               ))}
             </div>
           ) : groupedTransactions.length > 0 ? (
-            <div className="mt-5 space-y-6">
+            <div className="mt-4 space-y-5">
               {groupedTransactions.map((group) => {
                 const groupTotal = group.items.reduce((total, item) => total + item.amount, 0);
 
@@ -1345,9 +1291,10 @@ export default function TransactionsPage() {
               })}
 
               {/* Bottom Pagination Controls */}
-              {pageSize !== 'all' && totalPages > 1 ? (
-                <div className="border-t border-line/60 pt-4">
+              {pageSize !== 'all' && totalItems > 0 ? (
+                <div className="mt-3.5 border-t border-line/60 pt-3">
                   <Pagination
+                    alwaysShow
                     currentPage={currentPage}
                     onPageChange={setCurrentPage}
                     pageSize={effectivePageSize}
