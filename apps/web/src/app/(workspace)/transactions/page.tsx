@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 
+import { useConfirm } from '@/components/providers/confirm-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -424,6 +425,7 @@ function TransactionEditorModal({
 export default function TransactionsPage() {
   const queryClient = useQueryClient();
   const { data: user } = useCurrentUserQuery();
+  const { confirmDelete, confirmSave } = useConfirm();
   const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('create');
@@ -745,6 +747,18 @@ export default function TransactionsPage() {
       return;
     }
 
+    if (editorMode === 'edit') {
+      const confirmed = await confirmSave({
+        title: 'Save transaction changes?',
+        description: `Are you sure you want to save the updated details for "${payload.description}" (${formatMoney(payload.amount)})?`,
+        confirmText: 'Save changes',
+      });
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setFormError('');
     setListFeedback('');
@@ -771,6 +785,19 @@ export default function TransactionsPage() {
   };
 
   const handleDelete = async (expenseId: string) => {
+    const targetExpense = visibleTransactions.find((t) => t.id === expenseId);
+    const confirmed = await confirmDelete({
+      title: 'Delete transaction?',
+      description: targetExpense
+        ? `Are you sure you want to delete "${targetExpense.description}" (${formatMoney(targetExpense.amount)})? This action cannot be undone.`
+        : 'Are you sure you want to delete this transaction? This action cannot be undone.',
+      confirmText: 'Delete transaction',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     setDeleteTargetId(expenseId);
     setListFeedback('');
 

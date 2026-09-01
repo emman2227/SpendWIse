@@ -28,6 +28,7 @@ import {
 import Link from 'next/link';
 import { type FormEvent, useMemo, useState } from 'react';
 
+import { useConfirm } from '@/components/providers/confirm-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -307,6 +308,7 @@ function CategoryEditorModal({
 export default function CategoriesPage() {
   const queryClient = useQueryClient();
   const { data: user } = useCurrentUserQuery();
+  const { confirmDelete, confirmSave } = useConfirm();
   const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('create');
@@ -519,6 +521,18 @@ export default function CategoriesPage() {
       return;
     }
 
+    if (editorMode === 'edit') {
+      const confirmed = await confirmSave({
+        title: 'Save category changes?',
+        description: `Are you sure you want to save the changes for "${payload.name}"?`,
+        confirmText: 'Save changes',
+      });
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setPageMessage('');
     setFormError('');
@@ -542,6 +556,16 @@ export default function CategoriesPage() {
   };
 
   const handleDelete = async (category: CategoryView) => {
+    const confirmed = await confirmDelete({
+      title: 'Delete category?',
+      description: `Are you sure you want to delete "${category.name}"? Any transactions in this category will remain, but the category itself will be removed. This action cannot be undone.`,
+      confirmText: 'Delete category',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     setDeleteTargetId(category.id);
     setPageMessage('');
 

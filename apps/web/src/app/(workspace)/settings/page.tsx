@@ -43,6 +43,7 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
+import { useConfirm } from '@/components/providers/confirm-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
@@ -283,6 +284,7 @@ const validateProfilePhone = (phone: string) => {
 function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { confirmSave, confirmLogout } = useConfirm();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -340,6 +342,17 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
       return;
     }
 
+    const confirmed = await confirmSave({
+      title: 'Save profile changes?',
+      description:
+        'Are you sure you want to save the changes to your display name and phone number?',
+      confirmText: 'Save changes',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     setIsSaving(true);
     setSaveError('');
 
@@ -357,6 +370,11 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
   };
 
   const handleLogout = async () => {
+    const confirmed = await confirmLogout();
+    if (!confirmed) {
+      return;
+    }
+
     setIsLoggingOut(true);
 
     try {
@@ -1055,6 +1073,7 @@ function NotificationsPanel() {
 function PreferencesPanel({ user }: { user: UserProfile | null | undefined }) {
   const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
+  const { confirmSave } = useConfirm();
 
   const [currency, setCurrency] = useState(user?.currency ?? 'USD');
   const [isSaving, setIsSaving] = useState(false);
@@ -1064,6 +1083,16 @@ function PreferencesPanel({ user }: { user: UserProfile | null | undefined }) {
   const handleSave = async () => {
     if (currency === user?.currency) {
       setSaveNotice('No changes to save.');
+      return;
+    }
+
+    const confirmed = await confirmSave({
+      title: 'Save preferences?',
+      description: `Are you sure you want to change your workspace currency to ${currency}?`,
+      confirmText: 'Save preferences',
+    });
+
+    if (!confirmed) {
       return;
     }
 

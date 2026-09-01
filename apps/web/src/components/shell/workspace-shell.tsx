@@ -12,6 +12,7 @@ import { getUserInitials, LOGOUT_INTENT_STORAGE_KEY } from '@/lib/auth/constants
 import { mobileNavigation, primaryNavigation, secondaryNavigation } from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 
+import { useConfirm } from '../providers/confirm-provider';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -76,6 +77,7 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
   const activeFetchCount = useIsFetching();
   const router = useRouter();
   const { data: user } = useCurrentUserQuery();
+  const { confirmLogout } = useConfirm();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const initials = getUserInitials(user?.name);
@@ -83,6 +85,11 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
   const profileEmail = truncateProfileText(user?.email, 28, 'Secure workspace');
 
   const handleLogout = async () => {
+    const confirmed = await confirmLogout();
+    if (!confirmed) {
+      return;
+    }
+
     setIsLoggingOut(true);
 
     try {

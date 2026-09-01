@@ -5,6 +5,7 @@ import { Fraunces, Plus_Jakarta_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { AuthSessionManager } from '@/components/providers/auth-session-manager';
+import { ConfirmProvider } from '@/components/providers/confirm-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 
@@ -42,7 +43,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           disableTransitionOnChange
         >
           <QueryProvider>
-            <AuthSessionManager>{children}</AuthSessionManager>
+            <AuthSessionManager>
+              <ConfirmProvider>{children}</ConfirmProvider>
+            </AuthSessionManager>
           </QueryProvider>
         </ThemeProvider>
       </body>

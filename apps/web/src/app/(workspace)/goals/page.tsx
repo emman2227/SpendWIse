@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { type FormEvent, useMemo, useState } from 'react';
 
+import { useConfirm } from '@/components/providers/confirm-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -319,6 +320,7 @@ function FundGoalModal({
 export default function GoalsPage() {
   const queryClient = useQueryClient();
   const { data: user } = useCurrentUserQuery();
+  const { confirmDelete, confirmSave } = useConfirm();
   const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
 
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -518,6 +520,18 @@ export default function GoalsPage() {
       return;
     }
 
+    if (editorMode === 'edit') {
+      const confirmed = await confirmSave({
+        title: 'Save goal changes?',
+        description: `Are you sure you want to save the updated target and deadline for "${payload.title}"?`,
+        confirmText: 'Save changes',
+      });
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setFormError('');
     setPageMessage('');
@@ -569,6 +583,19 @@ export default function GoalsPage() {
   };
 
   const handleDelete = async (goalId: string) => {
+    const targetGoal = goalViews.find((goal) => goal.id === goalId);
+    const confirmed = await confirmDelete({
+      title: 'Delete goal?',
+      description: targetGoal
+        ? `Are you sure you want to delete "${targetGoal.title}"? All tracking progress for this goal will be removed.`
+        : 'Are you sure you want to delete this goal? This action cannot be undone.',
+      confirmText: 'Delete goal',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     setDeleteTargetId(goalId);
     setPageMessage('');
 
