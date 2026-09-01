@@ -7,15 +7,19 @@ import {
   CircleX,
   PencilLine,
   Plus,
+  RotateCcw,
+  Search,
   ShieldAlert,
   Sparkles,
   Target,
   Trash2,
   TrendingUp,
   Users,
+  X,
 } from 'lucide-react';
 import { type FormEvent, useMemo, useState } from 'react';
 
+import { useConfirm } from '@/components/providers/confirm-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -40,6 +44,7 @@ import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 
 type BudgetStatusFilter = 'all' | 'safe' | 'warning' | 'danger';
+type EditorMode = 'create' | 'edit';
 type BudgetField = 'categoryId' | 'limitAmount';
 
 interface BudgetFormValues {
@@ -105,6 +110,7 @@ function BudgetEditorModal({
   formError,
   formValues,
   isSubmitting,
+  mode,
   monthLabel,
   onClose,
   onFieldChange,
@@ -115,11 +121,14 @@ function BudgetEditorModal({
   formError: string;
   formValues: BudgetFormValues;
   isSubmitting: boolean;
+  mode: EditorMode;
   monthLabel: string;
   onClose: () => void;
   onFieldChange: (field: BudgetField, value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
+  const selectedCategory = categories.find((category) => category.id === formValues.categoryId);
+
   return (
     <div
       aria-modal="true"
@@ -129,11 +138,14 @@ function BudgetEditorModal({
       <div className="panel-surface-strong max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[32px] px-5 py-5 md:px-7 md:py-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="kicker">Budget</p>
-            <h2 className="mt-3 text-2xl font-semibold text-ink">Create or update budget</h2>
+            <p className="kicker">{mode === 'create' ? 'Add budget' : 'Edit budget'}</p>
+            <h2 className="mt-3 text-2xl font-semibold text-ink">
+              {mode === 'create' ? 'Create budget' : 'Update budget'}
+            </h2>
             <p className="mt-2 text-sm leading-6 text-ink-soft">
-              Budgets are saved per category for {monthLabel}. Saving the same category again will
-              update that month&apos;s limit.
+              {mode === 'create'
+                ? `Budgets are saved per category for ${monthLabel}. Saving the same category again will update that month's limit.`
+                : `Adjust the monthly spending limit for ${selectedCategory ? `"${selectedCategory.name}"` : 'this category'} for ${monthLabel}.`}
             </p>
           </div>
           <button
@@ -151,9 +163,10 @@ function BudgetEditorModal({
             <span>Category</span>
             <select
               className={cn(
-                'flex h-12 w-full rounded-[20px] border border-line bg-paper px-4 text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:bg-paper-strong',
+                'flex h-12 w-full rounded-[20px] border border-line bg-paper px-4 text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:bg-paper-strong disabled:cursor-not-allowed disabled:opacity-60',
                 fieldErrors.categoryId && 'border-danger',
               )}
+              disabled={mode === 'edit'}
               onChange={(event) => onFieldChange('categoryId', event.target.value)}
               value={formValues.categoryId}
             >
@@ -173,8 +186,9 @@ function BudgetEditorModal({
             <span>Monthly limit</span>
             <Input
               className={cn(fieldErrors.limitAmount && 'border-danger focus:border-danger')}
+              inputMode="decimal"
               onChange={(event) => onFieldChange('limitAmount', event.target.value)}
-              placeholder="600"
+              placeholder="0.00"
               value={formValues.limitAmount}
             />
             {fieldErrors.limitAmount ? (
@@ -190,7 +204,13 @@ function BudgetEditorModal({
 
           <div className="flex flex-wrap gap-3">
             <Button disabled={isSubmitting} type="submit" variant="secondary">
-              {isSubmitting ? 'Saving...' : 'Save budget'}
+              {isSubmitting
+                ? mode === 'create'
+                  ? 'Saving...'
+                  : 'Updating...'
+                : mode === 'create'
+                  ? 'Save budget'
+                  : 'Save changes'}
             </Button>
             <Button disabled={isSubmitting} onClick={onClose} type="button" variant="soft">
               Cancel
@@ -277,10 +297,13 @@ function ShareBudgetModal({
 export default function BudgetsPage() {
   const queryClient = useQueryClient();
   const { data: user } = useCurrentUserQuery();
+  const { confirmDelete, confirmSave } = useConfirm();
 
   const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
 
   const [isCreateBudgetOpen, setIsCreateBudgetOpen] = useState(false);
+  const [editorMode, setEditorMode] = useState<EditorMode>('create');
+  const [, setEditingBudgetId] = useState<string | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareTargetId, setShareTargetId] = useState<string | null>(null);
   const [shareEmail, setShareEmail] = useState('');
@@ -325,6 +348,15 @@ export default function BudgetsPage() {
     });
   }, [budgetSummary.data?.items, categoriesQuery.data]);
 
+  const statusCounts = useMemo(() => {
+    return {
+      all: budgetViews.length,
+      safe: budgetViews.filter((budget) => budget.status === 'safe').length,
+      warning: budgetViews.filter((budget) => budget.status === 'warning').length,
+      danger: budgetViews.filter((budget) => budget.status === 'danger').length,
+    };
+  }, [budgetViews]);
+
   const visibleBudgets = budgetViews.filter((budget) => {
     const matchesSearch =
       !searchValue || budget.categoryName.toLowerCase().includes(searchValue.toLowerCase());
@@ -347,6 +379,7 @@ export default function BudgetsPage() {
     setFormValues(getDefaultFormValues(defaultCategoryId));
     setFieldErrors({});
     setFormError('');
+    setEditingBudgetId(null);
   };
 
   const openCreateBudget = () => {
@@ -360,11 +393,14 @@ export default function BudgetsPage() {
       return;
     }
 
+    setEditorMode('create');
     resetForm();
     setIsCreateBudgetOpen(true);
   };
 
   const openEditBudget = (budget: (typeof budgetViews)[number]) => {
+    setEditorMode('edit');
+    setEditingBudgetId(budget.id);
     setFormValues({
       categoryId: budget.categoryId,
       limitAmount: budget.limitAmount.toString(),
@@ -377,6 +413,11 @@ export default function BudgetsPage() {
   const closeBudgetModal = () => {
     setIsCreateBudgetOpen(false);
     resetForm();
+  };
+
+  const resetFilters = () => {
+    setSearchValue('');
+    setStatusFilter('all');
   };
 
   const openShareBudget = (budget: (typeof budgetViews)[number]) => {
@@ -394,9 +435,17 @@ export default function BudgetsPage() {
   };
 
   const handleFieldChange = (field: BudgetField, value: string) => {
+    let sanitizedValue = value;
+
+    if (field === 'limitAmount') {
+      // Only allow digits and up to 2 decimal places (same as transactions)
+      const match = value.replace(/[^\d.]/g, '').match(/^(\d*)(\.?\d{0,2})/);
+      sanitizedValue = match ? `${match[1]}${match[2]}` : '';
+    }
+
     setFormValues((currentValues) => ({
       ...currentValues,
-      [field]: value,
+      [field]: sanitizedValue,
     }));
     setFieldErrors((currentErrors) => ({
       ...currentErrors,
@@ -456,6 +505,20 @@ export default function BudgetsPage() {
       return;
     }
 
+    if (editorMode === 'edit') {
+      const categoryName =
+        categories.find((category) => category.id === payload.categoryId)?.name ?? 'this category';
+      const confirmed = await confirmSave({
+        title: 'Save budget changes?',
+        description: `Are you sure you want to update the ${monthLabel} budget for "${categoryName}" to ${formatMoney(payload.limitAmount)}?`,
+        confirmText: 'Save changes',
+      });
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setFormError('');
     setPageMessage('');
@@ -464,7 +527,7 @@ export default function BudgetsPage() {
       await upsertBudget(payload);
       await invalidateBudgets();
       closeBudgetModal();
-      setPageMessage('Budget saved.');
+      setPageMessage(editorMode === 'create' ? 'Budget saved.' : 'Budget updated.');
     } catch (error) {
       setFormError(resolveBudgetError(error, 'Unable to save the budget right now.'));
     } finally {
@@ -472,14 +535,24 @@ export default function BudgetsPage() {
     }
   };
 
-  const handleDelete = async (budgetId: string) => {
-    setDeleteTargetId(budgetId);
+  const handleDelete = async (budget: (typeof budgetViews)[number]) => {
+    const confirmed = await confirmDelete({
+      title: 'Delete budget?',
+      description: `Are you sure you want to delete the ${monthLabel} budget for "${budget.categoryName}" (${formatMoney(budget.limitAmount)})? This action cannot be undone.`,
+      confirmText: 'Delete budget',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeleteTargetId(budget.id);
     setPageMessage('');
 
     try {
-      await deleteBudget(budgetId);
+      await deleteBudget(budget.id);
       await invalidateBudgets();
-      setPageMessage('Budget deleted.');
+      setPageMessage(`Deleted budget for ${budget.categoryName}.`);
     } catch (error) {
       setPageMessage(resolveBudgetError(error, 'Unable to delete the budget right now.'));
     } finally {
@@ -603,20 +676,38 @@ export default function BudgetsPage() {
           />
         </section>
 
-        <SurfaceCard className="overflow-hidden rounded-[34px] px-5 py-5 md:px-6 md:py-6">
+        {/* Simplified & Streamlined Filter Card */}
+        <SurfaceCard className="rounded-[30px] p-5 md:p-6">
           <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr),180px,auto]">
-              <Input
-                className="pl-4"
-                onChange={(event) => setSearchValue(event.target.value)}
-                placeholder="Search budgets"
-                value={searchValue}
-              />
-              <Input
-                onChange={(event) => setMonthFilter(event.target.value)}
-                type="month"
-                value={monthFilter}
-              />
+            <div className="grid gap-3 sm:grid-cols-[1fr,auto,auto]">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
+                <Input
+                  className="pl-10 pr-9"
+                  onChange={(event) => setSearchValue(event.target.value)}
+                  placeholder="Search budgets by category..."
+                  value={searchValue}
+                />
+                {searchValue ? (
+                  <button
+                    aria-label="Clear search"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft transition hover:text-ink"
+                    onClick={() => setSearchValue('')}
+                    type="button"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : null}
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  aria-label="Filter month"
+                  className="w-full sm:w-[170px]"
+                  onChange={(event) => setMonthFilter(event.target.value)}
+                  type="month"
+                  value={monthFilter}
+                />
+              </div>
               <Button
                 disabled={categoriesQuery.isLoading}
                 onClick={openCreateBudget}
@@ -627,67 +718,50 @@ export default function BudgetsPage() {
               </Button>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {[
-                ['all', 'All'],
-                ['safe', 'Safe'],
-                ['warning', 'Watch'],
-                ['danger', 'Over'],
-              ].map(([value, label]) => (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line/60 pt-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { value: 'all' as const, label: 'All', count: statusCounts.all },
+                  { value: 'safe' as const, label: 'Safe', count: statusCounts.safe },
+                  { value: 'warning' as const, label: 'Watch', count: statusCounts.warning },
+                  { value: 'danger' as const, label: 'Over', count: statusCounts.danger },
+                ].map(({ value, label, count }) => (
+                  <button
+                    key={value}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition',
+                      statusFilter === value
+                        ? 'bg-brand text-white shadow-sm'
+                        : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
+                    )}
+                    onClick={() => setStatusFilter(value)}
+                    type="button"
+                  >
+                    <span>{label}</span>
+                    <span
+                      className={cn(
+                        'rounded-full px-1.5 py-0.5 text-[10px] font-bold',
+                        statusFilter === value
+                          ? 'bg-white/20 text-white'
+                          : 'bg-black/5 text-ink-soft dark:bg-white/10',
+                      )}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {searchValue || statusFilter !== 'all' ? (
                 <button
-                  key={value}
-                  className={cn(
-                    'rounded-full px-4 py-2 text-sm font-semibold transition',
-                    statusFilter === value
-                      ? 'bg-brand text-white shadow-sm'
-                      : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
-                  )}
-                  onClick={() => setStatusFilter(value as BudgetStatusFilter)}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-soft transition hover:text-brand"
+                  onClick={resetFilters}
                   type="button"
                 >
-                  {label}
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reset filters
                 </button>
-              ))}
-            </div>
-
-            <div className="rounded-[28px] border border-brand/10 bg-[linear-gradient(140deg,rgba(15,123,113,0.08),rgba(255,255,255,0.92))] px-5 py-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="max-w-3xl">
-                  <p className="kicker">Overview</p>
-                  <h2 className="mt-2 text-xl font-semibold text-ink">
-                    Budget health at a glance.
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-ink-soft">
-                    Totals, current pressure, and next-step signals update with the selected month.
-                  </p>
-                </div>
-                <Target className="mt-1 h-5 w-5 shrink-0 text-brand" />
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Budgeted
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">
-                    {formatMoney(totalBudgeted)}
-                  </p>
-                </div>
-                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Spent
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">{formatMoney(totalSpent)}</p>
-                </div>
-                <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
-                    Next
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-ink">
-                    {atRiskCount ? 'Review risk' : 'All steady'}
-                  </p>
-                </div>
-              </div>
+              ) : null}
             </div>
           </div>
         </SurfaceCard>
@@ -882,7 +956,7 @@ export default function BudgetsPage() {
                         <button
                           className="rounded-full border border-danger/20 bg-paper-strong px-3 py-1.5 text-xs font-semibold text-danger transition hover:border-danger/40 hover:bg-danger/5"
                           disabled={deleteTargetId === budget.id}
-                          onClick={() => handleDelete(budget.id)}
+                          onClick={() => handleDelete(budget)}
                           type="button"
                         >
                           <span className="inline-flex items-center gap-1.5">
@@ -960,6 +1034,7 @@ export default function BudgetsPage() {
           formError={formError}
           formValues={formValues}
           isSubmitting={isSubmitting}
+          mode={editorMode}
           monthLabel={monthLabel}
           onClose={closeBudgetModal}
           onFieldChange={handleFieldChange}

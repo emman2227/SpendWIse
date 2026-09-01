@@ -4,6 +4,7 @@ import {
   AUTH_EMAIL_VERIFICATION_CODE_LENGTH,
   AUTH_PASSWORD_MIN_LENGTH,
   AUTH_PHONE_MAX_LENGTH,
+  createBudgetSchema,
   createExpenseSchema,
   loginSchema,
   registerSchema,
@@ -220,5 +221,23 @@ describe('shared schemas', () => {
         password: `SecurePass1!${'a'.repeat(AUTH_PASSWORD_MIN_LENGTH - 12)}`,
       }).success,
     ).toBe(true);
+  });
+
+  it('validates budget limits, amounts, and required fields', () => {
+    const validBase = {
+      categoryId: 'category-1',
+      limitAmount: 500,
+      month: 9,
+      year: 2026,
+    };
+
+    expect(createBudgetSchema.safeParse(validBase).success).toBe(true);
+    expect(createBudgetSchema.safeParse({ ...validBase, limitAmount: 0 }).success).toBe(false);
+    expect(createBudgetSchema.safeParse({ ...validBase, limitAmount: -50 }).success).toBe(false);
+    expect(createBudgetSchema.safeParse({ ...validBase, limitAmount: 150_000_000 }).success).toBe(
+      false,
+    );
+    expect(createBudgetSchema.safeParse({ ...validBase, categoryId: '' }).success).toBe(false);
+    expect(createBudgetSchema.safeParse({ ...validBase, month: 13 }).success).toBe(false);
   });
 });
