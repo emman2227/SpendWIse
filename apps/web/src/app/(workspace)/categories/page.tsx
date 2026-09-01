@@ -72,6 +72,8 @@ interface CategoryView extends Category {
 }
 
 const PAGE_SIZE = 8;
+const CATEGORY_NAME_MIN_LENGTH = 2;
+const CATEGORY_NAME_MAX_LENGTH = 30;
 
 const iconOptions = [
   { value: 'home', label: 'Home', icon: Home },
@@ -157,6 +159,7 @@ function CategoryEditorModal({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const PreviewIcon = iconMap[formValues.icon] ?? Wallet;
+  const currentLength = formValues.name.length;
 
   return (
     <div
@@ -205,16 +208,41 @@ function CategoryEditorModal({
         </div>
 
         <form className="mt-6 space-y-5" onSubmit={onSubmit}>
-          <label className="space-y-2 text-sm font-medium text-ink">
-            <span>Name</span>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm font-medium text-ink">
+              <label htmlFor="category-name-input">
+                Name <span className="text-danger">*</span>
+              </label>
+              <span
+                className={cn(
+                  'text-xs tabular-nums transition-colors',
+                  currentLength >= CATEGORY_NAME_MAX_LENGTH
+                    ? 'font-semibold text-danger'
+                    : currentLength >= CATEGORY_NAME_MAX_LENGTH - 5
+                      ? 'font-medium text-amber-500'
+                      : 'text-ink-soft',
+                )}
+              >
+                {currentLength}/{CATEGORY_NAME_MAX_LENGTH}
+              </span>
+            </div>
             <Input
+              id="category-name-input"
               className={cn(fieldErrors.name && 'border-danger focus:border-danger')}
+              maxLength={CATEGORY_NAME_MAX_LENGTH}
               onChange={(event) => onFieldChange('name', event.target.value)}
-              placeholder="Dining out"
+              placeholder="e.g. Dining out"
               value={formValues.name}
             />
-            {fieldErrors.name ? <p className="text-sm text-danger">{fieldErrors.name}</p> : null}
-          </label>
+            {fieldErrors.name ? (
+              <p className="text-sm text-danger">{fieldErrors.name}</p>
+            ) : (
+              <p className="text-xs text-ink-soft">
+                Must be between {CATEGORY_NAME_MIN_LENGTH} and {CATEGORY_NAME_MAX_LENGTH}{' '}
+                characters.
+              </p>
+            )}
+          </div>
 
           <div className="space-y-2">
             <span className="text-sm font-medium text-ink">Icon</span>
@@ -476,8 +504,42 @@ export default function CategoriesPage() {
   };
 
   const buildValidatedPayload = () => {
+    const trimmedName = formValues.name.trim();
+
+    if (!trimmedName) {
+      setFieldErrors({ name: 'Category name is required.' });
+      setFormError('Please provide a category name.');
+      return null;
+    }
+
+    if (trimmedName.length < CATEGORY_NAME_MIN_LENGTH) {
+      setFieldErrors({ name: `Name must be at least ${CATEGORY_NAME_MIN_LENGTH} characters.` });
+      setFormError('Category name is too short.');
+      return null;
+    }
+
+    if (trimmedName.length > CATEGORY_NAME_MAX_LENGTH) {
+      setFieldErrors({ name: `Name cannot exceed ${CATEGORY_NAME_MAX_LENGTH} characters.` });
+      setFormError('Category name is too long.');
+      return null;
+    }
+
+    // Check duplicate against existing categories
+    const isDuplicate = categories.some((category) => {
+      if (editorMode === 'edit' && category.id === editingCategoryId) {
+        return false;
+      }
+      return category.name.trim().toLowerCase() === trimmedName.toLowerCase();
+    });
+
+    if (isDuplicate) {
+      setFieldErrors({ name: 'A category with this name already exists.' });
+      setFormError('A category with this name already exists.');
+      return null;
+    }
+
     const candidate = {
-      name: formValues.name.trim(),
+      name: trimmedName,
       icon: formValues.icon,
       color: formValues.color,
     };
