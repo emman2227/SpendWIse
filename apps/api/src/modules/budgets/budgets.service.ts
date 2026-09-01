@@ -71,6 +71,17 @@ export class BudgetsService {
       this.expensesService.getMonthlyCategoryTotals(userId, month, year),
     ]);
 
+    const budgetedCategoryIds = new Set(budgets.map((b) => b.categoryId));
+    const unbudgetedItems: Array<{ categoryId: string; spent: number }> = [];
+
+    spendByCategory.forEach((spent, categoryId) => {
+      if (!budgetedCategoryIds.has(categoryId) && spent > 0) {
+        unbudgetedItems.push({ categoryId, spent });
+      }
+    });
+
+    const unbudgetedTotal = unbudgetedItems.reduce((acc, item) => acc + item.spent, 0);
+
     return {
       month,
       year,
@@ -83,6 +94,11 @@ export class BudgetsService {
           isOverBudget: spent > budget.limitAmount,
         };
       }),
+      unbudgeted: {
+        totalSpent: unbudgetedTotal,
+        categoriesCount: unbudgetedItems.length,
+        items: unbudgetedItems,
+      },
     };
   }
 }

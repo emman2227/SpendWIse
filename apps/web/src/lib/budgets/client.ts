@@ -15,10 +15,20 @@ export interface BudgetSummaryItem extends Budget {
   isOverBudget: boolean;
 }
 
+export interface UnbudgetedCategorySpend {
+  categoryId: string;
+  spent: number;
+}
+
 export interface BudgetSummary {
   month: number;
   year: number;
   items: BudgetSummaryItem[];
+  unbudgeted?: {
+    totalSpent: number;
+    categoriesCount: number;
+    items: UnbudgetedCategorySpend[];
+  };
 }
 
 export class BudgetsClientError extends Error {

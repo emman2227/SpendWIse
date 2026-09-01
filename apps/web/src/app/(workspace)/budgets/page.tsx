@@ -348,6 +348,21 @@ export default function BudgetsPage() {
     });
   }, [budgetSummary.data?.items, categoriesQuery.data]);
 
+  const unbudgetedSummary = budgetSummary.data?.unbudgeted;
+  const unbudgetedViews = useMemo(() => {
+    const currentCategories = categoriesQuery.data ?? [];
+    const currentItems = unbudgetedSummary?.items ?? [];
+    return currentItems.map((item) => {
+      const category = currentCategories.find((cat) => cat.id === item.categoryId);
+      return {
+        categoryId: item.categoryId,
+        spent: item.spent,
+        categoryName: category?.name ?? 'Unknown category',
+        categoryColor: category?.color ?? '#94A3B8',
+      };
+    });
+  }, [unbudgetedSummary?.items, categoriesQuery.data]);
+
   const statusCounts = useMemo(() => {
     return {
       all: budgetViews.length,
@@ -395,6 +410,26 @@ export default function BudgetsPage() {
 
     setEditorMode('create');
     resetForm();
+    setIsCreateBudgetOpen(true);
+  };
+
+  const openCreateBudgetForCategory = (categoryId: string, spentAmount: number) => {
+    if (categoriesQuery.isError) {
+      setPageMessage('Unable to load categories right now. Refresh the page and try again.');
+      return;
+    }
+
+    setEditorMode('create');
+    setEditingBudgetId(null);
+    setFieldErrors({});
+    setFormError('');
+    const suggestedLimit = (
+      Math.ceil((spentAmount > 0 ? spentAmount * 1.1 : 100) / 10) * 10
+    ).toString();
+    setFormValues({
+      categoryId,
+      limitAmount: suggestedLimit,
+    });
     setIsCreateBudgetOpen(true);
   };
 
@@ -654,7 +689,11 @@ export default function BudgetsPage() {
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <MetricCard
             delta={`${visibleBudgets.length} budgets`}
-            helper="Current filtered view"
+            helper={
+              unbudgetedViews.length > 0
+                ? `${formatMoney(unbudgetedSummary?.totalSpent ?? 0)} unbudgeted`
+                : 'Current filtered view'
+            }
             icon={Target}
             label="Remaining budget"
             value={formatMoney(totalRemaining)}
@@ -667,8 +706,8 @@ export default function BudgetsPage() {
             value={atRiskCount.toString()}
           />
           <MetricCard
-            delta={`${formatMoney(totalSpent)} spent`}
-            helper="Month-end outlook"
+            delta={`${formatMoney(totalSpent + (unbudgetedSummary?.totalSpent ?? 0))} total outflow`}
+            helper={`${formatMoney(totalSpent)} budgeted`}
             icon={TrendingUp}
             label="End-of-month outlook"
             tone="mint"
@@ -765,6 +804,69 @@ export default function BudgetsPage() {
             </div>
           </div>
         </SurfaceCard>
+
+        {/* Unbudgeted Spending Card */}
+        {unbudgetedViews.length > 0 ? (
+          <SurfaceCard className="rounded-[28px] border-warning/20 bg-warning/5 p-4 sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-warning/15 text-warning">
+                  <CircleAlert className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-semibold text-ink">Unbudgeted Spending</h3>
+                    <Badge variant="warning">
+                      {formatMoney(unbudgetedSummary?.totalSpent ?? 0)}
+                    </Badge>
+                  </div>
+                  <p className="mt-0.5 text-xs text-ink-soft sm:text-sm">
+                    {unbudgetedViews.length === 1
+                      ? `1 category has logged expenses for ${monthLabel} without an active budget limit.`
+                      : `${unbudgetedViews.length} categories have logged expenses for ${monthLabel} without active budget limits.`}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+              {unbudgetedViews.map((item) => (
+                <div
+                  key={item.categoryId}
+                  className="flex items-center justify-between gap-3 rounded-[20px] border border-line bg-paper px-3.5 py-2.5 transition hover:border-brand/30"
+                >
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <div
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-xs font-semibold"
+                      style={{
+                        backgroundColor: `${item.categoryColor}20`,
+                        color: item.categoryColor,
+                      }}
+                    >
+                      {item.categoryName.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-xs font-semibold text-ink">{item.categoryName}</p>
+                      <p className="text-[11px] font-medium text-ink-soft">
+                        {formatMoney(item.spent)} spent
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    className="h-7 shrink-0 text-xs"
+                    onClick={() => openCreateBudgetForCategory(item.categoryId, item.spent)}
+                    size="sm"
+                    variant="soft"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Assign budget
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </SurfaceCard>
+        ) : null}
 
         <SurfaceCard className="rounded-[28px] px-4 py-4 md:px-5 md:py-5">
           <div className="flex flex-col gap-3 border-b border-line/80 pb-4 md:flex-row md:items-end md:justify-between">
