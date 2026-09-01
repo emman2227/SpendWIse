@@ -321,7 +321,7 @@ export default function GoalsPage() {
   const queryClient = useQueryClient();
   const { data: user } = useCurrentUserQuery();
   const { confirmDelete, confirmSave } = useConfirm();
-  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP');
 
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<GoalEditorMode>('create');

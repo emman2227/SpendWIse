@@ -98,7 +98,7 @@ const statusRank: Record<BudgetStatus, number> = {
 
 export default function ReportsPage() {
   const { data: user } = useCurrentUserQuery();
-  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP');
   const [monthValue, setMonthValue] = useState(getInitialMonthValue());
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [pageMessage, setPageMessage] = useState('');

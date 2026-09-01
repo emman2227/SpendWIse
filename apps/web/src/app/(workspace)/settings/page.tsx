@@ -1075,7 +1075,7 @@ function PreferencesPanel({ user }: { user: UserProfile | null | undefined }) {
   const { theme, setTheme } = useTheme();
   const { confirmSave } = useConfirm();
 
-  const [currency, setCurrency] = useState(user?.currency ?? 'USD');
+  const [currency, setCurrency] = useState(user?.currency ?? 'PHP');
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState('');
   const [saveError, setSaveError] = useState('');

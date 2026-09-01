@@ -1,10 +1,10 @@
 'use client';
 
 import { Menu, X } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { AppLogo } from '@/components/ui/app-logo';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -24,13 +24,7 @@ export const LandingHeader = ({ items }: LandingHeaderProps) => {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-line/70 bg-paper-strong/95 backdrop-blur-xl backdrop-blur-xl">
       <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 md:px-6 md:py-2.5">
         <Link className="flex items-center gap-2" href="/">
-          <Image
-            src="/logo.png"
-            alt="SpendWise Logo"
-            width={28}
-            height={28}
-            className="shrink-0 rounded-[12px]"
-          />
+          <AppLogo size={28} className="rounded-[10px]" priority />
           <span className="text-[1.08rem] font-semibold tracking-tight text-ink md:text-[1.2rem]">
             SpendWise
           </span>

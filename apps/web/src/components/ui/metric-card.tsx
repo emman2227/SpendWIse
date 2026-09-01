@@ -59,6 +59,7 @@ export const MetricCard = ({
               'mt-3 text-2xl font-semibold sm:text-3xl',
               tone === 'ink' ? 'text-white' : 'text-ink',
             )}
+            suppressHydrationWarning
           >
             {value}
           </p>
@@ -70,6 +71,7 @@ export const MetricCard = ({
             'min-w-0 truncate text-sm',
             tone === 'ink' ? 'text-white/70' : 'text-ink-soft',
           )}
+          suppressHydrationWarning
         >
           {helper}
         </p>

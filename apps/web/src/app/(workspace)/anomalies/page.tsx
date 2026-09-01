@@ -12,7 +12,7 @@ import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 
 export default function AnomaliesPage() {
   const { data: user } = useCurrentUserQuery();
-  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP');
 
   const selected = alerts[0] ?? {
     id: 'fallback-alert',

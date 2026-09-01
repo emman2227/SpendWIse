@@ -2,7 +2,6 @@
 
 import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { LifeBuoy, LogOut, Plus, Search, Sparkles } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { type ReactNode, useState } from 'react';
@@ -13,6 +12,7 @@ import { mobileNavigation, primaryNavigation, secondaryNavigation } from '@/lib/
 import { cn } from '@/lib/utils';
 
 import { useConfirm } from '../providers/confirm-provider';
+import { AppLogo } from '../ui/app-logo';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -109,13 +109,7 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-line-strong bg-paper-strong text-ink backdrop-blur-xl lg:flex">
         <div className="sidebar-scroll flex h-full flex-col overflow-y-auto px-4 py-4">
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <Image
-              src="/logo.png"
-              alt="SpendWise Logo"
-              width={40}
-              height={40}
-              className="shrink-0 rounded-[14px]"
-            />
+            <AppLogo size={40} className="rounded-[14px]" priority />
             <div className="min-w-0">
               <p className="truncate text-[17px] font-semibold tracking-tight text-ink">
                 SpendWise

@@ -25,7 +25,7 @@ export default function ForecastsPage() {
     queryKey: forecastDetailsQueryKey,
     queryFn: getForecastDetails,
   });
-  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP');
 
   // Compute chart data dynamically
   const projectionData = forecastData?.forecastData

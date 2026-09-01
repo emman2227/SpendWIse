@@ -311,3 +311,18 @@ a {
     animation: none;
   }
 }
+
+.app-logo-light {
+  display: block;
+}
+.app-logo-dark {
+  display: none;
+}
+
+[data-theme='dark'] .app-logo-light {
+  display: none;
+}
+[data-theme='dark'] .app-logo-dark {
+  display: block;
+}
+

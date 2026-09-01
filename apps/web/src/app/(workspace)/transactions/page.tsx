@@ -460,7 +460,7 @@ export default function TransactionsPage() {
   const queryClient = useQueryClient();
   const { data: user } = useCurrentUserQuery();
   const { confirmDelete, confirmSave } = useConfirm();
-  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('create');
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);

@@ -268,7 +268,7 @@ const buildRecurringNotifications = (
 export const HeaderNotificationModal = () => {
   const { data: user } = useCurrentUserQuery();
   const formatMoney = useCallback(
-    (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD'),
+    (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP'),
     [user?.currency],
   );
   const queryClient = useQueryClient();

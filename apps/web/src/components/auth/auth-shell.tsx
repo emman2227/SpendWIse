@@ -1,8 +1,8 @@
 import { CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { AppLogo } from '../ui/app-logo';
 import { Badge } from '../ui/badge';
 import { SurfaceCard } from '../ui/surface-card';
 
@@ -44,13 +44,7 @@ export const AuthShell = ({ eyebrow, title, description, children, footer }: Aut
             href="/"
             className="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold"
           >
-            <Image
-              src="/logo.png"
-              alt="SpendWise Logo"
-              width={24}
-              height={24}
-              className="shrink-0"
-            />
+            <AppLogo size={24} className="rounded-[8px]" priority />
             SpendWise
           </Link>
 

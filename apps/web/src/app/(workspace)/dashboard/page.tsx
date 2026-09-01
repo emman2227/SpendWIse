@@ -104,7 +104,7 @@ const getInsightBadge = (type: string) => {
 export default function DashboardPage() {
   const queryClient = useQueryClient();
   const { data: user } = useCurrentUserQuery();
-  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP');
   const [pageMessage, setPageMessage] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -774,7 +774,7 @@ export default function DashboardPage() {
                   const badge = getInsightBadge(insight.type);
                   const evidenceFormatted = formatInsightEvidence(
                     insight.evidence,
-                    user?.currency ?? 'USD',
+                    user?.currency ?? 'PHP',
                   );
 
                   return (

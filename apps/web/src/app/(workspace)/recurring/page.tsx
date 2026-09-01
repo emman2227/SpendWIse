@@ -390,7 +390,7 @@ const detectRecurringSeries = (expenses: Expense[], categories: Category[]) => {
 export default function RecurringPage() {
   const queryClient = useQueryClient();
   const { data: user } = useCurrentUserQuery();
-  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP');
 
   const [statusFilter, setStatusFilter] = useState<RecurringFilter>('all');
   const [searchValue, setSearchValue] = useState('');

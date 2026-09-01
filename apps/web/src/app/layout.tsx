@@ -28,6 +28,11 @@ export const metadata: Metadata = {
   },
   description:
     'SpendWise is a premium AI-powered personal finance tracker for budgets, insights, anomaly alerts, and forecasting.',
+  icons: {
+    icon: [{ url: '/icon.png' }, { url: '/favicon.ico' }],
+    shortcut: '/favicon.ico',
+    apple: '/apple-icon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

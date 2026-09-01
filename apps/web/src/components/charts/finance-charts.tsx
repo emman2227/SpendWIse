@@ -25,7 +25,7 @@ import { formatMoney as baseFormatMoney } from '@/lib/formatters';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ChartTooltip = ({ active, label, payload }: any) => {
   const { data: user } = useCurrentUserQuery();
-  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP');
 
   if (!active || !payload?.length) {
     return null;

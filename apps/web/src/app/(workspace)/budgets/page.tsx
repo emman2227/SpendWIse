@@ -369,7 +369,7 @@ export default function BudgetsPage() {
   const { data: user } = useCurrentUserQuery();
   const { confirmDelete, confirmSave } = useConfirm();
 
-  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD');
+  const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP');
 
   const [isCreateBudgetOpen, setIsCreateBudgetOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('create');

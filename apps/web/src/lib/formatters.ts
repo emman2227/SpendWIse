@@ -1,6 +1,6 @@
 import { formatCurrency } from '@spendwise/shared';
 
-export const formatMoney = (amount: number, currency = 'USD') =>
+export const formatMoney = (amount: number, currency = 'PHP') =>
   formatCurrency(amount, 'en-US', currency);
 
 export const formatDelta = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(0)}%`;
@@ -13,7 +13,7 @@ export const formatCompactNumber = (value: number) =>
 
 export const formatConfidence = (value: number) => `${Math.round(value * 100)}% confidence`;
 
-export const formatInsightEvidence = (evidence: unknown, currency = 'USD'): string | null => {
+export const formatInsightEvidence = (evidence: unknown, currency = 'PHP'): string | null => {
   if (!evidence) {
     return null;
   }

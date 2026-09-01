@@ -309,7 +309,7 @@ export default function NotificationsPage() {
   const queryClient = useQueryClient();
   const { data: user } = useCurrentUserQuery();
   const formatMoney = useCallback(
-    (amount: number) => baseFormatMoney(amount, user?.currency ?? 'USD'),
+    (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP'),
     [user?.currency],
   );
   const [readIds, setReadIds] = useState<Set<string>>(() => new Set());
