@@ -58,6 +58,96 @@ describe('shared schemas', () => {
     }
   });
 
+  it('rejects an invalid or out-of-bounds amount', () => {
+    const validBase = {
+      categoryId: 'category-1',
+      description: 'Supermarket',
+      paymentMethod: 'debit_card',
+      date: new Date().toISOString(),
+    };
+
+    expect(createExpenseSchema.safeParse({ ...validBase, amount: 0 }).success).toBe(false);
+    expect(createExpenseSchema.safeParse({ ...validBase, amount: -10 }).success).toBe(false);
+    expect(createExpenseSchema.safeParse({ ...validBase, amount: 150_000_000 }).success).toBe(
+      false,
+    );
+    expect(createExpenseSchema.safeParse({ ...validBase, amount: 99.99 }).success).toBe(true);
+  });
+
+  it('rejects descriptions exceeding 120 characters or containing control characters', () => {
+    const validBase = {
+      amount: 45,
+      categoryId: 'category-1',
+      paymentMethod: 'debit_card',
+      date: new Date().toISOString(),
+    };
+
+    // > 120 chars
+    expect(
+      createExpenseSchema.safeParse({
+        ...validBase,
+        description: 'A'.repeat(121),
+      }).success,
+    ).toBe(false);
+
+    // Control characters / null bytes
+    expect(
+      createExpenseSchema.safeParse({
+        ...validBase,
+        description: 'Coffee\x00Shop',
+      }).success,
+    ).toBe(false);
+
+    expect(
+      createExpenseSchema.safeParse({
+        ...validBase,
+        description: 'Coffee\x1FShop',
+      }).success,
+    ).toBe(false);
+
+    // Valid 120 chars
+    expect(
+      createExpenseSchema.safeParse({
+        ...validBase,
+        description: 'A'.repeat(120),
+      }).success,
+    ).toBe(true);
+  });
+
+  it('rejects notes exceeding 200 characters or containing control characters', () => {
+    const validBase = {
+      amount: 45,
+      categoryId: 'category-1',
+      description: 'Lunch meeting',
+      paymentMethod: 'debit_card',
+      date: new Date().toISOString(),
+    };
+
+    // > 200 chars
+    expect(
+      createExpenseSchema.safeParse({
+        ...validBase,
+        notes: 'N'.repeat(201),
+      }).success,
+    ).toBe(false);
+
+    // Control character
+    expect(
+      createExpenseSchema.safeParse({
+        ...validBase,
+        notes: 'Meeting\x00notes',
+      }).success,
+    ).toBe(false);
+
+    // Valid 200 chars
+    expect(
+      createExpenseSchema.safeParse({
+        ...validBase,
+        notes: 'N'.repeat(200),
+      }).success,
+    ).toBe(true);
+  });
+
   it('rejects an invalid email on login', () => {
     const result = loginSchema.safeParse({
       email: 'not-an-email',

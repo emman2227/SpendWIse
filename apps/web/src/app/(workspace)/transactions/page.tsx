@@ -211,6 +211,15 @@ const getDayLabel = (value: string) => {
   }).format(date);
 };
 
+const sanitizeCsvCell = (value: string) => {
+  const clean = value.replace(/"/g, '""');
+  // Prevent CSV Formula Injection (=, +, -, @, tab, CR)
+  if (/^[=+\-@\t\r]/.test(clean)) {
+    return `"'${clean}"`;
+  }
+  return `"${clean}"`;
+};
+
 const buildCsv = (transactions: TransactionView[]) => {
   const rows = [
     ['Date', 'Description', 'Category', 'Amount', 'Payment Method', 'Notes'],
@@ -224,7 +233,7 @@ const buildCsv = (transactions: TransactionView[]) => {
     ]),
   ];
 
-  return rows.map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
+  return rows.map((row) => row.map((cell) => sanitizeCsvCell(cell)).join(',')).join('\n');
 };
 
 const getCategoryByName = (categories: Category[], names: string[]) =>
@@ -306,6 +315,7 @@ function TransactionEditorModal({
               <span>Amount</span>
               <Input
                 className={cn(fieldErrors.amount && 'border-danger focus:border-danger')}
+                inputMode="decimal"
                 onChange={(event) => onFieldChange('amount', event.target.value)}
                 placeholder="0.00"
                 value={formValues.amount}
@@ -370,9 +380,22 @@ function TransactionEditorModal({
           </div>
 
           <label className="space-y-2 text-sm font-medium text-ink">
-            <span>Merchant or description</span>
+            <div className="flex items-center justify-between">
+              <span>Merchant or description</span>
+              <span
+                className={cn(
+                  'text-xs font-normal',
+                  formValues.description.length >= 120
+                    ? 'font-semibold text-danger'
+                    : 'text-ink-soft',
+                )}
+              >
+                {formValues.description.length}/120
+              </span>
+            </div>
             <Input
               className={cn(fieldErrors.description && 'border-danger focus:border-danger')}
+              maxLength={120}
               onChange={(event) => onFieldChange('description', event.target.value)}
               placeholder="Where did you spend?"
               value={formValues.description}
@@ -383,14 +406,25 @@ function TransactionEditorModal({
           </label>
 
           <label className="space-y-2 text-sm font-medium text-ink">
-            <span>Notes</span>
+            <div className="flex items-center justify-between">
+              <span>Notes</span>
+              <span
+                className={cn(
+                  'text-xs font-normal',
+                  formValues.notes.length >= 200 ? 'font-semibold text-danger' : 'text-ink-soft',
+                )}
+              >
+                {formValues.notes.length}/200
+              </span>
+            </div>
             <Textarea
               className={cn(
-                'min-h-[110px]',
+                'min-h-[100px] resize-none',
                 fieldErrors.notes && 'border-danger focus:border-danger',
               )}
+              maxLength={200}
               onChange={(event) => onFieldChange('notes', event.target.value)}
-              placeholder="Optional notes or context"
+              placeholder="Optional notes or context (max 200 chars)"
               value={formValues.notes}
             />
             {fieldErrors.notes ? <p className="text-sm text-danger">{fieldErrors.notes}</p> : null}
@@ -668,9 +702,17 @@ export default function TransactionsPage() {
   };
 
   const handleFieldChange = (field: TransactionField, value: string) => {
+    let sanitizedValue = value;
+
+    if (field === 'amount') {
+      // Only allow digits and up to 2 decimal places
+      const match = value.replace(/[^\d.]/g, '').match(/^(\d*)(\.?\d{0,2})/);
+      sanitizedValue = match ? `${match[1]}${match[2]}` : '';
+    }
+
     setFormValues((currentValues) => ({
       ...currentValues,
-      [field]: field === 'paymentMethod' ? (value as PaymentMethod) : value,
+      [field]: field === 'paymentMethod' ? (sanitizedValue as PaymentMethod) : sanitizedValue,
     }));
     setFieldErrors((currentErrors) => ({
       ...currentErrors,
@@ -1216,7 +1258,7 @@ export default function TransactionsPage() {
                           className="rounded-[22px] border border-line bg-paper px-3.5 py-3 transition hover:border-brand/30"
                         >
                           <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
-                            <div className="flex min-w-0 items-center gap-3.5">
+                            <div className="flex min-w-0 flex-1 items-start gap-3.5">
                               <div
                                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] text-sm font-semibold"
                                 style={categoryTone(transaction.categoryColor)}
@@ -1225,7 +1267,10 @@ export default function TransactionsPage() {
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <p className="text-[15px] font-semibold text-ink">
+                                  <p
+                                    className="line-clamp-2 break-words text-[15px] font-semibold text-ink"
+                                    title={transaction.description}
+                                  >
                                     {transaction.description}
                                   </p>
                                   <Badge variant={transaction.alert ? 'warning' : 'neutral'}>
@@ -1238,13 +1283,16 @@ export default function TransactionsPage() {
                                     <Badge variant="danger">Needs review</Badge>
                                   ) : null}
                                 </div>
-                                <p className="mt-1 text-sm text-ink-soft">
+                                <p
+                                  className="mt-1 line-clamp-2 break-words text-sm text-ink-soft"
+                                  title={transaction.notes}
+                                >
                                   {transaction.notes?.trim() || 'No notes added.'}
                                 </p>
                               </div>
                             </div>
 
-                            <div className="grid gap-2 sm:grid-cols-3 xl:flex xl:items-center xl:gap-2.5">
+                            <div className="grid shrink-0 gap-2 sm:grid-cols-3 xl:flex xl:items-center xl:gap-2.5">
                               <div className="rounded-[16px] border border-line bg-paper px-3 py-2 xl:min-w-[112px]">
                                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                                   Date
@@ -1271,7 +1319,7 @@ export default function TransactionsPage() {
                               </div>
                             </div>
 
-                            <div className="flex flex-col gap-2.5 xl:min-w-[204px] xl:items-end">
+                            <div className="flex shrink-0 flex-col gap-2.5 xl:min-w-[204px] xl:items-end">
                               <div className="xl:text-right">
                                 <p className="text-lg font-semibold text-ink">
                                   {formatMoney(transaction.amount)}
