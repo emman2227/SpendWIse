@@ -18,11 +18,11 @@ import { useMemo, useState } from 'react';
 import { CategoryShareChart, SpendingOverviewChart } from '@/components/charts/finance-charts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { CircularGauge } from '@/components/ui/circular-gauge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { Pagination } from '@/components/ui/pagination';
-import { ProgressBar } from '@/components/ui/progress-bar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import {
@@ -43,6 +43,7 @@ import {
   listTransactionCategories,
   transactionCategoriesQueryKey,
 } from '@/lib/transactions/client';
+import { cn } from '@/lib/utils';
 
 const paymentMethodLabels: Record<PaymentMethod, string> = {
   cash: 'Cash',
@@ -249,7 +250,7 @@ export default function DashboardPage() {
       const progress = item.limitAmount > 0 ? (item.spent / item.limitAmount) * 100 : 0;
       const status: 'danger' | 'warning' | 'safe' = item.isOverBudget
         ? 'danger'
-        : progress >= 85
+        : progress >= 80
           ? 'warning'
           : 'safe';
 
@@ -628,95 +629,115 @@ export default function DashboardPage() {
 
       <section className="space-y-5">
         <SurfaceCard className="rounded-[28px] p-4 md:p-5">
-          <div className="flex flex-col gap-3 border-b border-line/80 pb-3.5 md:flex-row md:items-end md:justify-between">
-            <div>
+          <div className="flex flex-col gap-3 border-b border-line/70 pb-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="min-w-0">
               <p className="kicker">Budget pressure</p>
-              <h2 className="mt-1.5 text-[1.4rem] font-semibold leading-tight text-ink md:text-[1.6rem]">
+              <h2 className="mt-0.5 text-xl font-semibold leading-tight text-ink md:text-2xl">
                 Budget pressure
               </h2>
-              <p className="mt-1 max-w-2xl text-xs leading-5 text-ink-soft">
-                Risk first, details close.
-              </p>
+              <p className="mt-0.5 text-xs text-ink-soft sm:text-sm">Risk first, details close.</p>
             </div>
-            <Button asChild size="sm" variant="soft">
-              <Link href="/budgets">Open budgets</Link>
-            </Button>
+            <div className="flex flex-wrap items-center gap-2.5 sm:flex-nowrap sm:justify-end">
+              <Badge className="h-9 whitespace-nowrap px-3" variant="neutral">
+                {budgetViews.length} total
+              </Badge>
+              <Button asChild className="whitespace-nowrap" size="sm" variant="secondary">
+                <Link href="/budgets">Open budgets</Link>
+              </Button>
+            </div>
           </div>
 
           <div className="mt-4 space-y-2.5">
             {paginatedBudgetViews.length > 0 ? (
-              paginatedBudgetViews.map((budget) => (
-                <article
-                  key={budget.id}
-                  className="rounded-[20px] border border-line bg-paper px-3.5 py-3"
-                >
-                  <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(220px,0.95fr),minmax(260px,1.15fr)] lg:items-center lg:gap-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-[14px] font-semibold text-ink">{budget.name}</p>
-                        <Badge
-                          variant={
-                            budget.status === 'danger'
-                              ? 'danger'
-                              : budget.status === 'warning'
-                                ? 'warning'
-                                : 'success'
-                          }
+              paginatedBudgetViews.map((budget) => {
+                const toneClass =
+                  budget.status === 'danger'
+                    ? 'bg-danger/10 text-danger'
+                    : budget.status === 'warning'
+                      ? 'bg-warning/10 text-warning'
+                      : 'bg-brand/10 text-brand';
+
+                return (
+                  <article
+                    key={budget.id}
+                    className="rounded-[20px] border border-line bg-paper p-3.5 transition hover:border-brand/30 sm:p-4"
+                  >
+                    <div className="flex flex-col gap-3.5 lg:flex-row lg:items-center lg:justify-between">
+                      {/* Left: Category Icon, Name, Status, and Remaining Power */}
+                      <div className="flex min-w-0 items-center gap-3.5">
+                        <div
+                          className={cn(
+                            'flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] text-xs font-semibold',
+                            toneClass,
+                          )}
                         >
-                          {budget.status === 'danger'
-                            ? 'Exceeded'
-                            : budget.status === 'warning'
-                              ? 'Near limit'
-                              : 'On track'}
-                        </Badge>
+                          {(budget.name || 'BU').slice(0, 2).toUpperCase()}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p
+                              className="truncate text-[15px] font-semibold text-ink"
+                              title={budget.name}
+                            >
+                              {budget.name}
+                            </p>
+                            <Badge
+                              variant={
+                                budget.status === 'danger'
+                                  ? 'danger'
+                                  : budget.status === 'warning'
+                                    ? 'warning'
+                                    : 'success'
+                              }
+                            >
+                              {budget.status === 'danger'
+                                ? 'Exceeded'
+                                : budget.status === 'warning'
+                                  ? 'Near limit'
+                                  : 'On track'}
+                            </Badge>
+                          </div>
+                          <p className="mt-0.5 text-xs text-ink-soft">
+                            {budget.remaining >= 0
+                              ? `${formatMoney(budget.remaining)} left to spend`
+                              : `${formatMoney(Math.abs(budget.remaining))} over budget`}
+                          </p>
+                        </div>
                       </div>
-                      <p className="mt-0.5 text-xs text-ink-soft">Monthly budget</p>
-                    </div>
 
-                    <div className="rounded-[14px] border border-line bg-paper px-3 py-2.5">
-                      <ProgressBar
-                        helper={`${formatMoney(budget.spent)} of ${formatMoney(budget.limitAmount)}`}
-                        size="sm"
-                        status={budget.status}
-                        value={budget.progress}
-                      />
-                    </div>
-                  </div>
+                      {/* Right: Circular Ring Gauge + Spent Detail + Actions */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line/70 pt-3 sm:flex-nowrap sm:border-0 sm:pt-0 lg:justify-end lg:gap-4">
+                        {/* Gauge + Spending Metric Pill */}
+                        <div className="flex items-center gap-3 rounded-[16px] border border-line/70 bg-paper-strong/80 px-3 py-1.5 shadow-2xs">
+                          <CircularGauge
+                            progress={budget.progress}
+                            size={42}
+                            status={budget.status}
+                          />
+                          <div className="min-w-0 text-left">
+                            <p className="text-xs font-semibold text-ink">
+                              {formatMoney(budget.spent)}
+                            </p>
+                            <p className="text-[11px] font-medium text-ink-soft">
+                              of {formatMoney(budget.limitAmount)} limit
+                            </p>
+                          </div>
+                        </div>
 
-                  <div className="mt-2.5 flex flex-col gap-2 border-t border-line/70 pt-2.5 sm:grid sm:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:justify-between">
-                    <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:gap-2.5">
-                      <div className="rounded-[14px] border border-line bg-paper px-3 py-1.5">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                          Left
-                        </p>
-                        <p className="mt-0.5 text-xs font-semibold text-ink">
-                          {budget.remaining >= 0
-                            ? formatMoney(budget.remaining)
-                            : `-${formatMoney(Math.abs(budget.remaining))}`}
-                        </p>
-                      </div>
-                      <div className="rounded-[14px] border border-line bg-paper px-3 py-1.5">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-                          Pace
-                        </p>
-                        <p className="mt-0.5 text-xs font-semibold text-ink">
-                          {budget.status === 'danger'
-                            ? 'High'
-                            : budget.status === 'warning'
-                              ? 'Watch'
-                              : 'Good'}
-                        </p>
+                        {/* Action Button */}
+                        <div className="flex items-center gap-1.5">
+                          <Link
+                            className="rounded-full border border-line bg-paper-strong px-2.5 py-1 text-xs font-medium text-ink-soft transition hover:border-brand/30 hover:text-ink"
+                            href="/budgets"
+                          >
+                            Adjust
+                          </Link>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="flex flex-wrap gap-2 lg:justify-end">
-                      <Button asChild size="sm" variant="soft">
-                        <Link href="/budgets">Adjust</Link>
-                      </Button>
-                    </div>
-                  </div>
-                </article>
-              ))
+                  </article>
+                );
+              })
             ) : (
               <EmptyState
                 action={
