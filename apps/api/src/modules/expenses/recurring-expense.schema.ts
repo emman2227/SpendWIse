@@ -35,8 +35,14 @@ export class RecurringExpenseModel {
   @Prop({ type: Date, required: true })
   nextDueDate!: Date;
 
+  @Prop({ type: String, default: 'credit_card' })
+  paymentMethod!: string;
+
   @Prop({ type: Boolean, default: true })
   isActive!: boolean;
+
+  @Prop({ type: String, required: false })
+  notes?: string;
 
   id!: string;
   createdAt!: Date;

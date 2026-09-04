@@ -96,7 +96,7 @@ export class ExpensesService {
   }
 
   async listRecurring(userId: string) {
-    return this.recurringExpenseModel.find({ userId }).exec();
+    return this.recurringExpenseModel.find({ userId }).sort({ nextDueDate: 1 }).exec();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,15 +130,21 @@ export class ExpensesService {
           amount: exp.amount,
           categoryId: exp.categoryId,
           description: exp.description,
-          paymentMethod: 'bank_transfer', // Defaulting since recurring doesn't store this yet
+          paymentMethod: exp.paymentMethod || 'bank_transfer',
           date: new Date().toISOString(),
-          notes: 'Auto-generated recurring expense',
+          notes: exp.notes
+            ? `Auto-generated recurring: ${exp.notes}`
+            : 'Auto-generated recurring expense',
         });
 
         // Calculate next due date
         const nextDate = new Date(exp.nextDueDate);
         if (exp.cadence === 'weekly') {
           nextDate.setDate(nextDate.getDate() + 7);
+        } else if (exp.cadence === 'biweekly') {
+          nextDate.setDate(nextDate.getDate() + 14);
+        } else if (exp.cadence === 'quarterly') {
+          nextDate.setMonth(nextDate.getMonth() + 3);
         } else if (exp.cadence === 'yearly') {
           nextDate.setFullYear(nextDate.getFullYear() + 1);
         } else {
