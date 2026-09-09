@@ -2,6 +2,7 @@
 
 import { Bot, ChevronRight, HelpCircle, Lightbulb, Sparkles } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -101,7 +102,7 @@ export function InteractiveAiDemo() {
       </div>
 
       {/* Preset Scenario Selector Tabs */}
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
+      <div className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
         {scenarios.map((scenario) => {
           const isSelected = scenario.id === selectedId;
           return (
@@ -109,43 +110,45 @@ export function InteractiveAiDemo() {
               key={scenario.id}
               onClick={() => handleSelect(scenario.id)}
               type="button"
-              className={`group flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition-all sm:text-sm ${
+              className={`group flex items-center gap-1.5 sm:gap-2 rounded-full border px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-sm font-medium transition-all ${
                 isSelected
                   ? 'border-brand bg-brand text-white shadow-md shadow-brand/20'
                   : 'border-line bg-paper text-ink-soft hover:border-brand/40 hover:text-ink'
               }`}
             >
-              <Bot className={`h-4 w-4 ${isSelected ? 'text-white' : 'text-brand'}`} />
-              <span>{scenario.prompt.slice(0, 38)}...</span>
+              <Bot
+                className={`h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 ${isSelected ? 'text-white' : 'text-brand'}`}
+              />
+              <span className="truncate max-w-[200px] sm:max-w-none">{scenario.badge}</span>
             </button>
           );
         })}
       </div>
 
       {/* Interactive Mock Terminal / AI Card */}
-      <div className="mt-6 overflow-hidden rounded-[28px] border border-line-strong/60 bg-paper shadow-lift">
+      <div className="mt-5 sm:mt-6 overflow-hidden rounded-[22px] sm:rounded-[28px] border border-line-strong/60 bg-paper shadow-lift">
         {/* Chat Prompt Header */}
-        <div className="border-b border-line bg-surface-muted/60 p-4 sm:p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ink text-white shadow-sm">
-              <HelpCircle className="h-4 w-4" />
+        <div className="border-b border-line bg-surface-muted/60 p-3.5 sm:p-5">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl bg-ink text-white shadow-sm">
+              <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-soft">
+              <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-ink-soft">
                 User Query
               </span>
-              <p className="truncate text-sm font-semibold text-ink sm:text-base">
+              <p className="truncate text-xs sm:text-base font-semibold text-ink">
                 &ldquo;{activeScenario.prompt}&rdquo;
               </p>
             </div>
-            <span className="hidden rounded-full bg-surface-mint px-2.5 py-1 text-xs font-semibold text-brand sm:inline-block">
+            <span className="hidden rounded-full bg-surface-mint px-2.5 py-1 text-xs font-semibold text-brand md:inline-block">
               {activeScenario.category}
             </span>
           </div>
         </div>
 
         {/* AI Response Body */}
-        <div className="p-5 sm:p-7">
+        <div className="p-4 sm:p-7">
           <AnimatePresence mode="wait">
             {isSimulating ? (
               <motion.div
@@ -153,9 +156,9 @@ export function InteractiveAiDemo() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex min-h-[220px] flex-col items-center justify-center gap-3 text-ink-soft"
+                className="flex min-h-[180px] sm:min-h-[220px] flex-col items-center justify-center gap-3 text-ink-soft"
               >
-                <div className="h-7 w-7 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+                <div className="h-6 w-6 sm:h-7 sm:w-7 animate-spin rounded-full border-2 border-brand border-t-transparent" />
                 <p className="text-xs font-medium">SpendWise AI is calculating telemetry...</p>
               </motion.div>
             ) : (
@@ -164,62 +167,73 @@ export function InteractiveAiDemo() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25 }}
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
                 {/* AI Header Response */}
-                <div className="flex items-start gap-3.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-sm shadow-brand/20">
-                    <Sparkles className="h-5 w-5" />
+                <div className="flex items-start gap-2.5 sm:gap-3.5">
+                  <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-brand text-white shadow-sm shadow-brand/20">
+                    <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-brand">
+                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-brand">
                         SpendWise Copilot
                       </span>
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald" />
-                      <span className="text-[11px] text-ink-soft">Instant ML Analysis</span>
+                      <span className="text-[10px] sm:text-[11px] text-ink-soft">
+                        Instant ML Analysis
+                      </span>
                     </div>
-                    <h4 className="mt-1 text-base font-bold text-ink sm:text-lg">
+                    <h4 className="mt-0.5 sm:mt-1 text-sm font-bold text-ink sm:text-lg">
                       {activeScenario.summary}
                     </h4>
                   </div>
                 </div>
 
                 {/* Key Financial Telemetry Chips */}
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-2.5 sm:gap-3 sm:grid-cols-3">
                   {activeScenario.dataPoints.map((dp) => (
                     <div
                       key={dp.label}
-                      className="rounded-2xl border border-line/60 bg-surface-muted/40 p-3.5 transition hover:border-brand/30 hover:bg-surface-muted/70"
+                      className="rounded-xl sm:rounded-2xl border border-line/60 bg-surface-muted/40 p-3 sm:p-3.5 transition hover:border-brand/30 hover:bg-surface-muted/70"
                     >
-                      <p className="text-xs font-medium text-ink-soft">{dp.label}</p>
-                      <p className="mt-1 text-lg font-bold tracking-tight text-ink">{dp.value}</p>
+                      <p className="text-[11px] sm:text-xs font-medium text-ink-soft">{dp.label}</p>
+                      <p className="mt-0.5 sm:mt-1 text-base sm:text-lg font-bold tracking-tight text-ink">
+                        {dp.value}
+                      </p>
                       {dp.hint && (
-                        <p className="mt-0.5 text-[11px] font-medium text-brand">{dp.hint}</p>
+                        <p className="mt-0.5 text-[10px] sm:text-[11px] font-medium text-brand">
+                          {dp.hint}
+                        </p>
                       )}
                     </div>
                   ))}
                 </div>
 
                 {/* Detailed AI Reasoning */}
-                <div className="rounded-2xl bg-surface-muted/50 p-4 text-xs leading-relaxed text-ink-soft sm:text-sm sm:leading-relaxed">
+                <div className="rounded-xl sm:rounded-2xl bg-surface-muted/50 p-3.5 sm:p-4 text-xs leading-relaxed text-ink-soft sm:text-sm sm:leading-relaxed">
                   <p>{activeScenario.aiAnalysis}</p>
                 </div>
 
                 {/* Actionable Recommendation Bar */}
-                <div className="flex flex-col gap-3 rounded-2xl border border-brand/30 bg-surface-mint/20 p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <Lightbulb className="h-5 w-5 shrink-0 text-brand" />
-                    <p className="text-xs font-semibold text-ink sm:text-sm">
+                <div className="flex flex-col gap-3 rounded-xl sm:rounded-2xl border border-brand/30 bg-surface-mint/20 p-3.5 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start sm:items-center gap-2.5">
+                    <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-brand mt-0.5 sm:mt-0" />
+                    <p className="text-xs font-semibold text-ink sm:text-sm leading-snug">
                       <span className="text-brand font-bold">Suggested Move: </span>
                       {activeScenario.actionableTip}
                     </p>
                   </div>
-                  <Button asChild size="sm" variant="secondary" className="shrink-0 text-xs">
-                    <a href="/register">
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="secondary"
+                    className="w-full sm:w-auto shrink-0 text-xs"
+                  >
+                    <Link href="/register">
                       Automate This
                       <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                    </a>
+                    </Link>
                   </Button>
                 </div>
               </motion.div>

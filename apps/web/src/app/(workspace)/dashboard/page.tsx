@@ -6,6 +6,7 @@ import {
   ArrowUpRight,
   ChevronDown,
   ChevronUp,
+  Flag,
   PiggyBank,
   ReceiptText,
   Sparkles,
@@ -23,6 +24,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { MetricCard } from '@/components/ui/metric-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { Pagination } from '@/components/ui/pagination';
+import { ProgressBar } from '@/components/ui/progress-bar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import {
@@ -152,7 +154,7 @@ export default function DashboardPage() {
 
   const analytics = analyticsQuery.data;
   const categories = categoriesQuery.data ?? [];
-  const goals = goalsQuery.data ?? [];
+  const goals = useMemo(() => goalsQuery.data ?? [], [goalsQuery.data]);
   const categoryById = new Map(categories.map((category) => [category.id, category]));
 
   const spendingTrend = historyQueries
@@ -228,6 +230,29 @@ export default function DashboardPage() {
 
       return !leader || goalProgressValue > leaderProgress ? goal : leader;
     }, null) ?? null;
+
+  const goalViews = useMemo(() => {
+    return goals.map((goal) => {
+      const progress = goal.targetAmount > 0 ? (goal.currentAmount / goal.targetAmount) * 100 : 0;
+      const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
+      const isCompleted = goal.currentAmount >= goal.targetAmount;
+      const now = new Date();
+      const targetDate = new Date(goal.targetDate);
+      const isFailed = !isCompleted && targetDate.getTime() < now.getTime();
+      const status: 'completed' | 'failed' | 'active' = isCompleted
+        ? 'completed'
+        : isFailed
+          ? 'failed'
+          : 'active';
+
+      return {
+        ...goal,
+        progress,
+        remaining,
+        status,
+      };
+    });
+  }, [goals]);
 
   const categoryShare = (analytics?.categoryBreakdown ?? [])
     .map((entry) => {
@@ -760,6 +785,105 @@ export default function DashboardPage() {
               totalItems={budgetViews.length}
               totalPages={totalBudgetPages}
             />
+          </div>
+        </SurfaceCard>
+      </section>
+
+      <section className="space-y-5">
+        <SurfaceCard className="rounded-[28px] p-4 md:p-5">
+          <div className="flex flex-col gap-3 border-b border-line/70 pb-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="min-w-0">
+              <p className="kicker">Savings targets</p>
+              <h2 className="mt-0.5 text-xl font-semibold leading-tight text-ink md:text-2xl">
+                Active goals
+              </h2>
+              <p className="mt-0.5 text-xs text-ink-soft sm:text-sm">
+                Track momentum and progress toward target milestones.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5 sm:flex-nowrap sm:justify-end">
+              <Badge className="h-9 whitespace-nowrap px-3" variant="neutral">
+                {goals.length} {goals.length === 1 ? 'goal' : 'goals'}
+              </Badge>
+              <Button asChild className="whitespace-nowrap" size="sm" variant="secondary">
+                <Link href="/goals">Manage goals</Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {goalViews.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {goalViews.slice(0, 3).map((goal) => (
+                  <article
+                    key={goal.id}
+                    className="flex flex-col justify-between rounded-[20px] border border-line bg-paper p-4 transition hover:border-brand/30"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] bg-brand/10 text-brand">
+                            <Flag className="h-4 w-4" />
+                          </div>
+                          <p className="truncate text-sm font-semibold text-ink" title={goal.title}>
+                            {goal.title}
+                          </p>
+                        </div>
+                        <Badge
+                          variant={
+                            goal.status === 'completed'
+                              ? 'success'
+                              : goal.status === 'failed'
+                                ? 'danger'
+                                : 'warning'
+                          }
+                        >
+                          {goal.status === 'completed'
+                            ? 'Done'
+                            : goal.status === 'failed'
+                              ? 'Missed'
+                              : `${Math.round(goal.progress)}%`}
+                        </Badge>
+                      </div>
+
+                      <div className="mt-3">
+                        <ProgressBar
+                          helper={`${formatMoney(goal.currentAmount)} of ${formatMoney(goal.targetAmount)}`}
+                          size="sm"
+                          status={
+                            goal.status === 'completed'
+                              ? 'safe'
+                              : goal.status === 'failed'
+                                ? 'danger'
+                                : 'warning'
+                          }
+                          value={goal.progress}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between border-t border-line/60 pt-2.5 text-xs text-ink-soft">
+                      <span>Target: {formatShortDate(goal.targetDate)}</span>
+                      <Link className="font-medium text-brand hover:underline" href="/goals">
+                        Details &rarr;
+                      </Link>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                action={
+                  <Button asChild variant="soft">
+                    <Link href="/goals">Set first goal</Link>
+                  </Button>
+                }
+                className="rounded-[20px] px-4 py-5"
+                description="Set your first savings goal to track your momentum toward big milestones."
+                icon={PiggyBank}
+                title="No savings goals yet"
+              />
+            )}
           </div>
         </SurfaceCard>
       </section>

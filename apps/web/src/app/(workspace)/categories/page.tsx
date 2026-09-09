@@ -164,52 +164,52 @@ function CategoryEditorModal({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(19,38,63,0.42)] px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[rgba(19,38,63,0.42)] px-2.5 py-3 sm:px-4 sm:py-6 backdrop-blur-sm"
       role="dialog"
     >
-      <div className="panel-surface-strong max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[32px] px-5 py-5 md:px-7 md:py-6">
+      <div className="panel-surface-strong max-h-[92dvh] w-full max-w-2xl overflow-y-auto rounded-[24px] sm:rounded-[32px] px-4 py-4 sm:px-7 sm:py-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="kicker">{mode === 'create' ? 'Add category' : 'Edit category'}</p>
-            <h2 className="mt-3 text-2xl font-semibold text-ink">
+            <h2 className="mt-2 text-xl sm:text-2xl font-semibold text-ink">
               {mode === 'create' ? 'Create category' : 'Update category'}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-ink-soft">
+            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-ink-soft">
               Pick a clear name, icon, and color so the category is easy to scan everywhere.
             </p>
           </div>
           <button
             aria-label="Close category editor"
-            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
+            className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-[14px] sm:rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink shrink-0"
             onClick={onClose}
             type="button"
           >
-            <CircleX className="h-5 w-5" />
+            <CircleX className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
 
-        <div className="mt-6 rounded-[24px] border border-brand/10 bg-[linear-gradient(140deg,rgba(15,123,113,0.08),rgba(255,255,255,0.92))] px-5 py-5">
-          <div className="flex items-center gap-4">
+        <div className="mt-4 sm:mt-6 rounded-[20px] sm:rounded-[24px] border border-brand/10 bg-[linear-gradient(140deg,rgba(15,123,113,0.08),rgba(255,255,255,0.92))] px-4 py-4 sm:px-5 sm:py-5">
+          <div className="flex items-center gap-3.5 sm:gap-4">
             <div
-              className="flex h-14 w-14 items-center justify-center rounded-[20px]"
+              className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-[16px] sm:rounded-[20px]"
               style={{ backgroundColor: `${formValues.color}20`, color: formValues.color }}
             >
-              <PreviewIcon className="h-6 w-6" />
+              <PreviewIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-ink-soft">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
                 Preview
               </p>
-              <p className="mt-1 text-lg font-semibold text-ink">
+              <p className="mt-1 text-base sm:text-lg font-semibold text-ink">
                 {formValues.name.trim() || 'New category'}
               </p>
             </div>
           </div>
         </div>
 
-        <form className="mt-6 space-y-5" onSubmit={onSubmit}>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm font-medium text-ink">
+        <form className="mt-5 sm:mt-6 space-y-4 sm:space-y-5" onSubmit={onSubmit}>
+          <div className="space-y-1.5 sm:space-y-2">
+            <div className="flex items-center justify-between text-xs sm:text-sm font-medium text-ink">
               <label htmlFor="category-name-input">
                 Name <span className="text-danger">*</span>
               </label>
@@ -228,25 +228,28 @@ function CategoryEditorModal({
             </div>
             <Input
               id="category-name-input"
-              className={cn(fieldErrors.name && 'border-danger focus:border-danger')}
+              className={cn(
+                'text-base sm:text-sm',
+                fieldErrors.name && 'border-danger focus:border-danger',
+              )}
               maxLength={CATEGORY_NAME_MAX_LENGTH}
               onChange={(event) => onFieldChange('name', event.target.value)}
               placeholder="e.g. Dining out"
               value={formValues.name}
             />
             {fieldErrors.name ? (
-              <p className="text-sm text-danger">{fieldErrors.name}</p>
+              <p className="text-xs text-danger">{fieldErrors.name}</p>
             ) : (
-              <p className="text-xs text-ink-soft">
+              <p className="text-[11px] sm:text-xs text-ink-soft">
                 Must be between {CATEGORY_NAME_MIN_LENGTH} and {CATEGORY_NAME_MAX_LENGTH}{' '}
                 characters.
               </p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-ink">Icon</span>
-            <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5 sm:space-y-2">
+            <span className="text-xs sm:text-sm font-medium text-ink">Icon</span>
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-2">
               {iconOptions.map((option) => {
                 const Icon = option.icon;
                 const isSelected = formValues.icon === option.value;
@@ -255,7 +258,7 @@ function CategoryEditorModal({
                   <button
                     key={option.value}
                     className={cn(
-                      'flex items-center gap-3 rounded-[22px] border px-4 py-3 text-left transition',
+                      'flex items-center gap-2.5 sm:gap-3 rounded-[16px] sm:rounded-[22px] border px-3 py-2.5 sm:px-4 sm:py-3 text-left transition',
                       isSelected
                         ? 'border-brand bg-brand/10 text-ink'
                         : 'border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
@@ -264,22 +267,24 @@ function CategoryEditorModal({
                     type="button"
                   >
                     <span
-                      className="flex h-10 w-10 items-center justify-center rounded-[16px]"
+                      className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-[12px] sm:rounded-[16px] shrink-0"
                       style={{ backgroundColor: `${formValues.color}20`, color: formValues.color }}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                     </span>
-                    <span className="font-semibold">{option.label}</span>
+                    <span className="text-xs sm:text-sm font-semibold truncate">
+                      {option.label}
+                    </span>
                   </button>
                 );
               })}
             </div>
-            {fieldErrors.icon ? <p className="text-sm text-danger">{fieldErrors.icon}</p> : null}
+            {fieldErrors.icon ? <p className="text-xs text-danger">{fieldErrors.icon}</p> : null}
           </div>
 
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-ink">Color</span>
-            <div className="flex flex-wrap gap-3">
+          <div className="space-y-1.5 sm:space-y-2">
+            <span className="text-xs sm:text-sm font-medium text-ink">Color</span>
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               {colorTokens.map((token) => {
                 const isSelected = formValues.color === token.value;
 
@@ -287,7 +292,7 @@ function CategoryEditorModal({
                   <button
                     key={token.value}
                     className={cn(
-                      'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition',
+                      'flex items-center gap-1.5 sm:gap-2 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold transition',
                       isSelected
                         ? 'bg-brand text-white'
                         : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
@@ -296,7 +301,7 @@ function CategoryEditorModal({
                     type="button"
                   >
                     <span
-                      className="h-3 w-3 rounded-full"
+                      className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full"
                       style={{ backgroundColor: token.value }}
                     />
                     {token.name}
@@ -304,7 +309,7 @@ function CategoryEditorModal({
                 );
               })}
             </div>
-            {fieldErrors.color ? <p className="text-sm text-danger">{fieldErrors.color}</p> : null}
+            {fieldErrors.color ? <p className="text-xs text-danger">{fieldErrors.color}</p> : null}
           </div>
 
           {formError ? (
@@ -313,8 +318,22 @@ function CategoryEditorModal({
             </div>
           ) : null}
 
-          <div className="flex flex-wrap gap-3">
-            <Button disabled={isSubmitting} type="submit" variant="secondary">
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 pt-2">
+            <Button
+              className="w-full sm:w-auto h-11 sm:h-10 rounded-full text-sm"
+              disabled={isSubmitting}
+              onClick={onClose}
+              type="button"
+              variant="soft"
+            >
+              Cancel
+            </Button>
+            <Button
+              className="w-full sm:w-auto h-11 sm:h-10 rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+              disabled={isSubmitting}
+              type="submit"
+              variant="secondary"
+            >
               {isSubmitting
                 ? mode === 'create'
                   ? 'Saving...'
@@ -322,9 +341,6 @@ function CategoryEditorModal({
                 : mode === 'create'
                   ? 'Save category'
                   : 'Save changes'}
-            </Button>
-            <Button disabled={isSubmitting} onClick={onClose} type="button" variant="soft">
-              Cancel
             </Button>
           </div>
         </form>

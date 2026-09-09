@@ -32,20 +32,22 @@ const ChartTooltip = ({ active, label, payload }: any) => {
   }
 
   return (
-    <div className="rounded-2xl border border-line bg-paper px-4 py-3 shadow-soft">
-      <p className="text-sm font-semibold text-ink">{label}</p>
-      <div className="mt-2 space-y-2">
+    <div className="max-w-[260px] rounded-2xl border border-line bg-paper px-3.5 py-2.5 shadow-soft sm:max-w-xs">
+      <p className="text-xs font-semibold text-ink sm:text-sm">{label}</p>
+      <div className="mt-1.5 space-y-1.5">
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {payload.map((item: any) => (
-          <div key={item.dataKey ?? item.name} className="flex items-center justify-between gap-6">
-            <span className="flex items-center gap-2 text-xs font-medium text-ink-soft">
+          <div key={item.dataKey ?? item.name} className="flex items-center justify-between gap-4">
+            <span className="flex items-center gap-1.5 text-xs font-medium text-ink-soft">
               <span
-                className="h-2.5 w-2.5 rounded-full"
+                className="h-2 w-2 rounded-full shrink-0"
                 style={{ backgroundColor: item.color ?? '#0F7B71' }}
               />
-              {item.name}
+              <span className="truncate">{item.name}</span>
             </span>
-            <span className="text-sm font-semibold text-ink">{formatMoney(item.value ?? 0)}</span>
+            <span className="text-xs font-semibold text-ink sm:text-sm">
+              {formatMoney(item.value ?? 0)}
+            </span>
           </div>
         ))}
       </div>
@@ -55,8 +57,8 @@ const ChartTooltip = ({ active, label, payload }: any) => {
 
 export const SpendingOverviewChart = ({ data }: { data: TrendPoint[] }) => {
   return (
-    <ResponsiveContainer width="100%" height={290}>
-      <AreaChart data={data} margin={{ left: 0, right: 4, top: 10, bottom: 0 }}>
+    <ResponsiveContainer width="100%" height={280}>
+      <AreaChart data={data} margin={{ left: -15, right: 8, top: 10, bottom: 0 }}>
         <defs>
           <linearGradient id="spendFill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#0F7B71" stopOpacity={0.3} />
@@ -67,10 +69,10 @@ export const SpendingOverviewChart = ({ data }: { data: TrendPoint[] }) => {
         <XAxis
           axisLine={false}
           dataKey="label"
-          tick={{ fill: '#68778B', fontSize: 12 }}
+          tick={{ fill: '#68778B', fontSize: 11 }}
           tickLine={false}
         />
-        <YAxis axisLine={false} tick={false} tickLine={false} width={20} />
+        <YAxis axisLine={false} tick={false} tickLine={false} width={15} />
         <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#A7D7CC', strokeWidth: 1 }} />
         <Area
           dataKey="budget"
@@ -96,15 +98,15 @@ export const SpendingOverviewChart = ({ data }: { data: TrendPoint[] }) => {
 
 export const CategoryShareChart = ({ data }: { data: CategorySlice[] }) => {
   return (
-    <ResponsiveContainer width="100%" height={250}>
+    <ResponsiveContainer width="100%" height={240}>
       <PieChart>
         <Pie
           data={data}
           cx="50%"
           cy="50%"
           dataKey="amount"
-          innerRadius={68}
-          outerRadius={92}
+          innerRadius={58}
+          outerRadius={84}
           paddingAngle={4}
           stroke="transparent"
         >
@@ -125,7 +127,7 @@ export const ForecastProjectionChart = ({
 }) => {
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+      <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -15 }}>
         <defs>
           <linearGradient id="rangeFill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#0F7B71" stopOpacity={0.15} />
@@ -136,12 +138,14 @@ export const ForecastProjectionChart = ({
         <XAxis
           axisLine={false}
           dataKey="label"
-          tick={{ fill: '#68778B', fontSize: 12 }}
+          tick={{ fill: '#68778B', fontSize: 11 }}
           tickLine={false}
         />
-        <YAxis axisLine={false} tick={false} tickLine={false} width={20} />
+        <YAxis axisLine={false} tick={false} tickLine={false} width={15} />
         <Tooltip content={<ChartTooltip />} />
-        <Legend formatter={(value) => <span className="text-sm text-ink-soft">{value}</span>} />
+        <Legend
+          formatter={(value) => <span className="text-xs sm:text-sm text-ink-soft">{value}</span>}
+        />
         <Area dataKey="range" fill="url(#rangeFill)" stroke="none" name="Forecast Range" />
         <Line
           dataKey="spend"
@@ -171,18 +175,20 @@ export const CategoryComparisonChart = ({
   data: Array<{ label: string; current: number; projected: number; budget?: number }>;
 }) => {
   return (
-    <ResponsiveContainer width="100%" height={290}>
-      <BarChart data={data} barGap={4}>
+    <ResponsiveContainer width="100%" height={280}>
+      <BarChart data={data} barGap={3} margin={{ left: -15, right: 8, top: 10, bottom: 0 }}>
         <CartesianGrid stroke="rgba(92,113,132,0.1)" strokeDasharray="4 8" vertical={false} />
         <XAxis
           axisLine={false}
           dataKey="label"
-          tick={{ fill: '#68778B', fontSize: 12 }}
+          tick={{ fill: '#68778B', fontSize: 11 }}
           tickLine={false}
         />
-        <YAxis axisLine={false} tick={false} tickLine={false} width={20} />
+        <YAxis axisLine={false} tick={false} tickLine={false} width={15} />
         <Tooltip content={<ChartTooltip />} />
-        <Legend formatter={(value) => <span className="text-sm text-ink-soft">{value}</span>} />
+        <Legend
+          formatter={(value) => <span className="text-xs sm:text-sm text-ink-soft">{value}</span>}
+        />
         <Bar dataKey="current" fill="#D7EAE4" name="Current spend" radius={[4, 4, 0, 0]} />
         <Bar dataKey="projected" fill="#0F7B71" name="Projected spend" radius={[4, 4, 0, 0]} />
         <Bar dataKey="budget" fill="#13263F" name="Budget limit" radius={[4, 4, 0, 0]} />

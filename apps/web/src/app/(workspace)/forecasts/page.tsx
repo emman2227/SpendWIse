@@ -99,14 +99,14 @@ export default function ForecastsPage() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.15fr,0.85fr]">
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+        <SurfaceCard className="rounded-[28px] px-4 py-5 sm:rounded-[32px] sm:px-6 sm:py-6 md:px-7">
           <p className="kicker">Forecast chart</p>
-          <h2 className="mt-3 text-2xl font-semibold text-ink">
+          <h2 className="mt-2 text-xl font-semibold text-ink sm:mt-3 sm:text-2xl">
             Observed spending versus projected month-end path
           </h2>
-          <div className="mt-6">
+          <div className="mt-5 sm:mt-6">
             {isLoading ? (
-              <div className="flex h-[280px] items-center justify-center">
+              <div className="flex h-[240px] items-center justify-center sm:h-[280px]">
                 <Skeleton className="h-full w-full rounded-2xl" />
               </div>
             ) : (
@@ -115,14 +115,14 @@ export default function ForecastsPage() {
           </div>
         </SurfaceCard>
 
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+        <SurfaceCard className="rounded-[28px] px-4 py-5 sm:rounded-[32px] sm:px-6 sm:py-6 md:px-7">
           <p className="kicker">Forecast composition</p>
-          <h2 className="mt-3 text-2xl font-semibold text-ink">
+          <h2 className="mt-2 text-xl font-semibold text-ink sm:mt-3 sm:text-2xl">
             Projected spend distribution by category
           </h2>
-          <div className="mt-6">
+          <div className="mt-5 sm:mt-6">
             {isLoading ? (
-              <div className="flex h-[250px] items-center justify-center">
+              <div className="flex h-[220px] items-center justify-center sm:h-[250px]">
                 <Skeleton className="h-full w-full rounded-2xl" />
               </div>
             ) : (
@@ -133,14 +133,14 @@ export default function ForecastsPage() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.15fr,0.85fr]">
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+        <SurfaceCard className="rounded-[28px] px-4 py-5 sm:rounded-[32px] sm:px-6 sm:py-6 md:px-7">
           <p className="kicker">Category-level forecast</p>
-          <h2 className="mt-3 text-2xl font-semibold text-ink">
+          <h2 className="mt-2 text-xl font-semibold text-ink sm:mt-3 sm:text-2xl">
             Current spending compared to projected totals
           </h2>
-          <div className="mt-6">
+          <div className="mt-5 sm:mt-6">
             {isLoading ? (
-              <div className="flex h-[290px] items-center justify-center">
+              <div className="flex h-[240px] items-center justify-center sm:h-[290px]">
                 <Skeleton className="h-full w-full rounded-2xl" />
               </div>
             ) : (
@@ -149,17 +149,19 @@ export default function ForecastsPage() {
           </div>
         </SurfaceCard>
 
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7 flex flex-col">
+        <SurfaceCard className="flex flex-col rounded-[28px] px-4 py-5 sm:rounded-[32px] sm:px-6 sm:py-6 md:px-7">
           <p className="kicker">Risk indicators</p>
-          <h2 className="mt-3 text-2xl font-semibold text-ink">Areas needing attention</h2>
-          <div className="mt-6 space-y-4 flex-1">
+          <h2 className="mt-2 text-xl font-semibold text-ink sm:mt-3 sm:text-2xl">
+            Areas needing attention
+          </h2>
+          <div className="mt-5 flex-1 space-y-3 sm:mt-6 sm:space-y-4">
             {isLoading ? (
               <Skeleton className="h-[100px] w-full rounded-2xl" />
             ) : risks.length === 0 ? (
-              <div className="rounded-[24px] border border-line bg-paper px-5 py-5 h-full flex flex-col justify-center items-center text-center">
-                <Info className="h-8 w-8 text-ink-soft/50 mb-2" />
+              <div className="flex h-full flex-col items-center justify-center rounded-[20px] border border-line bg-paper px-4 py-5 text-center sm:rounded-[24px] sm:px-5">
+                <Info className="mb-2 h-8 w-8 text-ink-soft/50" />
                 <p className="font-semibold text-ink">No elevated risks detected</p>
-                <p className="mt-2 text-sm leading-6 text-ink-soft">
+                <p className="mt-2 text-xs leading-relaxed text-ink-soft sm:text-sm sm:leading-6">
                   Your spending is within safe bounds across all categories based on the current
                   forecast.
                 </p>
@@ -168,7 +170,7 @@ export default function ForecastsPage() {
               risks.map((risk: ForecastRisk, i: number) => (
                 <div
                   key={i}
-                  className={`rounded-[24px] border px-5 py-5 ${
+                  className={`rounded-[20px] border px-4 py-4 sm:rounded-[24px] sm:px-5 sm:py-5 ${
                     risk.riskLevel === 'high'
                       ? 'border-danger/25 bg-danger/10'
                       : risk.riskLevel === 'medium'
@@ -176,8 +178,10 @@ export default function ForecastsPage() {
                         : 'border-info/25 bg-info/10'
                   }`}
                 >
-                  <p className="font-semibold text-ink capitalize">{risk.category} pressure</p>
-                  <p className="mt-2 text-sm leading-6 text-ink-soft">{risk.explanation}</p>
+                  <p className="font-semibold capitalize text-ink">{risk.category} pressure</p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
+                    {risk.explanation}
+                  </p>
                 </div>
               ))
             )}

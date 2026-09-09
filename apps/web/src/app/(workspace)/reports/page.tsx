@@ -408,18 +408,18 @@ export default function ReportsPage() {
         />
       </section>
 
-      <SurfaceCard className="overflow-hidden rounded-[34px] px-5 py-5 md:px-6 md:py-6">
-        <div className="space-y-5">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr),auto]">
-            <div className="flex flex-wrap gap-3">
+      <SurfaceCard className="overflow-hidden rounded-[28px] px-4 py-4 sm:rounded-[34px] sm:px-5 sm:py-5 md:px-6 md:py-6">
+        <div className="space-y-4 sm:space-y-5">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr),auto] lg:gap-4">
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
               <Input
-                className="w-[190px]"
+                className="h-12 w-full rounded-[20px] sm:w-[190px]"
                 onChange={(event) => setMonthValue(event.target.value)}
                 type="month"
                 value={monthValue}
               />
               <select
-                className="flex h-12 rounded-[20px] border border-line bg-paper-strong px-4 text-sm font-medium text-ink-soft outline-none transition focus:border-brand"
+                className="flex h-12 w-full rounded-[20px] border border-line bg-paper-strong px-4 text-base font-medium text-ink-soft outline-none transition focus:border-brand sm:w-auto sm:text-sm"
                 onChange={(event) => setCategoryFilter(event.target.value)}
                 value={categoryFilter}
               >
@@ -431,7 +431,7 @@ export default function ReportsPage() {
                 ))}
               </select>
               <button
-                className="rounded-[20px] border border-line bg-paper-strong px-4 py-3 text-sm font-medium text-ink-soft transition hover:border-brand/30 hover:text-ink"
+                className="h-12 w-full rounded-[20px] border border-line bg-paper-strong px-4 py-3 text-sm font-medium text-ink-soft transition hover:border-brand/30 hover:text-ink sm:w-auto"
                 onClick={() => {
                   setMonthValue(getInitialMonthValue());
                   setCategoryFilter('all');
@@ -443,7 +443,7 @@ export default function ReportsPage() {
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:gap-3 [&>button]:w-full sm:[&>button]:w-auto">
               <Button onClick={handlePrintSummary} variant="soft">
                 <Printer className="h-4 w-4" />
                 Print summary
@@ -455,16 +455,18 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-brand/10 bg-[linear-gradient(140deg,rgba(15,123,113,0.08),rgba(255,255,255,0.92))] px-5 py-5">
-            <div className="flex items-start justify-between gap-4">
+          <div className="rounded-[24px] border border-brand/10 bg-[linear-gradient(140deg,rgba(15,123,113,0.08),rgba(255,255,255,0.92))] px-4 py-4 sm:rounded-[28px] sm:px-5 sm:py-5">
+            <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:gap-4">
               <div className="max-w-3xl">
                 <p className="kicker">Report snapshot</p>
-                <h2 className="mt-2 text-xl font-semibold text-ink">
+                <h2 className="mt-1 text-lg font-semibold text-ink sm:mt-2 sm:text-xl">
                   The story should be clear fast.
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-ink-soft">{summaryText}</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
+                  {summaryText}
+                </p>
               </div>
-              <Button asChild size="sm" variant="secondary">
+              <Button asChild size="sm" variant="secondary" className="w-full shrink-0 sm:w-auto">
                 <Link href="/dashboard">
                   <SlidersHorizontal className="h-4 w-4" />
                   Dashboard
@@ -472,24 +474,30 @@ export default function ReportsPage() {
               </Button>
             </div>
 
-            <div className="mt-4 grid gap-3 md:grid-cols-3">
-              <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
+            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
+              <div className="rounded-[20px] border border-line bg-paper px-3.5 py-3 sm:rounded-[22px] sm:px-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft sm:text-xs">
                   Mode
                 </p>
-                <p className="mt-2 text-lg font-semibold text-ink">{getMonthLabel(month, year)}</p>
+                <p className="mt-1 text-base font-semibold text-ink sm:mt-2 sm:text-lg">
+                  {getMonthLabel(month, year)}
+                </p>
               </div>
-              <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
+              <div className="rounded-[20px] border border-line bg-paper px-3.5 py-3 sm:rounded-[22px] sm:px-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft sm:text-xs">
                   Export
                 </p>
-                <p className="mt-2 text-lg font-semibold text-ink">CSV + print</p>
+                <p className="mt-1 text-base font-semibold text-ink sm:mt-2 sm:text-lg">
+                  CSV + print
+                </p>
               </div>
-              <div className="rounded-[22px] border border-line bg-paper px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
+              <div className="rounded-[20px] border border-line bg-paper px-3.5 py-3 sm:rounded-[22px] sm:px-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft sm:text-xs">
                   Focus
                 </p>
-                <p className="mt-2 text-lg font-semibold text-ink">{categoryFocusLabel}</p>
+                <p className="mt-1 truncate text-base font-semibold text-ink sm:mt-2 sm:text-lg">
+                  {categoryFocusLabel}
+                </p>
               </div>
             </div>
           </div>

@@ -209,6 +209,60 @@ const run = async () => {
   await expensesCollection.insertMany(generatedExpenses);
   console.log('Seeded demo expenses');
 
+  // Seed Goals for Demo User
+  const goalsCollection = mongoose.connection.collection('goals');
+  await goalsCollection.deleteMany({ userId });
+
+  const targetDate6Mo = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000);
+  const targetDate4Mo = new Date(now.getTime() + 120 * 24 * 60 * 60 * 1000);
+  const targetDatePast = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000);
+
+  const demoGoals = [
+    {
+      userId,
+      title: 'Emergency Fund',
+      targetAmount: 5000,
+      currentAmount: 2400,
+      targetDate: targetDate6Mo,
+      notes: 'Three-month living expense buffer',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      userId,
+      title: 'Japan Vacation',
+      targetAmount: 3000,
+      currentAmount: 1200,
+      targetDate: targetDate4Mo,
+      notes: 'Autumn trip to Tokyo and Kyoto',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      userId,
+      title: 'Laptop Upgrade',
+      targetAmount: 1500,
+      currentAmount: 1500,
+      targetDate: targetDatePast,
+      notes: 'New M-series workstation for remote work',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      userId,
+      title: 'Holiday Shopping Fund',
+      targetAmount: 2000,
+      currentAmount: 850,
+      targetDate: new Date(now.getTime() - 25 * 24 * 60 * 60 * 1000),
+      notes: 'Gifts and holiday season travel',
+      createdAt: new Date(now.getTime() - 120 * 24 * 60 * 60 * 1000),
+      updatedAt: now,
+    },
+  ];
+
+  await goalsCollection.insertMany(demoGoals);
+  console.log('Seeded demo goals');
+
   // Seed Default Prompt Templates
   const { DEFAULT_PROMPT_TEMPLATES } = await import('@spendwise/ai');
   const promptCollection = mongoose.connection.collection('prompt_templates');

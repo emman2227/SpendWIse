@@ -648,17 +648,19 @@ export default function NotificationsPage() {
         })}
       </section>
 
-      <SurfaceCard className="overflow-hidden rounded-[34px] px-5 py-5 md:px-6 md:py-6">
-        <div className="space-y-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <SurfaceCard className="overflow-hidden rounded-[28px] px-4 py-4 sm:rounded-[34px] sm:px-5 sm:py-5 md:px-6 md:py-6">
+        <div className="space-y-4 sm:space-y-5">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
             <div className="max-w-3xl">
               <p className="kicker">Notification filters</p>
-              <h2 className="mt-2 text-xl font-semibold text-ink">Control the feed</h2>
-              <p className="mt-2 text-sm leading-6 text-ink-soft">
+              <h2 className="mt-1 text-lg font-semibold text-ink sm:mt-2 sm:text-xl">
+                Control the feed
+              </h2>
+              <p className="mt-1.5 text-xs leading-relaxed text-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
                 Filter by source, refresh live data, or mark the current view as read.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:gap-2 [&>button]:w-full sm:[&>button]:w-auto">
               <Button
                 disabled={isLoading}
                 onClick={() => void refreshNotifications()}
@@ -676,7 +678,7 @@ export default function NotificationsPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:gap-2 sm:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {(
               [
                 'all',
@@ -691,7 +693,7 @@ export default function NotificationsPage() {
               <button
                 key={category}
                 className={cn(
-                  'rounded-full px-4 py-2 text-sm font-semibold transition',
+                  'shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition sm:px-4 sm:py-2 sm:text-sm',
                   activeCategory === category
                     ? 'bg-brand text-white shadow-sm'
                     : 'border border-line bg-paper-strong text-ink-soft hover:border-brand/30 hover:text-ink',
@@ -707,23 +709,23 @@ export default function NotificationsPage() {
       </SurfaceCard>
 
       <section className="grid gap-6 xl:grid-cols-[1.1fr,0.9fr]">
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+        <SurfaceCard className="rounded-[28px] px-4 py-5 sm:rounded-[32px] sm:px-6 sm:py-6 md:px-7">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="kicker">Notification center</p>
-              <h2 className="mt-3 text-2xl font-semibold text-ink">
+              <h2 className="mt-1 text-xl font-semibold text-ink sm:mt-3 sm:text-2xl">
                 Prioritize the most actionable items first
               </h2>
             </div>
-            <BellRing className="h-6 w-6 text-brand" />
+            <BellRing className="h-5 w-5 shrink-0 text-brand sm:h-6 sm:w-6" />
           </div>
 
           {isLoading ? (
-            <div className="mt-6 rounded-[24px] border border-line bg-paper px-5 py-8 text-center text-sm text-ink-soft">
+            <div className="mt-5 rounded-[20px] border border-line bg-paper px-4 py-8 text-center text-xs text-ink-soft sm:mt-6 sm:rounded-[24px] sm:px-5 sm:text-sm">
               Loading live notifications...
             </div>
           ) : notifications.length > 0 ? (
-            <div className="mt-6 space-y-4">
+            <div className="mt-5 space-y-3 sm:mt-6 sm:space-y-4">
               {notifications.map((item) => {
                 const unread = !readIds.has(item.id);
 
@@ -731,21 +733,21 @@ export default function NotificationsPage() {
                   <article
                     key={item.id}
                     className={cn(
-                      'rounded-[24px] border px-5 py-5 transition',
+                      'rounded-[20px] border px-4 py-4 transition sm:rounded-[24px] sm:px-5 sm:py-5',
                       unread ? 'border-brand/25 bg-brand/5' : 'border-line bg-paper',
                     )}
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2.5">
+                      <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
                         <span
                           className={cn(
-                            'h-2.5 w-2.5 rounded-full',
+                            'h-2 w-2 shrink-0 rounded-full sm:h-2.5 sm:w-2.5',
                             unread ? 'bg-brand' : 'bg-slate-300',
                           )}
                         />
-                        <p className="font-semibold text-ink">{item.title}</p>
+                        <p className="text-sm font-semibold text-ink sm:text-base">{item.title}</p>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                         <Badge variant={categoryBadgeVariant[item.category]}>{item.category}</Badge>
                         <Badge
                           variant={
@@ -760,10 +762,14 @@ export default function NotificationsPage() {
                         </Badge>
                       </div>
                     </div>
-                    <p className="mt-3 text-sm leading-6 text-ink-soft">{item.detail}</p>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                      <p className="text-sm text-ink-soft">{getRelativeTime(item.createdAt)}</p>
-                      <div className="flex flex-wrap gap-2">
+                    <p className="mt-2 text-xs leading-relaxed text-ink-soft sm:mt-3 sm:text-sm sm:leading-6">
+                      {item.detail}
+                    </p>
+                    <div className="mt-3.5 flex flex-col gap-2.5 border-t border-line/50 pt-2.5 sm:mt-4 sm:flex-row sm:items-center sm:justify-between sm:border-0 sm:pt-0">
+                      <p className="text-xs text-ink-soft sm:text-sm">
+                        {getRelativeTime(item.createdAt)}
+                      </p>
+                      <div className="flex flex-wrap gap-2 [&>button]:flex-1 sm:[&>button]:flex-none [&>a]:flex-1 sm:[&>a]:flex-none">
                         {unread ? (
                           <Button
                             onClick={() => markNotificationRead(item.id)}
@@ -774,7 +780,9 @@ export default function NotificationsPage() {
                           </Button>
                         ) : null}
                         <Button asChild size="sm" variant="secondary">
-                          <Link href={item.href}>{item.actionLabel}</Link>
+                          <Link href={item.href} className="text-center">
+                            {item.actionLabel}
+                          </Link>
                         </Button>
                       </div>
                     </div>

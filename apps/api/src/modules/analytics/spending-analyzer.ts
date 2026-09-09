@@ -2,6 +2,7 @@ import type {
   Budget,
   Category,
   Expense,
+  Goal,
   InsightEvidence,
   InsightSeverity,
   InsightType,
@@ -17,7 +18,12 @@ export interface StructuredFact {
 }
 
 export class SpendingAnalyzer {
-  static analyze(expenses: Expense[], budgets: Budget[], categories: Category[]): StructuredFact[] {
+  static analyze(
+    expenses: Expense[],
+    budgets: Budget[],
+    categories: Category[],
+    goals: Goal[] = [],
+  ): StructuredFact[] {
     const facts: StructuredFact[] = [];
 
     // Split into current vs historical based on current month
@@ -38,6 +44,7 @@ export class SpendingAnalyzer {
     facts.push(...this.detectAnomalies(currentExpenses, historicalExpenses, categories));
     facts.push(...this.detectBudgetRisks(currentExpenses, budgets, categories));
     facts.push(...this.detectTrends(currentExpenses, historicalExpenses, categories));
+    facts.push(...this.detectGoalOpportunities(currentExpenses, categories, goals));
 
     // Fallback if no facts generated
     if (facts.length === 0) {
@@ -204,6 +211,74 @@ export class SpendingAnalyzer {
             averageSpend: avg,
             percentChange: Math.round(percentChange),
             comparisonPeriod: 'last 3 months',
+          },
+        });
+      }
+    }
+
+    return facts;
+  }
+
+  static detectGoalOpportunities(
+    currentExpenses: Expense[],
+    categories: Category[],
+    goals: Goal[] = [],
+  ): StructuredFact[] {
+    const facts: StructuredFact[] = [];
+    const activeGoals = goals.filter((g) => g.currentAmount < g.targetAmount);
+
+    if (activeGoals.length === 0) return facts;
+
+    // Find top spending categories in current period
+    const spendByCategory = new Map<string, number>();
+    for (const e of currentExpenses) {
+      spendByCategory.set(e.categoryId, (spendByCategory.get(e.categoryId) || 0) + e.amount);
+    }
+
+    const sortedCategorySpend = Array.from(spendByCategory.entries())
+      .map(([categoryId, amount]) => ({
+        category: categories.find((c) => c.id === categoryId),
+        amount,
+      }))
+      .filter((entry) => entry.category && entry.amount > 0)
+      .sort((a, b) => b.amount - a.amount);
+
+    for (const goal of activeGoals.slice(0, 2)) {
+      const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
+      const targetDate = new Date(goal.targetDate);
+      const now = new Date();
+      const monthDiff = Math.max(
+        1,
+        (targetDate.getUTCFullYear() - now.getUTCFullYear()) * 12 +
+          (targetDate.getUTCMonth() - now.getUTCMonth()),
+      );
+      const monthlyNeeded = remaining / monthDiff;
+
+      const topCategory = sortedCategorySpend[0];
+      if (topCategory && topCategory.amount > 0) {
+        facts.push({
+          type: 'recommendation',
+          severity: 'info',
+          category: topCategory.category?.name,
+          title: `Savings boost for ${goal.title}`,
+          message: `Trimming discretionary spend in ${topCategory.category?.name} can help fund ${goal.title} on target.`,
+          evidence: {
+            currentSpend: topCategory.amount,
+            targetAmount: goal.targetAmount,
+            currentProgress: goal.currentAmount,
+            monthlySavingsNeeded: Math.round(monthlyNeeded),
+          },
+        });
+      } else {
+        facts.push({
+          type: 'recommendation',
+          severity: 'info',
+          title: `Goal pace: ${goal.title}`,
+          message: `Set aside about ${monthlyNeeded.toFixed(0)}/month over the next ${monthDiff} month(s) to hit your target on schedule.`,
+          evidence: {
+            targetAmount: goal.targetAmount,
+            currentProgress: goal.currentAmount,
+            monthlySavingsNeeded: Math.round(monthlyNeeded),
           },
         });
       }

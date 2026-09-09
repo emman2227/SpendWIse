@@ -138,17 +138,17 @@ function BudgetEditorModal({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(19,38,63,0.42)] px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[rgba(19,38,63,0.42)] px-2.5 py-3 sm:px-4 sm:py-6 backdrop-blur-sm"
       role="dialog"
     >
-      <div className="panel-surface-strong max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[32px] px-5 py-5 md:px-7 md:py-6">
+      <div className="panel-surface-strong max-h-[92dvh] w-full max-w-2xl overflow-y-auto rounded-[24px] sm:rounded-[32px] px-4 py-4 sm:px-7 sm:py-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="kicker">{mode === 'create' ? 'Add budget' : 'Edit budget'}</p>
-            <h2 className="mt-3 text-2xl font-semibold text-ink">
+            <h2 className="mt-2 text-xl sm:text-2xl font-semibold text-ink">
               {mode === 'create' ? 'Create budget' : 'Update budget'}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-ink-soft">
+            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-ink-soft">
               {mode === 'create'
                 ? `Budgets are saved per category for ${monthLabel}. Saving the same category again will update that month's limit.`
                 : `Adjust the monthly spending limit for ${selectedCategory ? `"${selectedCategory.name}"` : 'this category'} for ${monthLabel}.`}
@@ -156,20 +156,20 @@ function BudgetEditorModal({
           </div>
           <button
             aria-label="Close budget editor"
-            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
+            className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-[14px] sm:rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink shrink-0"
             onClick={onClose}
             type="button"
           >
-            <CircleX className="h-5 w-5" />
+            <CircleX className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
 
-        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-          <label className="space-y-2 text-sm font-medium text-ink">
+        <form className="mt-5 space-y-3.5 sm:space-y-4" onSubmit={onSubmit}>
+          <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
             <span>Category</span>
             <select
               className={cn(
-                'flex h-12 w-full rounded-[20px] border border-line bg-paper px-4 text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:bg-paper-strong disabled:cursor-not-allowed disabled:opacity-60',
+                'flex h-11 sm:h-12 w-full rounded-[16px] sm:rounded-[20px] border border-line bg-paper px-3.5 sm:px-4 text-base sm:text-sm text-ink shadow-sm outline-none transition focus:border-brand focus:bg-paper-strong disabled:cursor-not-allowed disabled:opacity-60',
                 fieldErrors.categoryId && 'border-danger',
               )}
               disabled={mode === 'edit'}
@@ -184,21 +184,24 @@ function BudgetEditorModal({
               ))}
             </select>
             {fieldErrors.categoryId ? (
-              <p className="text-sm text-danger">{fieldErrors.categoryId}</p>
+              <p className="text-xs text-danger">{fieldErrors.categoryId}</p>
             ) : null}
           </label>
 
-          <label className="space-y-2 text-sm font-medium text-ink">
+          <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
             <span>Monthly limit</span>
             <Input
-              className={cn(fieldErrors.limitAmount && 'border-danger focus:border-danger')}
+              className={cn(
+                'text-base sm:text-sm',
+                fieldErrors.limitAmount && 'border-danger focus:border-danger',
+              )}
               inputMode="decimal"
               onChange={(event) => onFieldChange('limitAmount', event.target.value)}
               placeholder="0.00"
               value={formValues.limitAmount}
             />
             {fieldErrors.limitAmount ? (
-              <p className="text-sm text-danger">{fieldErrors.limitAmount}</p>
+              <p className="text-xs text-danger">{fieldErrors.limitAmount}</p>
             ) : null}
           </label>
 
@@ -208,8 +211,22 @@ function BudgetEditorModal({
             </div>
           ) : null}
 
-          <div className="flex flex-wrap gap-3">
-            <Button disabled={isSubmitting} type="submit" variant="secondary">
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 pt-2">
+            <Button
+              className="w-full sm:w-auto h-11 sm:h-10 rounded-full text-sm"
+              disabled={isSubmitting}
+              onClick={onClose}
+              type="button"
+              variant="soft"
+            >
+              Cancel
+            </Button>
+            <Button
+              className="w-full sm:w-auto h-11 sm:h-10 rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+              disabled={isSubmitting}
+              type="submit"
+              variant="secondary"
+            >
               {isSubmitting
                 ? mode === 'create'
                   ? 'Saving...'
@@ -217,9 +234,6 @@ function BudgetEditorModal({
                 : mode === 'create'
                   ? 'Save budget'
                   : 'Save changes'}
-            </Button>
-            <Button disabled={isSubmitting} onClick={onClose} type="button" variant="soft">
-              Cancel
             </Button>
           </div>
         </form>
@@ -246,33 +260,33 @@ function ShareBudgetModal({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(19,38,63,0.42)] px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[rgba(19,38,63,0.42)] px-2.5 py-3 sm:px-4 sm:py-6 backdrop-blur-sm"
       role="dialog"
     >
-      <div className="panel-surface-strong max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-[32px] px-5 py-5 md:px-7 md:py-6">
+      <div className="panel-surface-strong max-h-[92dvh] w-full max-w-xl overflow-y-auto rounded-[24px] sm:rounded-[32px] px-4 py-4 sm:px-7 sm:py-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="kicker">Share Budget</p>
-            <h2 className="mt-3 text-2xl font-semibold text-ink">Invite to budget</h2>
-            <p className="mt-2 text-sm leading-6 text-ink-soft">
+            <h2 className="mt-2 text-xl sm:text-2xl font-semibold text-ink">Invite to budget</h2>
+            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-ink-soft">
               Enter the email of the person you want to share this budget with.
             </p>
           </div>
           <button
             aria-label="Close share modal"
-            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
+            className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-[14px] sm:rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink shrink-0"
             onClick={onClose}
             type="button"
           >
-            <CircleX className="h-5 w-5" />
+            <CircleX className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
 
-        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-          <label className="space-y-2 text-sm font-medium text-ink">
+        <form className="mt-5 space-y-3.5 sm:space-y-4" onSubmit={onSubmit}>
+          <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
             <span>Email address</span>
             <Input
-              className={cn(error && 'border-danger focus:border-danger')}
+              className={cn('text-base sm:text-sm', error && 'border-danger focus:border-danger')}
               onChange={(event) => onEmailChange(event.target.value)}
               placeholder="colleague@example.com"
               type="email"
@@ -286,12 +300,23 @@ function ShareBudgetModal({
             </div>
           ) : null}
 
-          <div className="flex flex-wrap gap-3">
-            <Button disabled={isSubmitting || !email} type="submit" variant="secondary">
-              {isSubmitting ? 'Sharing...' : 'Share budget'}
-            </Button>
-            <Button disabled={isSubmitting} onClick={onClose} type="button" variant="soft">
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 pt-2">
+            <Button
+              className="w-full sm:w-auto h-11 sm:h-10 rounded-full text-sm"
+              disabled={isSubmitting}
+              onClick={onClose}
+              type="button"
+              variant="soft"
+            >
               Cancel
+            </Button>
+            <Button
+              className="w-full sm:w-auto h-11 sm:h-10 rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+              disabled={isSubmitting || !email}
+              type="submit"
+              variant="secondary"
+            >
+              {isSubmitting ? 'Sharing...' : 'Share budget'}
             </Button>
           </div>
         </form>

@@ -6,6 +6,7 @@ import { createAnalyticsProvider } from '@spendwise/ai';
 import { BudgetsService } from '../budgets/budgets.service';
 import { CategoriesService } from '../categories/categories.service';
 import { ExpensesService } from '../expenses/expenses.service';
+import { GoalsService } from '../goals/goals.service';
 import { UsersService } from '../users/users.service';
 import { AnalyticsRepository } from './analytics.repository';
 import { ForecastEngine } from './forecast-engine';
@@ -22,6 +23,8 @@ export class AnalyticsService {
     private readonly budgetsService: BudgetsService,
     @Inject(CategoriesService)
     private readonly categoriesService: CategoriesService,
+    @Inject(GoalsService)
+    private readonly goalsService: GoalsService,
     @Inject(UsersService)
     private readonly usersService: UsersService,
     @Inject(AnalyticsRepository)
@@ -43,12 +46,13 @@ export class AnalyticsService {
     const expenses = await this.expensesService.list(userId, {});
     const budgets = await this.budgetsService.list(userId, currentMonth, currentYear);
     const categories = await this.categoriesService.list(userId);
+    const goals = await this.goalsService.list(userId);
 
     const user = await this.usersService.getProfile(userId);
     const currency = user.currency || 'USD';
 
     // 1. Deterministic Analysis
-    const structuredFacts = SpendingAnalyzer.analyze(expenses, budgets, categories);
+    const structuredFacts = SpendingAnalyzer.analyze(expenses, budgets, categories, goals);
 
     // 2. AI Interpretation
     const interpretations = await this.provider.interpretInsights(structuredFacts, currency);

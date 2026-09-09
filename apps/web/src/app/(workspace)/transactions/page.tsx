@@ -270,17 +270,17 @@ function TransactionEditorModal({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(19,38,63,0.42)] px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[rgba(19,38,63,0.42)] px-2.5 py-3 sm:px-4 sm:py-6 backdrop-blur-sm"
       role="dialog"
     >
-      <div className="panel-surface-strong max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[32px] px-5 py-5 md:px-7 md:py-6">
+      <div className="panel-surface-strong max-h-[92dvh] w-full max-w-2xl overflow-y-auto rounded-[24px] sm:rounded-[32px] px-4 py-4 sm:px-7 sm:py-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="kicker">{mode === 'create' ? 'Add' : 'Edit'}</p>
-            <h2 className="mt-3 text-2xl font-semibold text-ink">
+            <h2 className="mt-2 text-xl sm:text-2xl font-semibold text-ink">
               {mode === 'create' ? 'Quick add' : 'Update expense'}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-ink-soft">
+            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-ink-soft">
               {mode === 'create'
                 ? 'Save a new transaction with the essentials up front.'
                 : 'Adjust the amount, category, date, or notes and save the change.'}
@@ -288,19 +288,19 @@ function TransactionEditorModal({
           </div>
           <button
             aria-label="Close transaction editor"
-            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
+            className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-[14px] sm:rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink shrink-0"
             onClick={onClose}
             type="button"
           >
-            <CircleX className="h-5 w-5" />
+            <CircleX className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-1.5 sm:gap-2">
           {quickCapturePresets.map((preset) => (
             <button
               key={preset.label}
-              className="rounded-full border border-line bg-paper-strong px-3.5 py-2 text-sm font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
+              className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs sm:text-sm font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink active:scale-95"
               onClick={() => onPresetSelect(preset.label)}
               type="button"
             >
@@ -309,25 +309,32 @@ function TransactionEditorModal({
           ))}
         </div>
 
-        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2 text-sm font-medium text-ink">
+        <form className="mt-5 space-y-3.5 sm:space-y-4" onSubmit={onSubmit}>
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
+            <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
               <span>Amount</span>
               <Input
-                className={cn(fieldErrors.amount && 'border-danger focus:border-danger')}
+                className={cn(
+                  'text-base sm:text-sm',
+                  fieldErrors.amount && 'border-danger focus:border-danger',
+                )}
                 inputMode="decimal"
                 onChange={(event) => onFieldChange('amount', event.target.value)}
                 placeholder="0.00"
                 value={formValues.amount}
               />
               {fieldErrors.amount ? (
-                <p className="text-sm text-danger">{fieldErrors.amount}</p>
+                <p className="text-xs text-danger">{fieldErrors.amount}</p>
               ) : null}
             </label>
-            <label className="space-y-2 text-sm font-medium text-ink">
+            <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
               <span>Category</span>
               <select
-                className={cn(selectClassName, fieldErrors.categoryId && 'border-danger')}
+                className={cn(
+                  selectClassName,
+                  'text-base sm:text-sm',
+                  fieldErrors.categoryId && 'border-danger',
+                )}
                 onChange={(event) => onFieldChange('categoryId', event.target.value)}
                 value={formValues.categoryId}
               >
@@ -339,7 +346,7 @@ function TransactionEditorModal({
                 ))}
               </select>
               {fieldErrors.categoryId ? (
-                <p className="text-sm text-danger">{fieldErrors.categoryId}</p>
+                <p className="text-xs text-danger">{fieldErrors.categoryId}</p>
               ) : null}
             </label>
           </div>
@@ -436,8 +443,22 @@ function TransactionEditorModal({
             </div>
           ) : null}
 
-          <div className="flex flex-wrap gap-3">
-            <Button disabled={isSubmitting} type="submit" variant="secondary">
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 pt-2">
+            <Button
+              className="w-full sm:w-auto h-11 sm:h-10 rounded-full text-sm"
+              disabled={isSubmitting}
+              onClick={onClose}
+              type="button"
+              variant="soft"
+            >
+              Cancel
+            </Button>
+            <Button
+              className="w-full sm:w-auto h-11 sm:h-10 rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+              disabled={isSubmitting}
+              type="submit"
+              variant="secondary"
+            >
               {isSubmitting
                 ? mode === 'create'
                   ? 'Saving...'
@@ -445,9 +466,6 @@ function TransactionEditorModal({
                 : mode === 'create'
                   ? 'Save expense'
                   : 'Save changes'}
-            </Button>
-            <Button disabled={isSubmitting} onClick={onClose} type="button" variant="soft">
-              Cancel
             </Button>
           </div>
         </form>

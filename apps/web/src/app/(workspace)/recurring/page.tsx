@@ -538,37 +538,37 @@ function RecurringEditorModal({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(19,38,63,0.42)] px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[rgba(19,38,63,0.42)] px-2.5 py-3 sm:px-4 sm:py-6 backdrop-blur-sm"
       role="dialog"
     >
-      <div className="panel-surface-strong max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[32px] px-5 py-5 md:px-7 md:py-6">
+      <div className="panel-surface-strong max-h-[92dvh] w-full max-w-2xl overflow-y-auto rounded-[24px] sm:rounded-[32px] px-4 py-4 sm:px-7 sm:py-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="kicker">{mode === 'create' ? 'New schedule' : 'Edit schedule'}</p>
-            <h2 className="mt-3 text-2xl font-semibold text-ink">
+            <h2 className="mt-2 text-xl sm:text-2xl font-semibold text-ink">
               {mode === 'create' ? 'Save recurring schedule' : 'Update recurring schedule'}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-ink-soft">
+            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-ink-soft">
               Saved schedules run automatically in the database and keep your recurring forecast
               synchronized.
             </p>
           </div>
           <button
             aria-label="Close recurring editor"
-            className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink"
+            className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-[14px] sm:rounded-[18px] border border-line bg-paper-strong text-ink-soft transition hover:border-brand/30 hover:text-ink shrink-0"
             onClick={onClose}
             type="button"
           >
-            <CircleX className="h-5 w-5" />
+            <CircleX className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
 
         {mode === 'create' ? (
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-1.5 sm:gap-2">
             {recurringPresets.map((preset) => (
               <button
                 key={preset.title}
-                className="rounded-full border border-line bg-paper-strong px-3.5 py-2 text-sm font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink"
+                className="rounded-full border border-line bg-paper-strong px-3 py-1.5 text-xs sm:text-sm font-semibold text-ink-soft transition hover:border-brand/30 hover:text-ink active:scale-95"
                 onClick={() => onPresetSelect(preset)}
                 type="button"
               >
@@ -578,39 +578,46 @@ function RecurringEditorModal({
           </div>
         ) : null}
 
-        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-          <label className="space-y-2 text-sm font-medium text-ink">
+        <form className="mt-5 space-y-3.5 sm:space-y-4" onSubmit={onSubmit}>
+          <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
             <span>Description / Service</span>
             <Input
-              className={cn(fieldErrors.description && 'border-danger focus:border-danger')}
+              className={cn(
+                'text-base sm:text-sm',
+                fieldErrors.description && 'border-danger focus:border-danger',
+              )}
               onChange={(event) => onFieldChange('description', event.target.value)}
               placeholder="e.g. Netflix, Gym, Apartment Rent"
               value={formValues.description}
             />
             {fieldErrors.description ? (
-              <p className="text-sm text-danger">{fieldErrors.description}</p>
+              <p className="text-xs text-danger">{fieldErrors.description}</p>
             ) : null}
           </label>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2 text-sm font-medium text-ink">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
+            <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
               <span>Amount</span>
               <Input
-                className={cn(fieldErrors.amount && 'border-danger focus:border-danger')}
+                className={cn(
+                  'text-base sm:text-sm',
+                  fieldErrors.amount && 'border-danger focus:border-danger',
+                )}
+                inputMode="decimal"
                 onChange={(event) => onFieldChange('amount', event.target.value)}
                 placeholder="0.00"
                 value={formValues.amount}
               />
               {fieldErrors.amount ? (
-                <p className="text-sm text-danger">{fieldErrors.amount}</p>
+                <p className="text-xs text-danger">{fieldErrors.amount}</p>
               ) : null}
             </label>
 
-            <label className="space-y-2 text-sm font-medium text-ink">
+            <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
               <span>Category</span>
               <select
                 className={cn(
-                  'h-11 w-full rounded-[18px] border border-line bg-paper px-4 text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/10',
+                  'h-11 w-full rounded-[16px] sm:rounded-[18px] border border-line bg-paper px-3.5 sm:px-4 text-base sm:text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/10',
                   fieldErrors.categoryId && 'border-danger focus:border-danger',
                 )}
                 onChange={(event) => onFieldChange('categoryId', event.target.value)}
@@ -624,16 +631,16 @@ function RecurringEditorModal({
                 ))}
               </select>
               {fieldErrors.categoryId ? (
-                <p className="text-sm text-danger">{fieldErrors.categoryId}</p>
+                <p className="text-xs text-danger">{fieldErrors.categoryId}</p>
               ) : null}
             </label>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2 text-sm font-medium text-ink">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
+            <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
               <span>Billing frequency</span>
               <select
-                className="h-11 w-full rounded-[18px] border border-line bg-paper px-4 text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/10"
+                className="h-11 w-full rounded-[16px] sm:rounded-[18px] border border-line bg-paper px-3.5 sm:px-4 text-base sm:text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/10"
                 onChange={(event) =>
                   onFieldChange('cadence', event.target.value as RecurringCadence)
                 }
@@ -647,25 +654,28 @@ function RecurringEditorModal({
               </select>
             </label>
 
-            <label className="space-y-2 text-sm font-medium text-ink">
+            <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
               <span>Next due date</span>
               <Input
-                className={cn(fieldErrors.nextDueDate && 'border-danger focus:border-danger')}
+                className={cn(
+                  'text-base sm:text-sm',
+                  fieldErrors.nextDueDate && 'border-danger focus:border-danger',
+                )}
                 onChange={(event) => onFieldChange('nextDueDate', event.target.value)}
                 type="date"
                 value={formValues.nextDueDate}
               />
               {fieldErrors.nextDueDate ? (
-                <p className="text-sm text-danger">{fieldErrors.nextDueDate}</p>
+                <p className="text-xs text-danger">{fieldErrors.nextDueDate}</p>
               ) : null}
             </label>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2 text-sm font-medium text-ink">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
+            <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
               <span>Payment method</span>
               <select
-                className="h-11 w-full rounded-[18px] border border-line bg-paper px-4 text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/10"
+                className="h-11 w-full rounded-[16px] sm:rounded-[18px] border border-line bg-paper px-3.5 sm:px-4 text-base sm:text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/10"
                 onChange={(event) =>
                   onFieldChange('paymentMethod', event.target.value as PaymentMethod)
                 }
@@ -679,9 +689,10 @@ function RecurringEditorModal({
               </select>
             </label>
 
-            <label className="space-y-2 text-sm font-medium text-ink">
+            <label className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm font-medium text-ink">
               <span>Short tag / memo</span>
               <Input
+                className="text-base sm:text-sm"
                 onChange={(event) => onFieldChange('notes', event.target.value)}
                 placeholder="e.g. Shared plan, Autopay on"
                 value={formValues.notes}
@@ -695,8 +706,22 @@ function RecurringEditorModal({
             </div>
           ) : null}
 
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Button disabled={isSubmitting} type="submit" variant="secondary">
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 pt-2">
+            <Button
+              className="w-full sm:w-auto h-11 sm:h-10 rounded-full text-sm"
+              disabled={isSubmitting}
+              onClick={onClose}
+              type="button"
+              variant="soft"
+            >
+              Cancel
+            </Button>
+            <Button
+              className="w-full sm:w-auto h-11 sm:h-10 rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+              disabled={isSubmitting}
+              type="submit"
+              variant="secondary"
+            >
               {isSubmitting
                 ? mode === 'create'
                   ? 'Saving...'
@@ -704,9 +729,6 @@ function RecurringEditorModal({
                 : mode === 'create'
                   ? 'Save recurring schedule'
                   : 'Save changes'}
-            </Button>
-            <Button disabled={isSubmitting} onClick={onClose} type="button" variant="soft">
-              Cancel
             </Button>
           </div>
         </form>

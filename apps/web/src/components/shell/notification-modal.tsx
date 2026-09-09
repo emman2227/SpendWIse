@@ -90,10 +90,10 @@ interface PanelPosition {
   width: number;
 }
 
-const panelEdgeGap = 16;
-const panelMinWidth = 320;
+const panelEdgeGap = 8;
+const panelMinWidth = 280;
 const panelMaxWidth = 390;
-const panelTopOffset = 12;
+const panelTopOffset = 8;
 
 const getPanelPosition = (triggerRect: DOMRect): PanelPosition => {
   const width = Math.min(

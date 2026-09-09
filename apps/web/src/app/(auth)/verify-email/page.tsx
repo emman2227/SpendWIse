@@ -148,9 +148,9 @@ function VerifyEmailPageContent() {
       : 'Check your inbox and spam folder for the latest verification code.';
 
   return (
-    <main className="min-h-screen bg-cream px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden">
-      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-paper-strong shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
-        <section className="relative overflow-hidden bg-mint px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]">
+    <main className="min-h-screen bg-cream px-3.5 py-4 sm:px-6 sm:py-8 md:flex md:items-center md:justify-center md:py-10">
+      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[24px] bg-paper-strong shadow-[0_18px_48px_rgba(18,35,47,0.1)] sm:rounded-[28px] lg:grid lg:min-h-[520px] lg:grid-cols-[0.93fr,0.83fr]">
+        <section className="relative hidden overflow-hidden bg-mint px-8 py-8 lg:flex lg:min-h-[520px] lg:flex-col lg:justify-between">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -left-10 top-0 h-40 w-56 rounded-full bg-white/28 blur-sm" />
             <div className="absolute right-[8%] top-[11%] h-44 w-44 rounded-full bg-surface-muted opacity-95" />
@@ -222,16 +222,26 @@ function VerifyEmailPageContent() {
           </div>
         </section>
 
-        <section className="min-h-0 overflow-y-auto bg-paper-strong px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5">
-          <div className="mx-auto flex h-full max-w-[360px] flex-col">
+        <section className="bg-paper-strong px-4 py-6 sm:px-8 sm:py-8 md:px-10 md:py-10">
+          <div className="mx-auto flex h-full max-w-[380px] flex-col">
+            {/* Mobile Header */}
+            <div className="mb-5 flex items-center justify-between lg:hidden">
+              <Link href="/" className="text-xl font-extrabold tracking-[-0.04em] text-brand">
+                SpendWise
+              </Link>
+              <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
+                Verification
+              </span>
+            </div>
+
             <div className="space-y-2">
-              <div className="inline-flex items-center rounded-full bg-brand/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
+              <div className="hidden lg:inline-flex items-center rounded-full bg-brand/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
                 Verification
               </div>
-              <h2 className="text-[1.45rem] font-semibold tracking-[-0.04em] text-ink md:text-[1.55rem]">
+              <h2 className="text-xl font-semibold tracking-[-0.04em] text-ink sm:text-2xl md:text-[1.55rem]">
                 Enter Your Code
               </h2>
-              <p className="text-[13px] leading-5 text-ink-soft">
+              <p className="text-[13px] leading-relaxed text-ink-soft">
                 Enter the {AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit code sent to your email to
                 finish creating your SpendWise account.
               </p>
@@ -251,7 +261,7 @@ function VerifyEmailPageContent() {
                     aria-invalid={Boolean(emailError)}
                     autoComplete="email"
                     className={cn(
-                      'h-10 rounded-[14px] border border-transparent bg-surface-muted text-sm shadow-none placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
+                      'h-11 sm:h-10 rounded-[14px] border border-transparent bg-surface-muted text-base sm:text-sm shadow-none placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
                       emailError && 'border-[var(--danger)]',
                     )}
                     disabled={isSubmitting || isResending}
@@ -286,7 +296,7 @@ function VerifyEmailPageContent() {
                     aria-invalid={Boolean(codeError)}
                     autoComplete="one-time-code"
                     className={cn(
-                      'h-12 rounded-[16px] border border-transparent bg-surface-muted text-center font-mono text-lg tracking-[0.4em] shadow-none placeholder:tracking-[0.28em] placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
+                      'h-12 rounded-[16px] border border-transparent bg-surface-muted text-center font-mono text-base sm:text-lg tracking-[0.25em] sm:tracking-[0.4em] shadow-none placeholder:tracking-[0.2em] placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
                       codeError && 'border-[var(--danger)]',
                     )}
                     disabled={isSubmitting}
@@ -332,7 +342,7 @@ function VerifyEmailPageContent() {
 
               <div className="mt-auto space-y-2.5 pt-4">
                 <Button
-                  className="h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                  className="h-12 sm:h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
                   disabled={isSubmitting}
                   size="lg"
                   type="submit"
@@ -341,7 +351,7 @@ function VerifyEmailPageContent() {
                   {isSubmitting ? 'Verifying...' : 'Verify Email'}
                 </Button>
                 <Button
-                  className="h-10 w-full rounded-full text-sm"
+                  className="h-11 sm:h-10 w-full rounded-full text-sm"
                   disabled={isResending || isSubmitting}
                   size="lg"
                   type="button"

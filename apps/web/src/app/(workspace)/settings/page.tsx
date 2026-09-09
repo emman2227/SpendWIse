@@ -389,19 +389,26 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1.15fr,0.85fr]">
-      <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-        <div className="flex items-center justify-between">
+      <SurfaceCard className="rounded-[28px] px-4 py-5 sm:rounded-[32px] sm:px-6 sm:py-6 md:px-7">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-brand/10 text-xl font-bold text-brand">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] bg-brand/10 text-lg font-bold text-brand sm:h-16 sm:w-16 sm:rounded-[24px] sm:text-xl">
               {initials}
             </div>
             <div>
               <p className="kicker">Account</p>
-              <h2 className="mt-2 text-2xl font-semibold text-ink">Your profile</h2>
+              <h2 className="mt-1 text-xl font-semibold text-ink sm:mt-2 sm:text-2xl">
+                Your profile
+              </h2>
             </div>
           </div>
           {!isEditing ? (
-            <Button onClick={startEditing} size="sm" variant="soft">
+            <Button
+              onClick={startEditing}
+              size="sm"
+              variant="soft"
+              className="self-start sm:self-auto"
+            >
               <Pencil className="h-3.5 w-3.5" />
               Edit
             </Button>
@@ -409,15 +416,15 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
         </div>
 
         {isEditing ? (
-          <div className="mt-6 space-y-5">
+          <div className="mt-6 space-y-4 sm:space-y-5">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-ink" htmlFor="profile-name">
+              <label className="text-xs font-semibold text-ink sm:text-sm" htmlFor="profile-name">
                 Display name
               </label>
               <Input
                 autoComplete="name"
                 className={cn(
-                  'h-14 rounded-[24px] bg-paper',
+                  'h-12 rounded-[20px] bg-paper text-base sm:h-14 sm:rounded-[24px] sm:text-sm',
                   nameError && 'border-danger focus:border-danger',
                 )}
                 id="profile-name"
@@ -431,17 +438,17 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
                 type="text"
                 value={name}
               />
-              {nameError ? <p className="text-sm text-danger">{nameError}</p> : null}
+              {nameError ? <p className="text-xs text-danger sm:text-sm">{nameError}</p> : null}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-ink" htmlFor="profile-phone">
+              <label className="text-xs font-semibold text-ink sm:text-sm" htmlFor="profile-phone">
                 Phone number
               </label>
               <Input
                 autoComplete="tel"
                 className={cn(
-                  'h-14 rounded-[24px] bg-paper',
+                  'h-12 rounded-[20px] bg-paper text-base sm:h-14 sm:rounded-[24px] sm:text-sm',
                   phoneError && 'border-danger focus:border-danger',
                 )}
                 id="profile-phone"
@@ -456,22 +463,22 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
                 type="tel"
                 value={phone}
               />
-              {phoneError ? <p className="text-sm text-danger">{phoneError}</p> : null}
+              {phoneError ? <p className="text-xs text-danger sm:text-sm">{phoneError}</p> : null}
             </div>
 
-            <div className="rounded-[24px] border border-line bg-paper px-5 py-5">
-              <p className="text-sm text-ink-soft">Email address</p>
-              <p className="mt-2 font-semibold text-ink">{user?.email ?? 'Loading...'}</p>
+            <div className="rounded-[20px] border border-line bg-paper px-4 py-4 sm:rounded-[24px] sm:px-5 sm:py-5">
+              <p className="text-xs text-ink-soft sm:text-sm">Email address</p>
+              <p className="mt-1 font-semibold text-ink sm:mt-2">{user?.email ?? 'Loading...'}</p>
               <p className="mt-1 text-xs text-ink-soft">Email cannot be changed from settings.</p>
             </div>
 
             {saveError ? (
-              <div className="rounded-[20px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
+              <div className="rounded-[18px] border border-danger/20 bg-danger/10 px-4 py-3 text-xs text-danger sm:rounded-[20px] sm:text-sm">
                 {saveError}
               </div>
             ) : null}
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:flex-wrap sm:gap-3 [&>button]:w-full sm:[&>button]:w-auto">
               <Button disabled={isSaving} onClick={handleSave} variant="secondary">
                 {isSaving ? 'Saving...' : 'Save changes'}
               </Button>
@@ -482,7 +489,7 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
             </div>
           </div>
         ) : (
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="mt-6 grid gap-3 sm:gap-4 md:grid-cols-2">
             {[
               { label: 'Display name', value: user?.name ?? 'Loading...' },
               { label: 'Email address', value: user?.email ?? 'Loading...' },
@@ -492,15 +499,18 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
                 icon: Phone,
               },
             ].map(({ label, value }) => (
-              <div key={label} className="rounded-[24px] border border-line bg-paper px-5 py-5">
-                <p className="text-sm text-ink-soft">{label}</p>
-                <p className="mt-2 font-semibold text-ink">{value}</p>
+              <div
+                key={label}
+                className="rounded-[20px] border border-line bg-paper px-4 py-4 sm:rounded-[24px] sm:px-5 sm:py-5"
+              >
+                <p className="text-xs text-ink-soft sm:text-sm">{label}</p>
+                <p className="mt-1 break-words font-semibold text-ink sm:mt-2">{value}</p>
               </div>
             ))}
 
             <div
               className={cn(
-                'flex items-center gap-3 rounded-[24px] border px-5 py-5',
+                'flex items-center gap-3 rounded-[20px] border px-4 py-4 sm:rounded-[24px] sm:px-5 sm:py-5',
                 user?.emailVerified
                   ? 'border-emerald-200/80 bg-emerald-50/60'
                   : 'border-amber-200/80 bg-amber-50/60',
@@ -512,10 +522,10 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
                 <ShieldAlert className="h-5 w-5 shrink-0 text-amber-600" />
               )}
               <div>
-                <p className="text-sm text-ink-soft">Email status</p>
+                <p className="text-xs text-ink-soft sm:text-sm">Email status</p>
                 <p
                   className={cn(
-                    'mt-1 font-semibold',
+                    'mt-0.5 font-semibold sm:mt-1',
                     user?.emailVerified ? 'text-emerald-700' : 'text-amber-700',
                   )}
                 >
@@ -527,35 +537,37 @@ function AccountPanel({ user }: { user: UserProfile | null | undefined }) {
         )}
 
         {saveNotice && !isEditing ? (
-          <div className="mt-4 rounded-[18px] border border-brand/15 bg-brand/10 px-4 py-3 text-sm text-ink">
+          <div className="mt-4 rounded-[18px] border border-brand/15 bg-brand/10 px-4 py-3 text-xs text-ink sm:text-sm">
             {saveNotice}
           </div>
         ) : null}
       </SurfaceCard>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {memberSince ? (
-          <SurfaceCard className="rounded-[30px] px-6 py-6">
+          <SurfaceCard className="rounded-[28px] px-4 py-5 sm:rounded-[30px] sm:px-6 sm:py-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
                 <Calendar className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm text-ink-soft">Member since</p>
-                <p className="mt-1 text-lg font-semibold text-ink">{memberSince}</p>
+                <p className="text-xs text-ink-soft sm:text-sm">Member since</p>
+                <p className="mt-0.5 text-base font-semibold text-ink sm:mt-1 sm:text-lg">
+                  {memberSince}
+                </p>
               </div>
             </div>
           </SurfaceCard>
         ) : null}
 
-        <SurfaceCard className="rounded-[30px] px-6 py-6">
-          <h3 className="text-lg font-semibold text-ink">Sign out</h3>
-          <p className="mt-2 text-sm leading-7 text-ink-soft">
+        <SurfaceCard className="rounded-[28px] px-4 py-5 sm:rounded-[30px] sm:px-6 sm:py-6">
+          <h3 className="text-base font-semibold text-ink sm:text-lg">Sign out</h3>
+          <p className="mt-1.5 text-xs leading-relaxed text-ink-soft sm:mt-2 sm:text-sm sm:leading-7">
             End your current session on this device. You&apos;ll need to sign in again to access
             your workspace.
           </p>
           <Button
-            className="mt-5"
+            className="mt-4 w-full sm:mt-5 sm:w-auto"
             disabled={isLoggingOut}
             onClick={() => {
               void handleLogout();
@@ -687,17 +699,17 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
   };
 
   return (
-    <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-      <div className="flex items-start gap-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-brand/10 text-brand">
-          <Shield className="h-7 w-7" />
+    <SurfaceCard className="rounded-[28px] px-4 py-5 sm:rounded-[32px] sm:px-6 sm:py-6 md:px-7">
+      <div className="flex items-start gap-3 sm:gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[20px] bg-brand/10 text-brand sm:h-16 sm:w-16 sm:rounded-[24px]">
+          <Shield className="h-6 w-6 sm:h-7 sm:w-7" />
         </div>
         <div>
           <p className="kicker">Security</p>
-          <h2 className="mt-2 text-2xl font-semibold text-ink md:text-[2.1rem]">
+          <h2 className="mt-1 text-xl font-semibold text-ink sm:mt-2 sm:text-2xl md:text-[2.1rem]">
             Password and sign-in protection
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-ink-soft">
+          <p className="mt-2 max-w-2xl text-xs leading-relaxed text-ink-soft sm:mt-3 sm:text-sm sm:leading-7">
             Confirm your current password first, then we&apos;ll send a one-time code to{' '}
             <span className="font-semibold text-ink">{maskedEmail}</span> before the change is
             saved.
@@ -706,23 +718,23 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
       </div>
 
       {memberSince ? (
-        <div className="mt-5 flex items-center gap-2 rounded-[18px] border border-line bg-paper px-4 py-3">
+        <div className="mt-4 flex items-center gap-2 rounded-[16px] border border-line bg-paper px-3.5 py-2.5 sm:mt-5 sm:rounded-[18px] sm:px-4 sm:py-3">
           <Calendar className="h-4 w-4 shrink-0 text-ink-soft" />
-          <p className="text-sm text-ink-soft">
+          <p className="text-xs text-ink-soft sm:text-sm">
             Account created on <span className="font-medium text-ink">{memberSince}</span>
           </p>
         </div>
       ) : null}
 
-      <div className="mt-8 space-y-5">
+      <div className="mt-6 space-y-4 sm:mt-8 sm:space-y-5">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-ink" htmlFor="current-password">
+          <label className="text-xs font-semibold text-ink sm:text-sm" htmlFor="current-password">
             Current password
           </label>
           <Input
             autoComplete="current-password"
             className={cn(
-              'h-14 rounded-[24px] bg-paper',
+              'h-12 rounded-[20px] bg-paper text-base sm:h-14 sm:rounded-[24px] sm:text-sm',
               errors.currentPassword && 'border-danger focus:border-danger',
             )}
             id="current-password"
@@ -732,18 +744,18 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
             value={values.currentPassword}
           />
           {errors.currentPassword ? (
-            <p className="text-sm text-danger">{errors.currentPassword}</p>
+            <p className="text-xs text-danger sm:text-sm">{errors.currentPassword}</p>
           ) : null}
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-ink" htmlFor="new-password">
+          <label className="text-xs font-semibold text-ink sm:text-sm" htmlFor="new-password">
             New password
           </label>
           <Input
             autoComplete="new-password"
             className={cn(
-              'h-14 rounded-[24px] bg-paper',
+              'h-12 rounded-[20px] bg-paper text-base sm:h-14 sm:rounded-[24px] sm:text-sm',
               errors.newPassword && 'border-danger focus:border-danger',
             )}
             id="new-password"
@@ -752,17 +764,19 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
             type="password"
             value={values.newPassword}
           />
-          {errors.newPassword ? <p className="text-sm text-danger">{errors.newPassword}</p> : null}
+          {errors.newPassword ? (
+            <p className="text-xs text-danger sm:text-sm">{errors.newPassword}</p>
+          ) : null}
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-ink" htmlFor="confirm-password">
+          <label className="text-xs font-semibold text-ink sm:text-sm" htmlFor="confirm-password">
             Confirm new password
           </label>
           <Input
             autoComplete="new-password"
             className={cn(
-              'h-14 rounded-[24px] bg-paper',
+              'h-12 rounded-[20px] bg-paper text-base sm:h-14 sm:rounded-[24px] sm:text-sm',
               errors.confirmPassword && 'border-danger focus:border-danger',
             )}
             id="confirm-password"
@@ -772,7 +786,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
             value={values.confirmPassword}
           />
           {errors.confirmPassword ? (
-            <p className="text-sm text-danger">{errors.confirmPassword}</p>
+            <p className="text-xs text-danger sm:text-sm">{errors.confirmPassword}</p>
           ) : null}
         </div>
       </div>
@@ -806,15 +820,17 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
       </div>
 
       {codeRequested ? (
-        <div className="mt-6 rounded-[26px] border border-brand/15 bg-[linear-gradient(135deg,rgba(214,235,231,0.78),rgba(255,255,255,0.92))] px-5 py-5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="mt-5 rounded-[22px] border border-brand/15 bg-[linear-gradient(135deg,rgba(214,235,231,0.78),rgba(255,255,255,0.92))] px-4 py-4 sm:mt-6 sm:rounded-[26px] sm:px-5 sm:py-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-paper text-brand shadow-soft">
-                <MailCheck className="h-5 w-5" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] bg-paper text-brand shadow-soft sm:h-12 sm:w-12 sm:rounded-[18px]">
+                <MailCheck className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-ink">Enter your email verification code</p>
-                <p className="mt-1 text-sm leading-6 text-ink-soft">
+                <p className="text-xs font-semibold text-ink sm:text-sm">
+                  Enter your email verification code
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-ink-soft sm:text-sm sm:leading-6">
                   {deliveryHint === 'log'
                     ? 'SMTP is unavailable right now, so the code was written to the API terminal for local development.'
                     : `We sent a ${AUTH_EMAIL_VERIFICATION_CODE_LENGTH}-digit code to ${maskedEmail}.`}
@@ -822,7 +838,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
               </div>
             </div>
             <Button
-              className="shrink-0"
+              className="w-full shrink-0 sm:w-auto"
               disabled={isResendingCode || isUpdatingPassword}
               onClick={() => requestOtp(true)}
               size="sm"
@@ -834,14 +850,17 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
             </Button>
           </div>
 
-          <div className="mt-5 space-y-2">
-            <label className="text-sm font-semibold text-ink" htmlFor="password-change-code">
+          <div className="mt-4 space-y-2 sm:mt-5">
+            <label
+              className="text-xs font-semibold text-ink sm:text-sm"
+              htmlFor="password-change-code"
+            >
               Verification code
             </label>
             <Input
               autoComplete="one-time-code"
               className={cn(
-                'h-14 rounded-[24px] bg-paper text-center font-mono text-lg tracking-[0.42em]',
+                'h-12 rounded-[20px] bg-paper text-center font-mono text-base tracking-[0.35em] sm:h-14 sm:rounded-[24px] sm:text-lg sm:tracking-[0.42em]',
                 errors.code && 'border-danger focus:border-danger',
               )}
               id="password-change-code"
@@ -852,13 +871,13 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
               type="text"
               value={values.code}
             />
-            {errors.code ? <p className="text-sm text-danger">{errors.code}</p> : null}
+            {errors.code ? <p className="text-xs text-danger sm:text-sm">{errors.code}</p> : null}
           </div>
         </div>
       ) : null}
 
       {formError ? (
-        <div className="mt-6 rounded-[20px] border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">
+        <div className="mt-5 rounded-[18px] border border-danger/20 bg-danger/10 px-4 py-3 text-xs text-danger sm:mt-6 sm:rounded-[20px] sm:text-sm">
           {formError}
         </div>
       ) : null}
@@ -866,7 +885,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
       {notice ? (
         <div
           className={cn(
-            'mt-6 rounded-[20px] px-4 py-3 text-sm',
+            'mt-5 rounded-[18px] px-4 py-3 text-xs sm:mt-6 sm:rounded-[20px] sm:text-sm',
             notice.tone === 'success'
               ? 'border border-brand/15 bg-brand/10 text-ink'
               : 'border border-line bg-paper text-ink',
@@ -876,7 +895,7 @@ function SecurityPanel({ user }: { user: UserProfile | null | undefined }) {
         </div>
       ) : null}
 
-      <div className="mt-6 flex flex-wrap gap-3">
+      <div className="mt-6 flex flex-col-reverse gap-2.5 sm:flex-row sm:flex-wrap sm:gap-3 [&>button]:w-full sm:[&>button]:w-auto">
         {codeRequested ? (
           <>
             <Button
@@ -1236,36 +1255,43 @@ function DataPrivacyPanel() {
   };
 
   return (
-    <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
-      <div className="flex items-start gap-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-brand/10 text-brand">
-          <Database className="h-7 w-7" />
+    <SurfaceCard className="rounded-[28px] px-4 py-5 sm:rounded-[32px] sm:px-6 sm:py-6 md:px-7">
+      <div className="flex items-start gap-3 sm:gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[20px] bg-brand/10 text-brand sm:h-16 sm:w-16 sm:rounded-[24px]">
+          <Database className="h-6 w-6 sm:h-7 sm:w-7" />
         </div>
         <div>
           <p className="kicker">Data & Privacy</p>
-          <h2 className="mt-2 text-2xl font-semibold text-ink">Manage your data</h2>
+          <h2 className="mt-1 text-xl font-semibold text-ink sm:mt-2 sm:text-2xl">
+            Manage your data
+          </h2>
         </div>
       </div>
 
-      <div className="mt-8 space-y-8">
+      <div className="mt-6 space-y-6 sm:mt-8 sm:space-y-8">
         <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-ink">Export your data</h3>
-          <p className="text-sm leading-6 text-ink-soft max-w-xl">
+          <h3 className="text-base font-semibold text-ink sm:text-lg">Export your data</h3>
+          <p className="max-w-xl text-xs leading-relaxed text-ink-soft sm:text-sm sm:leading-6">
             Download a copy of your personal data, including all budgets, expenses, and goals. The
             file will be in JSON format.
           </p>
-          <Button onClick={handleExport} disabled={isExporting} variant="outline" className="mt-2">
-            <Download className="h-4 w-4 mr-2" />
+          <Button
+            onClick={handleExport}
+            disabled={isExporting}
+            variant="outline"
+            className="mt-2 w-full sm:w-auto"
+          >
+            <Download className="mr-2 h-4 w-4" />
             {isExporting ? 'Preparing download...' : 'Export my data'}
           </Button>
         </div>
 
         <hr className="border-line" />
 
-        <div className="space-y-4 rounded-[24px] border border-danger/20 bg-danger/5 px-6 py-6">
+        <div className="space-y-4 rounded-[20px] border border-danger/20 bg-danger/5 px-4 py-4 sm:rounded-[24px] sm:px-6 sm:py-6">
           <div>
-            <h3 className="text-lg font-semibold text-danger">Delete account</h3>
-            <p className="mt-2 text-sm leading-6 text-ink-soft max-w-xl">
+            <h3 className="text-base font-semibold text-danger sm:text-lg">Delete account</h3>
+            <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
               Permanently remove your account and all associated data. This action cannot be undone.
             </p>
           </div>
@@ -1281,57 +1307,61 @@ function DataPrivacyPanel() {
             }}
           >
             <Dialog.Trigger asChild>
-              <Button className="bg-danger text-white hover:bg-danger/90">
-                <Trash2 className="h-4 w-4 mr-2" />
+              <Button className="w-full bg-danger text-white hover:bg-danger/90 sm:w-auto">
+                <Trash2 className="mr-2 h-4 w-4" />
                 Delete account
               </Button>
             </Dialog.Trigger>
 
             <Dialog.Portal>
               <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-              <Dialog.Content className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-paper-strong p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-[24px]">
+              <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 grid max-h-[92dvh] w-full max-w-lg gap-4 overflow-y-auto rounded-t-[28px] border bg-paper-strong p-5 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:bottom-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-[24px] sm:p-6">
                 <div className="flex flex-col space-y-1.5 text-center sm:text-left">
-                  <Dialog.Title className="text-lg font-semibold leading-none tracking-tight text-ink">
+                  <Dialog.Title className="text-base font-semibold leading-none tracking-tight text-ink sm:text-lg">
                     Are you absolutely sure?
                   </Dialog.Title>
-                  <Dialog.Description className="text-sm text-ink-soft">
+                  <Dialog.Description className="text-xs text-ink-soft sm:text-sm">
                     This action cannot be undone. This will permanently delete your account and
                     remove your data from our servers.
                   </Dialog.Description>
                 </div>
 
-                <div className="space-y-4 py-4">
+                <div className="space-y-4 py-3 sm:py-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-ink">Enter your password</label>
+                    <label className="text-xs font-semibold text-ink sm:text-sm">
+                      Enter your password
+                    </label>
                     <Input
                       type="password"
                       placeholder="Your current password"
                       value={passwordInput}
                       onChange={(e) => setPasswordInput(e.target.value)}
-                      className="h-12 rounded-[16px]"
+                      className="h-12 rounded-[16px] text-base sm:text-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-ink">Type DELETE to confirm</label>
+                    <label className="text-xs font-semibold text-ink sm:text-sm">
+                      Type DELETE to confirm
+                    </label>
                     <Input
                       placeholder="DELETE"
                       value={deleteInput}
                       onChange={(e) => setDeleteInput(e.target.value)}
-                      className="h-12 rounded-[16px]"
+                      className="h-12 rounded-[16px] text-base sm:text-sm"
                     />
                   </div>
                 </div>
 
-                <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+                <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end sm:gap-2">
                   <Dialog.Close asChild>
-                    <Button variant="outline" disabled={isDeleting}>
+                    <Button variant="outline" disabled={isDeleting} className="w-full sm:w-auto">
                       Cancel
                     </Button>
                   </Dialog.Close>
                   <Button
                     onClick={handleDelete}
                     disabled={deleteInput !== 'DELETE' || !passwordInput || isDeleting}
-                    className="bg-danger text-white hover:bg-danger/90 disabled:opacity-50"
+                    className="w-full bg-danger text-white hover:bg-danger/90 disabled:opacity-50 sm:w-auto"
                   >
                     {isDeleting ? 'Deleting...' : 'Delete account permanently'}
                   </Button>
@@ -1372,15 +1402,17 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        className="px-6 py-5 md:px-7 md:py-6"
         description="Manage your account details, security, and notification preferences."
         eyebrow="Settings"
         title="Settings"
       />
 
       <section className="space-y-6">
-        <SurfaceCard tone="mint" className="rounded-[32px] px-3 py-3">
-          <div className="flex flex-wrap gap-2">
+        <SurfaceCard
+          tone="mint"
+          className="rounded-[28px] px-2 py-2 sm:rounded-[32px] sm:px-3 sm:py-3"
+        >
+          <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:gap-2 sm:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {settingsTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = tab.id === activeTab;
@@ -1390,7 +1422,7 @@ export default function SettingsPage() {
                   aria-pressed={isActive}
                   key={tab.id}
                   className={cn(
-                    'group relative flex min-w-[148px] flex-1 items-center justify-center gap-2 overflow-hidden rounded-[20px] px-4 py-3 text-sm font-semibold transition-all duration-200',
+                    'group relative flex min-w-[120px] shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-[18px] px-3.5 py-2.5 text-xs font-semibold transition-all duration-200 sm:min-w-[148px] sm:flex-1 sm:gap-2 sm:rounded-[20px] sm:px-4 sm:py-3 sm:text-sm',
                     isActive
                       ? 'bg-paper text-ink shadow-soft ring-1 ring-white/80'
                       : 'text-ink-soft hover:bg-paper-strong hover:text-ink',
@@ -1414,7 +1446,7 @@ export default function SettingsPage() {
                         : 'bg-gradient-to-r from-white/55 via-white/20 to-transparent opacity-0 group-hover:opacity-100',
                     )}
                   />
-                  <Icon className="relative z-10 h-4 w-4" />
+                  <Icon className="relative z-10 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span className="relative z-10">{tab.label}</span>
                 </button>
               );

@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BudgetsModule } from '../budgets/budgets.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { ExpensesModule } from '../expenses/expenses.module';
+import { GoalsModule } from '../goals/goals.module';
 import { UsersModule } from '../users/users.module';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsRepository } from './analytics.repository';
@@ -21,6 +22,7 @@ import { PromptService } from './prompt.service';
     ExpensesModule,
     BudgetsModule,
     CategoriesModule,
+    GoalsModule,
     UsersModule,
     MongooseModule.forFeature([
       { name: InsightModel.name, schema: InsightSchema },

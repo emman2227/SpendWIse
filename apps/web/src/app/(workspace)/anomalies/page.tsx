@@ -46,23 +46,26 @@ export default function AnomaliesPage() {
       />
 
       <section className="grid gap-6 lg:grid-cols-[1fr,0.95fr]">
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+        <SurfaceCard className="rounded-[28px] px-4 py-5 sm:rounded-[32px] sm:px-6 sm:py-6 md:px-7">
           <p className="kicker">Alerts list</p>
-          <h2 className="mt-3 text-2xl font-semibold text-ink">
+          <h2 className="mt-2 text-xl font-semibold text-ink sm:mt-3 sm:text-2xl">
             Each alert should be reviewable in one pass
           </h2>
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-5 space-y-3 sm:mt-6 sm:space-y-4">
             {alerts.map((alert) => (
-              <div key={alert.id} className="rounded-[24px] border border-line bg-paper px-5 py-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+              <div
+                key={alert.id}
+                className="rounded-[20px] border border-line bg-paper px-4 py-4 sm:rounded-[24px] sm:px-5 sm:py-5"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2.5">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-warning/15 text-warning">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-warning/15 text-warning">
                       <ShieldAlert className="h-5 w-5" />
                     </div>
                     <div>
                       <p className="font-semibold text-ink">{alert.merchant}</p>
-                      <p className="text-sm text-ink-soft">{alert.category}</p>
+                      <p className="text-xs text-ink-soft sm:text-sm">{alert.category}</p>
                     </div>
                   </div>
                   <Badge
@@ -77,39 +80,51 @@ export default function AnomaliesPage() {
                     {alert.severity}
                   </Badge>
                 </div>
-                <p className="mt-4 text-sm leading-6 text-ink-soft">{alert.reason}</p>
-                <p className="mt-4 font-semibold text-ink">{formatMoney(alert.amount)}</p>
+                <p className="mt-3 text-xs leading-relaxed text-ink-soft sm:mt-4 sm:text-sm sm:leading-6">
+                  {alert.reason}
+                </p>
+                <p className="mt-3 text-base font-semibold text-ink sm:mt-4">
+                  {formatMoney(alert.amount)}
+                </p>
               </div>
             ))}
           </div>
         </SurfaceCard>
 
-        <SurfaceCard className="rounded-[32px] px-6 py-6 md:px-7">
+        <SurfaceCard className="rounded-[28px] px-4 py-5 sm:rounded-[32px] sm:px-6 sm:py-6 md:px-7">
           <p className="kicker">Alert detail</p>
-          <h2 className="mt-3 text-2xl font-semibold text-ink">{selected.merchant}</h2>
-          <p className="mt-2 text-sm text-ink-soft">{selected.category} anomaly</p>
+          <h2 className="mt-2 text-xl font-semibold text-ink sm:mt-3 sm:text-2xl">
+            {selected.merchant}
+          </h2>
+          <p className="mt-1 text-xs text-ink-soft sm:mt-2 sm:text-sm">
+            {selected.category} anomaly
+          </p>
 
-          <div className="mt-6 space-y-4">
-            <div className="rounded-[24px] border border-warning/25 bg-warning/10 px-5 py-5">
-              <p className="text-sm font-semibold text-ink">Reason for flagging</p>
-              <p className="mt-2 text-sm leading-6 text-ink-soft">{selected.reason}</p>
+          <div className="mt-5 space-y-3 sm:mt-6 sm:space-y-4">
+            <div className="rounded-[20px] border border-warning/25 bg-warning/10 px-4 py-4 sm:rounded-[24px] sm:px-5 sm:py-5">
+              <p className="text-xs font-semibold text-ink sm:text-sm">Reason for flagging</p>
+              <p className="mt-1.5 text-xs leading-relaxed text-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
+                {selected.reason}
+              </p>
             </div>
 
-            <div className="rounded-[24px] border border-line bg-paper px-5 py-5">
-              <p className="text-sm font-semibold text-ink">Suggested action</p>
-              <p className="mt-2 text-sm leading-6 text-ink-soft">{selected.suggestedAction}</p>
+            <div className="rounded-[20px] border border-line bg-paper px-4 py-4 sm:rounded-[24px] sm:px-5 sm:py-5">
+              <p className="text-xs font-semibold text-ink sm:text-sm">Suggested action</p>
+              <p className="mt-1.5 text-xs leading-relaxed text-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
+                {selected.suggestedAction}
+              </p>
             </div>
 
-            <div className="rounded-[24px] border border-line bg-sage/30 px-5 py-5">
-              <p className="text-sm font-semibold text-ink">Review guidance</p>
-              <p className="mt-2 text-sm leading-6 text-ink-soft">
+            <div className="rounded-[20px] border border-line bg-sage/30 px-4 py-4 sm:rounded-[24px] sm:px-5 sm:py-5">
+              <p className="text-xs font-semibold text-ink sm:text-sm">Review guidance</p>
+              <p className="mt-1.5 text-xs leading-relaxed text-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
                 Keep confirmation controls close to the explanation so users can mark the alert as
                 expected or important without hunting for next steps.
               </p>
             </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:gap-3 [&>button]:w-full sm:[&>button]:w-auto">
             <Button variant="secondary">Mark as important</Button>
             <Button variant="soft">This is normal</Button>
             <Button variant="ghost">Dismiss alert</Button>

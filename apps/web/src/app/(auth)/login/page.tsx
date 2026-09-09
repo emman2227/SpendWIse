@@ -192,15 +192,16 @@ export default function LoginPage() {
 
   return (
     <motion.main
-      className="min-h-screen bg-cream px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden"
+      className="min-h-screen bg-cream px-3.5 py-4 sm:px-6 sm:py-8 md:flex md:items-center md:justify-center md:py-10"
       initial="hidden"
       animate="visible"
       exit="exit"
       variants={pageTransition}
     >
-      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-paper-strong shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
+      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[24px] sm:rounded-[28px] bg-paper-strong shadow-[0_18px_48px_rgba(18,35,47,0.1)] lg:grid lg:min-h-[520px] lg:grid-cols-[0.93fr,0.83fr]">
+        {/* Left Decorative Branding Section (Desktop showcase, streamlined on mobile) */}
         <motion.section
-          className="relative overflow-hidden bg-mint px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]"
+          className="hidden lg:relative lg:flex lg:flex-col lg:justify-between overflow-hidden bg-mint px-6 py-6 md:px-8 md:py-8 lg:min-h-[520px]"
           variants={slideInFromLeft}
         >
           <div className="pointer-events-none absolute inset-0">
@@ -235,7 +236,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative pt-6">
               <div className="mb-5 grid max-w-[280px] grid-cols-[1.15fr,0.85fr] gap-3">
                 <div className="rounded-[22px] border border-white/35 bg-white/28 p-4 backdrop-blur">
                   <div className="h-20 rounded-[18px] bg-[linear-gradient(135deg,rgba(17,39,32,0.88),rgba(16,105,93,0.72),rgba(255,255,255,0.18))]" />
@@ -265,49 +266,63 @@ export default function LoginPage() {
           </div>
         </motion.section>
 
+        {/* Form Section */}
         <motion.section
-          className="min-h-0 overflow-y-auto bg-paper-strong px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5"
+          className="bg-paper-strong px-4 py-6 sm:px-8 sm:py-8 lg:px-8 lg:py-8 flex flex-col justify-between"
           variants={slideInFromRight}
         >
-          <div className="mx-auto flex h-full max-w-[360px] flex-col">
-            <div className="space-y-2">
-              <h2 className="text-[1.45rem] font-semibold tracking-[-0.04em] text-ink md:text-[1.55rem]">
+          <div className="mx-auto w-full max-w-[380px] flex flex-col flex-1 justify-between">
+            {/* Mobile Header Link */}
+            <div className="mb-4 flex items-center justify-between lg:hidden">
+              <Link href="/" className="text-lg font-extrabold tracking-tight text-brand">
+                SpendWise
+              </Link>
+              <Link
+                href="/register"
+                className="text-xs font-semibold text-ink-soft hover:text-brand"
+              >
+                Create account
+              </Link>
+            </div>
+
+            <div className="space-y-1.5 sm:space-y-2">
+              <h2 className="text-xl sm:text-2xl font-semibold tracking-[-0.04em] text-ink">
                 Welcome Back
               </h2>
-              <p className="text-[13px] leading-5 text-ink-soft">
-                Log in to access your dashboard, insights, and premium planning tools.
+              <p className="text-xs sm:text-[13px] leading-relaxed text-ink-soft">
+                Log in to access your dashboard, insights, and smart budget copilot.
               </p>
             </div>
 
-            <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid grid-cols-2 gap-2.5 sm:gap-3">
               <motion.button
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-line bg-paper-strong px-4 text-sm font-semibold text-ink transition hover:border-brand/30 hover:text-brand"
+                className="inline-flex h-11 sm:h-10 items-center justify-center gap-2 rounded-full border border-line bg-paper-strong px-3 text-xs sm:text-sm font-semibold text-ink transition hover:border-brand/30 hover:text-brand active:scale-[0.98]"
                 type="button"
                 variants={tapScale}
                 whileTap="whileTap"
               >
                 <GoogleMark className="h-4 w-4 shrink-0" />
-                Google
+                <span>Google</span>
               </motion.button>
               <motion.button
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-line bg-paper-strong px-4 text-sm font-semibold text-ink transition hover:border-brand/30 hover:text-brand"
+                className="inline-flex h-11 sm:h-10 items-center justify-center gap-2 rounded-full border border-line bg-paper-strong px-3 text-xs sm:text-sm font-semibold text-ink transition hover:border-brand/30 hover:text-brand active:scale-[0.98]"
                 type="button"
                 variants={tapScale}
                 whileTap="whileTap"
               >
                 <AppleMark className="h-3.5 w-3.5 shrink-0 text-ink" />
-                Apple
+                <span>Apple</span>
               </motion.button>
             </div>
 
-            <div className="mt-3.5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
+            <div className="mt-4 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
               <span className="h-px flex-1 bg-line" />
               Or email
               <span className="h-px flex-1 bg-line" />
             </div>
 
             {sessionMessage ? (
-              <div className="mt-3.5 rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-ink">
+              <div className="mt-3.5 rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-2.5 text-xs text-ink">
                 {sessionMessage}
               </div>
             ) : null}
@@ -315,7 +330,7 @@ export default function LoginPage() {
             <form className="mt-3.5 space-y-3" noValidate onSubmit={handleSubmit}>
               <div className="space-y-1">
                 <label
-                  className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
+                  className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                   htmlFor="email"
                 >
                   Email Address
@@ -325,7 +340,7 @@ export default function LoginPage() {
                   aria-invalid={Boolean(errors.email)}
                   autoComplete="email"
                   className={cn(
-                    'h-10 rounded-[14px] border border-transparent bg-surface-muted text-sm shadow-none placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
+                    'h-11 sm:h-10 rounded-[14px] border border-transparent bg-surface-muted text-base sm:text-sm shadow-none placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
                     errors.email && 'border-[var(--danger)]',
                   )}
                   disabled={isSubmitting}
@@ -352,7 +367,7 @@ export default function LoginPage() {
               <div className="space-y-1">
                 <div className="flex items-center justify-between gap-3">
                   <label
-                    className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
+                    className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                     htmlFor="password"
                   >
                     Password
@@ -367,7 +382,7 @@ export default function LoginPage() {
                     aria-invalid={Boolean(errors.password)}
                     autoComplete="current-password"
                     className={cn(
-                      'h-10 rounded-[14px] border border-transparent bg-surface-muted pr-11 text-sm shadow-none placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
+                      'h-11 sm:h-10 rounded-[14px] border border-transparent bg-surface-muted pr-11 text-base sm:text-sm shadow-none placeholder:text-ink-soft focus:border-brand focus:bg-paper-strong',
                       errors.password && 'border-[var(--danger)]',
                     )}
                     disabled={isSubmitting}
@@ -381,15 +396,11 @@ export default function LoginPage() {
                   />
                   <button
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-ink-soft transition hover:text-ink"
+                    className="absolute inset-y-0 right-0 inline-flex w-11 h-11 items-center justify-center text-ink-soft transition hover:text-ink"
                     type="button"
                     onClick={() => setShowPassword((currentValue) => !currentValue)}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-3.5 w-3.5" />
-                    ) : (
-                      <Eye className="h-3.5 w-3.5" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
                 <p
@@ -405,12 +416,12 @@ export default function LoginPage() {
               </div>
 
               {formError ? (
-                <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3 text-[12px] text-[var(--danger)]">
+                <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-2.5 text-xs text-[var(--danger)]">
                   {formError}
                 </div>
               ) : null}
 
-              <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-ink">
+              <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-3.5 py-2.5 text-xs text-ink">
                 Need to finish setup?{' '}
                 <Link className="font-semibold text-brand" href={verifyEmailHref}>
                   Enter your verification code
@@ -420,7 +431,7 @@ export default function LoginPage() {
 
               <motion.div variants={tapScale} whileTap="whileTap">
                 <Button
-                  className="mt-0.5 h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                  className="mt-1 h-11 w-full rounded-full text-sm font-semibold shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
                   disabled={isSubmitting}
                   size="lg"
                   type="submit"
@@ -430,7 +441,7 @@ export default function LoginPage() {
                 </Button>
               </motion.div>
 
-              <p className="text-center text-[12px] text-ink-soft">
+              <p className="text-center text-xs text-ink-soft pt-1">
                 Don&apos;t have an account?{' '}
                 <Link className="font-semibold text-brand" href="/register">
                   Create one

@@ -298,9 +298,10 @@ export default function ForgotPasswordPage() {
         : '';
 
   return (
-    <main className="min-h-screen bg-cream px-3 py-3 md:flex md:min-h-screen md:items-center md:px-4 md:py-4 md:overflow-hidden">
-      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[22px] bg-paper-strong shadow-[0_18px_48px_rgba(18,35,47,0.1)] md:max-h-[calc(100vh-2rem)] lg:grid lg:h-[500px] lg:grid-cols-[0.93fr,0.83fr]">
-        <section className="relative overflow-hidden bg-[linear-gradient(180deg,#d7e3dd_0%,#dce8e1_100%)] px-5 py-4 md:px-5 md:py-5 lg:min-h-[500px]">
+    <main className="min-h-screen bg-cream px-3.5 py-4 sm:px-6 sm:py-8 md:flex md:items-center md:justify-center md:py-10">
+      <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[24px] sm:rounded-[28px] bg-paper-strong shadow-[0_18px_48px_rgba(18,35,47,0.1)] lg:grid lg:min-h-[540px] lg:grid-cols-[0.93fr,0.83fr]">
+        {/* Left Decorative Branding Section (Desktop showcase, streamlined on mobile) */}
+        <section className="hidden lg:relative lg:flex lg:flex-col lg:justify-between overflow-hidden bg-[linear-gradient(180deg,#d7e3dd_0%,#dce8e1_100%)] px-6 py-6 md:px-8 md:py-8 lg:min-h-[540px]">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -left-12 top-0 h-40 w-64 rounded-full bg-white/24 blur-md" />
             <div className="absolute right-[8%] top-[10%] h-52 w-52 rounded-full bg-surface-muted opacity-90" />
@@ -391,30 +392,49 @@ export default function ForgotPasswordPage() {
           </div>
         </section>
 
-        <section className="min-h-0 overflow-y-auto bg-paper-strong px-5 pb-6 pt-4 md:px-5 md:pb-7 md:pt-5">
-          <div className="mx-auto flex h-full max-w-[360px] flex-col">
-            <div className="space-y-2">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
-                {step === 1 ? 'Email' : step === 2 ? 'Code' : 'New password'}
+        {/* Form Section */}
+        <section className="bg-paper-strong px-4 py-6 sm:px-8 sm:py-8 lg:px-8 lg:py-8 flex flex-col justify-between">
+          <div className="mx-auto w-full max-w-[380px] flex flex-col flex-1 justify-between">
+            {/* Mobile Header Link */}
+            <div className="mb-4 flex items-center justify-between lg:hidden">
+              <Link href="/" className="text-lg font-extrabold tracking-tight text-brand">
+                SpendWise
+              </Link>
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-brand bg-brand/10 px-2.5 py-1 rounded-full">
+                Step {step} of 3
               </div>
-              <h2 className="text-[1.48rem] font-semibold tracking-[-0.04em] text-ink md:text-[1.6rem]">
+            </div>
+
+            <div className="space-y-1.5 sm:space-y-2">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
+                {step === 1
+                  ? 'Step 1: Account Email'
+                  : step === 2
+                    ? 'Step 2: Reset Code'
+                    : 'Step 3: New Password'}
+              </div>
+              <h2 className="text-xl sm:text-2xl font-semibold tracking-[-0.04em] text-ink">
                 Forgot Password
               </h2>
-              <p className="text-[13px] leading-5 text-ink-soft">
+              <p className="text-xs sm:text-[13px] leading-relaxed text-ink-soft">
                 {step === 1
-                  ? 'Enter your registered email address.'
+                  ? 'Enter your registered email address to receive a reset code.'
                   : step === 2
-                    ? 'Enter the reset code sent to that email.'
+                    ? 'Enter the reset code sent to your registered email.'
                     : 'Create your new password with the strength guide below.'}
               </p>
             </div>
 
-            <form className="mt-4 flex h-full flex-col" noValidate onSubmit={handleSubmit}>
+            <form
+              className="mt-4 flex flex-1 flex-col justify-between"
+              noValidate
+              onSubmit={handleSubmit}
+            >
               <div className="space-y-3">
                 {step === 1 ? (
                   <div className="space-y-1">
                     <label
-                      className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
+                      className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                       htmlFor="email"
                     >
                       Account Email
@@ -430,7 +450,7 @@ export default function ForgotPasswordPage() {
                       placeholder="john@spendwise.com"
                       autoComplete="email"
                       className={cn(
-                        'h-10 rounded-[14px] border border-transparent bg-surface-muted text-sm shadow-none focus:border-brand focus:bg-paper-strong',
+                        'h-11 sm:h-10 rounded-[14px] border border-transparent bg-surface-muted text-base sm:text-sm shadow-none focus:border-brand focus:bg-paper-strong',
                         errors.email && 'border-[var(--danger)]',
                       )}
                     />
@@ -448,11 +468,11 @@ export default function ForgotPasswordPage() {
                 {step === 2 ? (
                   <>
                     <div className="rounded-[20px] border border-line bg-paper px-4 py-4">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft">
+                      <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft">
                         Reset Destination
                       </p>
                       <p className="mt-1 text-sm font-semibold text-ink">{values.email}</p>
-                      <p className="mt-1 text-[12px] text-ink-soft">
+                      <p className="mt-1 text-[11px] sm:text-[12px] text-ink-soft">
                         {deliveryHint === 'log'
                           ? 'Email delivery is unavailable right now, so the code is in the API terminal.'
                           : 'A 6-digit reset code is waiting in this inbox.'}
@@ -461,7 +481,7 @@ export default function ForgotPasswordPage() {
 
                     <div className="space-y-1">
                       <label
-                        className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
+                        className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                         htmlFor="code"
                       >
                         Reset Code
@@ -478,7 +498,7 @@ export default function ForgotPasswordPage() {
                         autoComplete="one-time-code"
                         maxLength={AUTH_EMAIL_VERIFICATION_CODE_LENGTH}
                         className={cn(
-                          'h-12 rounded-[16px] border border-transparent bg-surface-muted text-center font-mono text-lg tracking-[0.4em] shadow-none focus:border-brand focus:bg-paper-strong',
+                          'h-12 rounded-[16px] border border-transparent bg-surface-muted text-center font-mono text-base sm:text-lg tracking-[0.25em] sm:tracking-[0.4em] shadow-none focus:border-brand focus:bg-paper-strong',
                           errors.code && 'border-[var(--danger)]',
                         )}
                       />
@@ -497,7 +517,7 @@ export default function ForgotPasswordPage() {
                 {step === 3 ? (
                   <>
                     <div className="rounded-[20px] border border-line bg-paper px-4 py-4">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft">
+                      <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft">
                         Updating password for
                       </p>
                       <p className="mt-1 text-sm font-semibold text-ink">{values.email}</p>
@@ -505,7 +525,7 @@ export default function ForgotPasswordPage() {
 
                     <div className="space-y-1">
                       <label
-                        className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
+                        className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] text-ink-soft"
                         htmlFor="password"
                       >
                         New Password
@@ -522,20 +542,20 @@ export default function ForgotPasswordPage() {
                           placeholder="Create a secure password"
                           autoComplete="new-password"
                           className={cn(
-                            'h-10 rounded-[14px] border border-transparent bg-surface-muted pr-11 text-sm shadow-none focus:border-brand focus:bg-paper-strong',
+                            'h-11 sm:h-10 rounded-[14px] border border-transparent bg-surface-muted pr-11 text-base sm:text-sm shadow-none focus:border-brand focus:bg-paper-strong',
                             errors.password && 'border-[var(--danger)]',
                           )}
                         />
                         <button
                           type="button"
-                          className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-ink-soft hover:text-ink"
+                          className="absolute inset-y-0 right-0 inline-flex w-11 h-11 items-center justify-center text-ink-soft hover:text-ink"
                           onClick={() => setShowPassword((current) => !current)}
                           aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                           {showPassword ? (
-                            <EyeOff className="h-3.5 w-3.5" />
+                            <EyeOff className="h-4 w-4" />
                           ) : (
-                            <Eye className="h-3.5 w-3.5" />
+                            <Eye className="h-4 w-4" />
                           )}
                         </button>
                       </div>
@@ -557,7 +577,7 @@ export default function ForgotPasswordPage() {
                         status={passwordStrength.status}
                         value={passwordStrength.progress}
                       />
-                      <div className="mt-2.5 grid gap-x-4 gap-y-1.5 sm:grid-cols-2">
+                      <div className="mt-2.5 grid gap-x-3 gap-y-1.5 sm:grid-cols-2">
                         {passwordStrength.checklist.map((item) => (
                           <div
                             key={item.label}
@@ -581,12 +601,12 @@ export default function ForgotPasswordPage() {
                 ) : null}
 
                 {formError ? (
-                  <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3 text-[12px] text-[var(--danger)]">
+                  <div className="rounded-[16px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-2.5 text-xs text-[var(--danger)]">
                     {formError}
                   </div>
                 ) : null}
                 {notice ? (
-                  <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-3 text-[12px] text-ink">
+                  <div className="rounded-[16px] border border-brand/15 bg-brand/10 px-4 py-2.5 text-xs text-ink">
                     {notice}
                   </div>
                 ) : null}
@@ -595,7 +615,7 @@ export default function ForgotPasswordPage() {
               <div className="mt-auto space-y-2.5 pt-4">
                 {step === 1 ? (
                   <Button
-                    className="h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                    className="h-11 w-full rounded-full text-sm font-semibold shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
                     size="lg"
                     type="submit"
                     variant="secondary"
@@ -608,7 +628,7 @@ export default function ForgotPasswordPage() {
                 {step === 2 ? (
                   <>
                     <Button
-                      className="h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                      className="h-11 w-full rounded-full text-sm font-semibold shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
                       size="lg"
                       type="submit"
                       variant="secondary"
@@ -644,7 +664,7 @@ export default function ForgotPasswordPage() {
                 {step === 3 ? (
                   <>
                     <Button
-                      className="h-11 w-full rounded-full text-sm shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
+                      className="h-11 w-full rounded-full text-sm font-semibold shadow-[0_12px_24px_rgba(15,123,113,0.2)]"
                       size="lg"
                       type="submit"
                       variant="secondary"
@@ -665,7 +685,7 @@ export default function ForgotPasswordPage() {
                   </>
                 ) : null}
 
-                <p className="text-center text-[12px] text-ink-soft">
+                <p className="text-center text-xs text-ink-soft pt-1">
                   Remembered it?{' '}
                   <Link className="font-semibold text-brand" href="/login">
                     Return to login
