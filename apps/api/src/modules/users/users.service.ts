@@ -1,4 +1,5 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { compareSync } from '@node-rs/bcrypt';
 import type { NotificationPreferences } from '@spendwise/shared';
 
 import { UsersRepository } from './users.repository';
@@ -45,5 +46,58 @@ export class UsersService {
     }
 
     return this.usersRepository.getNotificationPreferences(user);
+  }
+
+  async exportData(userId: string) {
+    const exportResult = await this.usersRepository.exportUserData(userId);
+
+    if (!exportResult) {
+      throw new NotFoundException('User not found');
+    }
+
+    return exportResult;
+  }
+
+  async clearData(userId: string, password: string) {
+    const user = await this.usersRepository.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isPasswordValid = compareSync(password, user.passwordHash);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Incorrect password. Data clearing aborted.');
+    }
+
+    const { deletedCount } = await this.usersRepository.clearUserExpenses(userId);
+
+    return {
+      success: true,
+      message: `Successfully deleted ${deletedCount} transaction record(s).`,
+      deletedCount,
+    };
+  }
+
+  async deleteAccount(userId: string, password: string) {
+    const user = await this.usersRepository.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isPasswordValid = compareSync(password, user.passwordHash);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Incorrect password. Account deletion aborted.');
+    }
+
+    await this.usersRepository.deleteUserCascade(userId);
+
+    return {
+      success: true,
+      message: 'Your account and all associated data have been permanently deleted.',
+    };
   }
 }

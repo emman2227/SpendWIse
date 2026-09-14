@@ -7,11 +7,21 @@ import {
 } from '@spendwise/shared';
 import type { Model } from 'mongoose';
 
+import { BudgetModel } from '../budgets/budget.schema';
+import { CategoryModel } from '../categories/category.schema';
+import { ExpenseModel } from '../expenses/expense.schema';
+import { GoalModel } from '../goals/goal.schema';
 import { type UserDocument, UserModel } from './user.schema';
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectModel(UserModel.name) private readonly userModel: Model<UserModel>) {}
+  constructor(
+    @InjectModel(UserModel.name) private readonly userModel: Model<UserModel>,
+    @InjectModel(ExpenseModel.name) private readonly expenseModel: Model<ExpenseModel>,
+    @InjectModel(BudgetModel.name) private readonly budgetModel: Model<BudgetModel>,
+    @InjectModel(GoalModel.name) private readonly goalModel: Model<GoalModel>,
+    @InjectModel(CategoryModel.name) private readonly categoryModel: Model<CategoryModel>,
+  ) {}
 
   create(input: { name: string; email: string; phone: string; passwordHash: string }) {
     return this.userModel.create(input);
@@ -193,5 +203,90 @@ export class UsersRepository {
       createdAt: document.createdAt.toISOString(),
       updatedAt: document.updatedAt.toISOString(),
     };
+  }
+
+  async exportUserData(userId: string) {
+    const [userDoc, expenses, budgets, goals, customCategories] = await Promise.all([
+      this.userModel.findById(userId).lean().exec(),
+      this.expenseModel.find({ userId }).sort({ date: -1 }).lean().exec(),
+      this.budgetModel.find({ userId }).sort({ year: -1, month: -1 }).lean().exec(),
+      this.goalModel.find({ userId }).sort({ targetDate: 1 }).lean().exec(),
+      this.categoryModel.find({ userId }).sort({ name: 1 }).lean().exec(),
+    ]);
+
+    if (!userDoc) {
+      return null;
+    }
+
+    return {
+      exportMetadata: {
+        exportedAt: new Date().toISOString(),
+        version: '1.0.0',
+        appName: 'SpendWise',
+        userId,
+      },
+      profile: {
+        id: userDoc._id.toString(),
+        name: userDoc.name,
+        email: userDoc.email,
+        phone: userDoc.phone,
+        currency: userDoc.currency,
+        emailVerified: userDoc.emailVerified,
+        createdAt: userDoc.createdAt,
+        updatedAt: userDoc.updatedAt,
+      },
+      notificationPreferences: userDoc.notificationPreferences ?? defaultNotificationPreferences,
+      expenses: expenses.map((e) => ({
+        id: e._id.toString(),
+        amount: e.amount,
+        categoryId: e.categoryId,
+        description: e.description,
+        paymentMethod: e.paymentMethod,
+        date: e.date,
+        notes: e.notes,
+        createdAt: e.createdAt,
+      })),
+      budgets: budgets.map((b) => ({
+        id: b._id.toString(),
+        categoryId: b.categoryId,
+        limitAmount: b.limitAmount,
+        month: b.month,
+        year: b.year,
+        createdAt: b.createdAt,
+      })),
+      goals: goals.map((g) => ({
+        id: g._id.toString(),
+        title: g.title,
+        targetAmount: g.targetAmount,
+        currentAmount: g.currentAmount,
+        targetDate: g.targetDate,
+        notes: g.notes,
+        createdAt: g.createdAt,
+      })),
+      customCategories: customCategories.map((c) => ({
+        id: c._id.toString(),
+        name: c.name,
+        icon: c.icon,
+        color: c.color,
+        createdAt: c.createdAt,
+      })),
+    };
+  }
+
+  async clearUserExpenses(userId: string) {
+    const result = await this.expenseModel.deleteMany({ userId }).exec();
+    return { deletedCount: result.deletedCount };
+  }
+
+  async deleteUserCascade(userId: string) {
+    await Promise.all([
+      this.expenseModel.deleteMany({ userId }).exec(),
+      this.budgetModel.deleteMany({ userId }).exec(),
+      this.goalModel.deleteMany({ userId }).exec(),
+      this.categoryModel.deleteMany({ userId }).exec(),
+      this.userModel.findByIdAndDelete(userId).exec(),
+    ]);
+
+    return { success: true };
   }
 }

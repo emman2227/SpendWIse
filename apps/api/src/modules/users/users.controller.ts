@@ -1,5 +1,20 @@
-import { Body, Controller, Get, Inject, Patch, UseGuards, UsePipes } from '@nestjs/common';
-import { updateNotificationPreferencesSchema, updateProfileSchema } from '@spendwise/shared';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Patch,
+  Post,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common';
+import {
+  clearUserDataSchema,
+  deleteAccountSchema,
+  updateNotificationPreferencesSchema,
+  updateProfileSchema,
+} from '@spendwise/shared';
 import type { z } from 'zod';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -42,5 +57,35 @@ export class UsersController {
     @Body() body: z.infer<typeof updateNotificationPreferencesSchema>,
   ) {
     return this.usersService.updateNotificationPreferences(user.userId, body);
+  }
+
+  @Get('me/export')
+  @UseGuards(JwtAuthGuard)
+  exportUserData(@CurrentUser() user: AuthUser) {
+    return this.usersService.exportData(user.userId);
+  }
+
+  @Post('me/clear-data')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ZodValidationPipe(clearUserDataSchema))
+  clearUserData(@CurrentUser() user: AuthUser, @Body() body: z.infer<typeof clearUserDataSchema>) {
+    return this.usersService.clearData(user.userId, body.password);
+  }
+
+  @Delete('me')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ZodValidationPipe(deleteAccountSchema))
+  deleteAccount(@CurrentUser() user: AuthUser, @Body() body: z.infer<typeof deleteAccountSchema>) {
+    return this.usersService.deleteAccount(user.userId, body.password);
+  }
+
+  @Post('me/delete')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ZodValidationPipe(deleteAccountSchema))
+  deleteAccountPost(
+    @CurrentUser() user: AuthUser,
+    @Body() body: z.infer<typeof deleteAccountSchema>,
+  ) {
+    return this.usersService.deleteAccount(user.userId, body.password);
   }
 }
