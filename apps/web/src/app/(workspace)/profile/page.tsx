@@ -20,9 +20,11 @@ import {
   CreditCard,
   Flag,
   Lock,
+  LogOut,
   Mail,
   Pencil,
   Phone,
+  Shield,
   ShieldAlert,
   ShieldCheck,
   Sliders,
@@ -31,8 +33,10 @@ import {
   X,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { useConfirm } from '@/components/providers/confirm-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,10 +46,15 @@ import { SurfaceCard } from '@/components/ui/surface-card';
 import {
   authQueryKey,
   getAuthErrorMessage,
+  logoutSession,
   updateProfile,
   useCurrentUserQuery,
 } from '@/lib/auth/client';
-import { getUserInitials, INACTIVITY_TIMEOUT_MINUTES } from '@/lib/auth/constants';
+import {
+  getUserInitials,
+  INACTIVITY_TIMEOUT_MINUTES,
+  LOGOUT_INTENT_STORAGE_KEY,
+} from '@/lib/auth/constants';
 import { sanitizeNameInput, sanitizePhoneInput } from '@/lib/auth/input';
 import { budgetSummaryQueryKey, getBudgetSummary } from '@/lib/budgets/client';
 import { goalsQueryKey, listGoals } from '@/lib/goals/client';
@@ -97,11 +106,14 @@ const validateProfilePhone = (phone: string) => {
 };
 
 export default function ProfilePage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
+  const { confirmLogout } = useConfirm();
   const { data: user, isLoading: isUserLoading } = useCurrentUserQuery();
   const initials = getUserInitials(user?.name);
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Quick edit modal state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -181,6 +193,24 @@ export default function ProfilePage() {
       setSaveError(getAuthErrorMessage(error, 'Unable to update profile. Please try again.'));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    const confirmed = await confirmLogout();
+    if (!confirmed) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+
+    try {
+      await logoutSession();
+    } finally {
+      window.sessionStorage.setItem(LOGOUT_INTENT_STORAGE_KEY, 'manual');
+      queryClient.setQueryData(authQueryKey, null);
+      router.replace('/login');
+      setIsLoggingOut(false);
     }
   };
 
@@ -300,10 +330,11 @@ export default function ProfilePage() {
       {/* Main Identity & Attributes Grid */}
       <section className="grid gap-6 lg:grid-cols-[0.85fr,1.15fr]">
         {/* Hero Identity Card */}
-        <SurfaceCard className="relative overflow-hidden rounded-[28px] p-6 sm:rounded-[32px] sm:p-7">
+        <SurfaceCard className="relative flex flex-col justify-between overflow-hidden rounded-[28px] p-6 sm:rounded-[32px] sm:p-7">
           {/* Subtle background glow accent */}
           <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-brand/10 blur-3xl" />
 
+          {/* Upper Hero Info */}
           <div className="relative flex flex-col items-center text-center">
             {/* Avatar with gradient border styling */}
             <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-tr from-brand-strong to-brand p-[3px] shadow-soft sm:h-28 sm:w-28">
@@ -360,7 +391,7 @@ export default function ProfilePage() {
 
             {/* Account ID Pill */}
             {user?.id && (
-              <div className="mt-6 flex w-full items-center justify-between rounded-[20px] border border-line bg-paper px-4 py-3 text-xs text-ink-soft">
+              <div className="mt-5 flex w-full items-center justify-between rounded-[20px] border border-line bg-paper px-4 py-2.5 text-xs text-ink-soft">
                 <span className="font-mono text-[11px] text-ink-soft">
                   ID: {user.id.slice(0, 12)}...
                 </span>
@@ -383,6 +414,47 @@ export default function ProfilePage() {
                 </button>
               </div>
             )}
+          </div>
+
+          {/* Lower Quick Action Controls */}
+          <div className="mt-6 border-t border-line/70 pt-5">
+            <p className="text-left text-xs font-medium text-ink-soft">Quick account actions</p>
+            <div className="mt-3 flex flex-col gap-2">
+              <Button
+                onClick={openEditModal}
+                variant="outline"
+                className="h-10.5 w-full justify-between rounded-[16px] text-xs font-semibold"
+              >
+                <span className="flex items-center gap-2">
+                  <Pencil className="h-3.5 w-3.5 text-brand" />
+                  Edit account info
+                </span>
+                <ArrowRight className="h-3.5 w-3.5 text-ink-soft" />
+              </Button>
+
+              <Link href="/settings?tab=security" className="block w-full">
+                <Button
+                  variant="outline"
+                  className="h-10.5 w-full justify-between rounded-[16px] text-xs font-semibold"
+                >
+                  <span className="flex items-center gap-2">
+                    <Shield className="h-3.5 w-3.5 text-brand" />
+                    Security & sign-in
+                  </span>
+                  <ArrowRight className="h-3.5 w-3.5 text-ink-soft" />
+                </Button>
+              </Link>
+
+              <Button
+                onClick={() => void handleLogout()}
+                disabled={isLoggingOut}
+                variant="ghost"
+                className="h-10.5 w-full justify-start gap-2 rounded-[16px] text-xs font-semibold text-danger hover:bg-danger/10 hover:text-danger"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span>{isLoggingOut ? 'Signing out...' : 'Sign out of workspace'}</span>
+              </Button>
+            </div>
           </div>
         </SurfaceCard>
 
