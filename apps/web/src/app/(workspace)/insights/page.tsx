@@ -130,6 +130,7 @@ export default function InsightsPage() {
               <div className="border-t border-line px-4 sm:px-8 py-3.5 sm:py-4">
                 <Pagination
                   currentPage={currentValidPage}
+                  itemLabel="insights"
                   onPageChange={setPage}
                   pageSize={1}
                   totalItems={insights.length}

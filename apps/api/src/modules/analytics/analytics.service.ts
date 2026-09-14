@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { AnalyticsProvider } from '@spendwise/ai';
 import { createAnalyticsProvider } from '@spendwise/ai';
+import type { Alert, AlertStatus } from '@spendwise/shared';
 
 import { BudgetsService } from '../budgets/budgets.service';
 import { CategoriesService } from '../categories/categories.service';
@@ -272,5 +273,52 @@ export class AnalyticsService {
       categories: categoryInfo,
       currency,
     });
+  }
+
+  async getAlerts(
+    userId: string,
+    status?: AlertStatus,
+    forceScan: boolean = false,
+  ): Promise<Alert[]> {
+    const existing = await this.analyticsRepository.findAlerts(userId, status);
+
+    if (existing.length === 0 || forceScan) {
+      return this.generateAlerts(userId, status);
+    }
+
+    return existing;
+  }
+
+  async generateAlerts(userId: string, statusFilter?: AlertStatus): Promise<Alert[]> {
+    const currentMonth = new Date().getUTCMonth();
+    const currentYear = new Date().getUTCFullYear();
+
+    const [expenses, budgets, categories] = await Promise.all([
+      this.expensesService.list(userId, {}),
+      this.budgetsService.list(userId, currentMonth, currentYear),
+      this.categoriesService.list(userId),
+    ]);
+
+    const detected = SpendingAnalyzer.detectAlerts(expenses, budgets, categories);
+    const synced = await this.analyticsRepository.syncAlerts(userId, detected);
+
+    if (statusFilter) {
+      return synced.filter((a) => a.status === statusFilter);
+    }
+
+    return synced;
+  }
+
+  async updateAlertStatus(userId: string, alertId: string, status: AlertStatus): Promise<Alert> {
+    const updated = await this.analyticsRepository.updateAlertStatus(userId, alertId, status);
+    if (!updated) {
+      throw new Error('Alert not found');
+    }
+    return updated;
+  }
+
+  async dismissAllAlerts(userId: string): Promise<{ dismissedCount: number }> {
+    const count = await this.analyticsRepository.dismissAllAlerts(userId);
+    return { dismissedCount: count };
   }
 }

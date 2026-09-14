@@ -1,4 +1,7 @@
 import type {
+  Alert,
+  AlertSeverity,
+  AlertType,
   Budget,
   Category,
   Expense,
@@ -285,5 +288,175 @@ export class SpendingAnalyzer {
     }
 
     return facts;
+  }
+
+  static detectAlerts(
+    expenses: Expense[],
+    budgets: Budget[],
+    categories: Category[],
+  ): Array<Omit<Alert, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'status'>> {
+    const alerts: Array<Omit<Alert, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'status'>> = [];
+    const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+
+    // 1. Transaction Spikes and Anomalies
+    const categoryExpenses = new Map<string, Expense[]>();
+    for (const exp of expenses) {
+      if (!categoryExpenses.has(exp.categoryId)) {
+        categoryExpenses.set(exp.categoryId, []);
+      }
+      categoryExpenses.get(exp.categoryId)!.push(exp);
+    }
+
+    // Overall mean for fallback comparison
+    const allAmounts = expenses.map((e) => e.amount);
+    const overallMean =
+      allAmounts.length > 0 ? allAmounts.reduce((a, b) => a + b, 0) / allAmounts.length : 0;
+
+    for (const [catId, catExps] of categoryExpenses.entries()) {
+      const catName = categoryMap.get(catId) || 'General';
+      const amounts = catExps.map((e) => e.amount);
+      const catMean = amounts.reduce((a, b) => a + b, 0) / amounts.length;
+      const benchmarkMean = catExps.length >= 2 ? catMean : overallMean;
+
+      for (const exp of catExps) {
+        if (benchmarkMean > 0 && exp.amount >= benchmarkMean * 2.2 && exp.amount >= 25) {
+          const ratio = (exp.amount / benchmarkMean).toFixed(1);
+          const severity: AlertSeverity = exp.amount >= benchmarkMean * 3.5 ? 'danger' : 'warning';
+          const type: AlertType = 'spike';
+
+          alerts.push({
+            type,
+            severity,
+            merchant: exp.description,
+            category: catName,
+            categoryId: exp.categoryId,
+            amount: exp.amount,
+            date: exp.date,
+            transactionId: exp.id,
+            reason: `This amount is ${ratio}x higher than your usual ${catName} average (${benchmarkMean.toFixed(0)}).`,
+            suggestedAction:
+              'Mark as normal if this was a planned one-off purchase, or re-categorize if needed.',
+            evidence: {
+              currentSpend: exp.amount,
+              averageSpend: benchmarkMean,
+              ratio: parseFloat(ratio),
+              transactionId: exp.id,
+            },
+          });
+        }
+      }
+    }
+
+    // 2. Near-duplicate charges within 48 hours
+    const sortedExpenses = [...expenses].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
+    for (let i = 0; i < sortedExpenses.length; i++) {
+      for (let j = i + 1; j < sortedExpenses.length; j++) {
+        const expA = sortedExpenses[i];
+        const expB = sortedExpenses[j];
+        if (!expA || !expB) continue;
+
+        const timeDiff = Math.abs(new Date(expB.date).getTime() - new Date(expA.date).getTime());
+        const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+
+        if (daysDiff > 2) break; // Array is sorted by date, no need to check further
+
+        const descA = expA.description.trim().toLowerCase();
+        const descB = expB.description.trim().toLowerCase();
+        const amountRatio = Math.abs(expA.amount - expB.amount) / Math.max(expA.amount, 1);
+
+        if (
+          expA.id !== expB.id &&
+          (descA === descB || descA.includes(descB) || descB.includes(descA)) &&
+          amountRatio <= 0.05
+        ) {
+          const catName = categoryMap.get(expB.categoryId) || 'General';
+          alerts.push({
+            type: 'duplicate',
+            severity: 'danger',
+            merchant: expB.description,
+            category: catName,
+            categoryId: expB.categoryId,
+            amount: expB.amount,
+            date: expB.date,
+            transactionId: expB.id,
+            reason: `A near-duplicate charge of ${expB.amount} was logged within 48 hours of another transaction for "${expA.description}".`,
+            suggestedAction:
+              'Confirm if this is an unintended double-charge. If suspicious, contact the merchant or your bank.',
+            evidence: {
+              firstTransactionId: expA.id,
+              secondTransactionId: expB.id,
+              firstDate: expA.date,
+              secondDate: expB.date,
+              amount: expB.amount,
+            },
+          });
+        }
+      }
+    }
+
+    // 3. Category Budget Overspending Alerts
+    const currentMonth = new Date().getUTCMonth();
+    const currentYear = new Date().getUTCFullYear();
+    const currentMonthExpenses = expenses.filter((e) => {
+      const d = new Date(e.date);
+      return d.getUTCMonth() === currentMonth && d.getUTCFullYear() === currentYear;
+    });
+
+    const spendByCat = new Map<string, number>();
+    for (const exp of currentMonthExpenses) {
+      spendByCat.set(exp.categoryId, (spendByCat.get(exp.categoryId) || 0) + exp.amount);
+    }
+
+    for (const budget of budgets) {
+      const spent = spendByCat.get(budget.categoryId) || 0;
+      const catName = categoryMap.get(budget.categoryId) || 'Budget Category';
+
+      if (budget.limitAmount > 0 && spent >= budget.limitAmount * 0.9) {
+        const isOver = spent > budget.limitAmount;
+        const overAmount = spent - budget.limitAmount;
+        const utilization = Math.round((spent / budget.limitAmount) * 100);
+
+        alerts.push({
+          type: 'budget_risk',
+          severity: isOver ? 'danger' : 'warning',
+          merchant: `${catName} Budget Limit`,
+          category: catName,
+          categoryId: budget.categoryId,
+          amount: isOver ? overAmount : spent,
+          date: new Date().toISOString(),
+          reason: isOver
+            ? `${catName} budget has been exceeded by ${overAmount.toFixed(2)} (${utilization}% of limit).`
+            : `${catName} has reached ${utilization}% of its monthly spending limit.`,
+          suggestedAction: isOver
+            ? `Pause discretionary purchases in ${catName} or adjust your budget limit.`
+            : `Track remaining transactions closely to stay within the ${budget.limitAmount} limit.`,
+          evidence: {
+            spent,
+            limit: budget.limitAmount,
+            utilization,
+            overAmount: isOver ? overAmount : 0,
+          },
+        });
+      }
+    }
+
+    // Deduplicate alerts by unique signature (type + merchant/transactionId + date)
+    const seen = new Set<string>();
+    const deduplicatedAlerts: Array<
+      Omit<Alert, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'status'>
+    > = [];
+
+    for (const a of alerts) {
+      const key = `${a.type}:${a.transactionId || a.categoryId || a.merchant}:${a.amount}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        deduplicatedAlerts.push(a);
+      }
+    }
+
+    return deduplicatedAlerts;
   }
 }

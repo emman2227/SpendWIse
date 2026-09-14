@@ -36,6 +36,16 @@ export const INSIGHT_SEVERITIES = ['info', 'positive', 'warning', 'critical'] as
 export const FORECAST_RISK_LEVELS = ['low', 'medium', 'high'] as const;
 export const FORECAST_PERIODS = ['weekly', 'monthly', 'quarterly'] as const;
 
+export const ALERT_SEVERITIES = ['info', 'warning', 'danger'] as const;
+export const ALERT_STATUSES = ['pending', 'normal', 'important', 'dismissed'] as const;
+export const ALERT_TYPES = [
+  'anomaly',
+  'spike',
+  'duplicate',
+  'budget_risk',
+  'recurring_spike',
+] as const;
+
 export const SUPPORTED_CURRENCIES = [
   { code: 'USD', symbol: '$', label: 'US Dollar' },
   { code: 'EUR', symbol: '€', label: 'Euro' },

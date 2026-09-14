@@ -7,6 +7,7 @@ import { CategoriesModule } from '../categories/categories.module';
 import { ExpensesModule } from '../expenses/expenses.module';
 import { GoalsModule } from '../goals/goals.module';
 import { UsersModule } from '../users/users.module';
+import { AlertModel, AlertSchema } from './alert.schema';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsRepository } from './analytics.repository';
 import { AnalyticsService } from './analytics.service';
@@ -28,6 +29,7 @@ import { PromptService } from './prompt.service';
       { name: InsightModel.name, schema: InsightSchema },
       { name: ForecastModel.name, schema: ForecastSchema },
       { name: PromptTemplateModel.name, schema: PromptTemplateSchema },
+      { name: AlertModel.name, schema: AlertSchema },
     ]),
   ],
   controllers: [AnalyticsController],

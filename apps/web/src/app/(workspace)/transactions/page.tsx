@@ -1389,6 +1389,7 @@ export default function TransactionsPage() {
                   <Pagination
                     alwaysShow
                     currentPage={currentPage}
+                    itemLabel="transactions"
                     onPageChange={setCurrentPage}
                     pageSize={effectivePageSize}
                     totalItems={totalItems}

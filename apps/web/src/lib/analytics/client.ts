@@ -1,6 +1,6 @@
 'use client';
 
-import type { Expense, Forecast, Insight } from '@spendwise/shared';
+import type { Alert, AlertStatus, Expense, Forecast, Insight } from '@spendwise/shared';
 
 export interface DashboardBudgetSummaryItem {
   id: string;
@@ -121,6 +121,7 @@ const request = async <T>(path: string, init: RequestInit = {}) => {
 export const dashboardAnalyticsQueryKey = ['analytics', 'dashboard'] as const;
 export const forecastDetailsQueryKey = ['analytics', 'forecast'] as const;
 export const insightsQueryKey = ['analytics', 'insights'] as const;
+export const alertsQueryKey = ['analytics', 'alerts'] as const;
 
 export const getDashboardAnalytics = () =>
   request<DashboardAnalyticsData>('/api/analytics/dashboard');
@@ -141,3 +142,31 @@ export const deepDiveInsight = (id: string, question: string) =>
     method: 'POST',
     body: JSON.stringify({ question }),
   });
+
+export const getAlerts = (params?: { status?: AlertStatus; refresh?: boolean }) => {
+  const searchParams = new URLSearchParams();
+  if (params?.status) searchParams.set('status', params.status);
+  if (params?.refresh) searchParams.set('refresh', 'true');
+  const query = searchParams.toString();
+  return request<Alert[]>(`/api/analytics/alerts${query ? `?${query}` : ''}`);
+};
+
+export const updateAlertStatus = (id: string, status: AlertStatus) =>
+  request<Alert>(`/api/analytics/alerts/${encodeURIComponent(id)}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+
+export const dismissAllAlerts = () =>
+  request<{ dismissedCount: number }>('/api/analytics/alerts/dismiss-all', {
+    method: 'POST',
+  });
+
+export const generateAlerts = (params?: { status?: AlertStatus }) => {
+  const searchParams = new URLSearchParams();
+  if (params?.status) searchParams.set('status', params.status);
+  const query = searchParams.toString();
+  return request<Alert[]>(`/api/analytics/alerts${query ? `?${query}` : ''}`, {
+    method: 'POST',
+  });
+};

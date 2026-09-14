@@ -1,4 +1,7 @@
 import type {
+  ALERT_SEVERITIES,
+  ALERT_STATUSES,
+  ALERT_TYPES,
   FORECAST_PERIODS,
   FORECAST_RISK_LEVELS,
   INSIGHT_SEVERITIES,
@@ -9,8 +12,12 @@ import type {
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 export type InsightType = (typeof INSIGHT_TYPES)[number];
 export type InsightSeverity = (typeof INSIGHT_SEVERITIES)[number];
-export type ForecastPeriod = (typeof FORECAST_PERIODS)[number];
 export type ForecastRiskLevel = (typeof FORECAST_RISK_LEVELS)[number];
+export type ForecastPeriod = (typeof FORECAST_PERIODS)[number];
+
+export type AlertSeverity = (typeof ALERT_SEVERITIES)[number];
+export type AlertStatus = (typeof ALERT_STATUSES)[number];
+export type AlertType = (typeof ALERT_TYPES)[number];
 
 export interface BaseEntity {
   id: string;
@@ -132,4 +139,20 @@ export interface Forecast {
   risks: ForecastRisk[];
   assumptions: string[];
   generatedAt: string;
+}
+
+export interface Alert extends BaseEntity {
+  userId: string;
+  type: AlertType;
+  severity: AlertSeverity;
+  status: AlertStatus;
+  merchant: string;
+  category: string;
+  categoryId?: string;
+  amount: number;
+  date: string;
+  reason: string;
+  suggestedAction: string;
+  evidence?: Record<string, unknown>;
+  transactionId?: string;
 }

@@ -1058,6 +1058,7 @@ export default function GoalsPage() {
               <Pagination
                 alwaysShow
                 currentPage={currentGoalPage}
+                itemLabel="goals"
                 onPageChange={setGoalPage}
                 pageSize={pageSize}
                 totalItems={totalItems}

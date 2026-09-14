@@ -984,6 +984,7 @@ export default function CategoriesPage() {
                 <div className="mt-5 border-t border-line/60 pt-3">
                   <Pagination
                     currentPage={currentPage}
+                    itemLabel="categories"
                     onPageChange={setCurrentPage}
                     pageSize={PAGE_SIZE}
                     totalItems={visibleCategories.length}

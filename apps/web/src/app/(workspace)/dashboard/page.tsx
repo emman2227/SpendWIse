@@ -780,6 +780,7 @@ export default function DashboardPage() {
             <Pagination
               compact
               currentPage={currentBudgetPage}
+              itemLabel="budgets"
               onPageChange={setBudgetPage}
               pageSize={BUDGETS_PER_PAGE}
               totalItems={budgetViews.length}
@@ -979,6 +980,7 @@ export default function DashboardPage() {
           <Pagination
             compact
             currentPage={currentInsightsPage}
+            itemLabel="insights"
             onPageChange={setInsightsPage}
             pageSize={INSIGHTS_PER_PAGE}
             totalItems={insightsList.length}
@@ -1051,6 +1053,7 @@ export default function DashboardPage() {
           <Pagination
             compact
             currentPage={currentTransactionsPage}
+            itemLabel="transactions"
             onPageChange={setTransactionsPage}
             pageSize={TRANSACTIONS_PER_PAGE}
             totalItems={recentTransactions.length}

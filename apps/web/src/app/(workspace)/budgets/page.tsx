@@ -940,6 +940,7 @@ export default function BudgetsPage() {
                   alwaysShow
                   compact
                   currentPage={unbudgetedPage}
+                  itemLabel="unbudgeted items"
                   onPageChange={setUnbudgetedPage}
                   pageSize={UNBUDGETED_PAGE_SIZE}
                   totalItems={totalUnbudgetedItems}
@@ -1176,6 +1177,7 @@ export default function BudgetsPage() {
                   <Pagination
                     alwaysShow
                     currentPage={currentPage}
+                    itemLabel="budgets"
                     onPageChange={setCurrentPage}
                     pageSize={effectivePageSize}
                     totalItems={totalItems}

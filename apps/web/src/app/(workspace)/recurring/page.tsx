@@ -1328,6 +1328,7 @@ export default function RecurringPage() {
               <Pagination
                 alwaysShow
                 currentPage={savedPage}
+                itemLabel="schedules"
                 onPageChange={setSavedPage}
                 pageSize={savedPageSize}
                 totalItems={visibleSaved.length}
@@ -1463,6 +1464,7 @@ export default function RecurringPage() {
               <Pagination
                 alwaysShow
                 currentPage={detectedPage}
+                itemLabel="detected patterns"
                 onPageChange={setDetectedPage}
                 pageSize={detectedPageSize}
                 totalItems={visibleDetected.length}
