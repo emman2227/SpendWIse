@@ -5,6 +5,7 @@ import {
   createExpenseSchema,
   type Expense,
   formatShortDate,
+  type ParsedReceiptResult,
   PAYMENT_METHODS,
   type PaymentMethod,
 } from '@spendwise/shared';
@@ -14,18 +15,22 @@ import {
   CircleX,
   CreditCard,
   Download,
+  FileSpreadsheet,
   Filter,
   PencilLine,
   Plus,
   ReceiptText,
   RotateCcw,
   Search,
+  Sparkles,
   Trash2,
   X,
 } from 'lucide-react';
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 
 import { useConfirm } from '@/components/providers/confirm-provider';
+import { CsvImportModal } from '@/components/transactions/csv-import-modal';
+import { ReceiptScannerModal } from '@/components/transactions/receipt-scanner-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -44,6 +49,7 @@ import {
   deleteExpense,
   listExpenses,
   listTransactionCategories,
+  suggestCategory,
   transactionCategoriesQueryKey,
   transactionExpensesQueryKey,
   updateExpense,
@@ -400,13 +406,59 @@ function TransactionEditorModal({
                 {formValues.description.length}/120
               </span>
             </div>
-            <Input
-              className={cn(fieldErrors.description && 'border-danger focus:border-danger')}
-              maxLength={120}
-              onChange={(event) => onFieldChange('description', event.target.value)}
-              placeholder="Where did you spend?"
-              value={formValues.description}
-            />
+            <div className="relative">
+              <Input
+                className={cn(
+                  fieldErrors.description && 'border-danger focus:border-danger',
+                  'pr-10',
+                )}
+                maxLength={120}
+                onChange={(event) => onFieldChange('description', event.target.value)}
+                onBlur={async () => {
+                  if (formValues.description.trim().length >= 3) {
+                    try {
+                      const res = await suggestCategory(formValues.description);
+                      if (
+                        res.categoryId &&
+                        (!formValues.categoryId || formValues.categoryId === categories[0]?.id)
+                      ) {
+                        onFieldChange('categoryId', res.categoryId);
+                      }
+                    } catch {
+                      // silent fallback
+                    }
+                  }
+                }}
+                placeholder="Where did you spend? (e.g. Starbucks, Uber)"
+                value={formValues.description}
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  if (formValues.description.trim().length >= 2) {
+                    try {
+                      const res = await suggestCategory(formValues.description);
+                      if (res.categoryId) {
+                        onFieldChange('categoryId', res.categoryId);
+                      }
+                      if (
+                        res.normalizedMerchant &&
+                        res.normalizedMerchant !== formValues.description
+                      ) {
+                        onFieldChange('description', res.normalizedMerchant);
+                      }
+                    } catch {
+                      // silent fallback
+                    }
+                  }
+                }}
+                title="AI auto-detect category and normalize merchant"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-brand hover:text-brand-strong transition-colors p-1"
+              >
+                <Sparkles className="w-4 h-4" />
+              </button>
+            </div>
+
             {fieldErrors.description ? (
               <p className="text-sm text-danger">{fieldErrors.description}</p>
             ) : null}
@@ -480,6 +532,8 @@ export default function TransactionsPage() {
   const { confirmDelete, confirmSave } = useConfirm();
   const formatMoney = (amount: number) => baseFormatMoney(amount, user?.currency ?? 'PHP');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('create');
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [monthFilter, setMonthFilter] = useState(getInitialMonthValue);
@@ -499,7 +553,25 @@ export default function TransactionsPage() {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [listFeedback, setListFeedback] = useState('');
 
+  const handleApplyReceipt = (data: ParsedReceiptResult) => {
+    setEditorMode('create');
+    setEditingExpenseId(null);
+    setFieldErrors({});
+    setFormError('');
+    setFormValues({
+      amount: data.amount ? data.amount.toFixed(2) : '',
+      categoryId: data.categoryId || categories[0]?.id || '',
+      description: data.merchant || '',
+      paymentMethod: (data.paymentMethod as PaymentMethod) || 'credit_card',
+      date: data.date ? toDateInputValue(data.date) : new Date().toISOString().slice(0, 10),
+      notes: data.notes || '',
+    });
+    setIsEditorOpen(true);
+    setListFeedback(`Receipt scanned for ${data.merchant}. Review details and click Save.`);
+  };
+
   const activeMonth = parseMonthValue(monthFilter);
+
   const categoriesQuery = useQuery({
     queryKey: transactionCategoriesQueryKey,
     queryFn: listTransactionCategories,
@@ -927,6 +999,22 @@ export default function TransactionsPage() {
               <Button disabled={expensesQuery.isLoading} onClick={handleExportAll} variant="soft">
                 <Download className="h-4 w-4" />
                 Export All
+              </Button>
+              <Button
+                disabled={categoriesQuery.isLoading || categories.length === 0}
+                onClick={() => setIsCsvModalOpen(true)}
+                variant="soft"
+              >
+                <FileSpreadsheet className="h-4 w-4 text-brand" />
+                Import CSV
+              </Button>
+              <Button
+                disabled={categoriesQuery.isLoading || categories.length === 0}
+                onClick={() => setIsReceiptModalOpen(true)}
+                variant="soft"
+              >
+                <Sparkles className="h-4 w-4 text-brand" />
+                Scan receipt
               </Button>
               <Button
                 disabled={categoriesQuery.isLoading || categories.length === 0}
@@ -1436,6 +1524,26 @@ export default function TransactionsPage() {
           onSubmit={handleSubmit}
         />
       ) : null}
+
+      <ReceiptScannerModal
+        isOpen={isReceiptModalOpen}
+        categories={categories}
+        onClose={() => setIsReceiptModalOpen(false)}
+        onApply={handleApplyReceipt}
+      />
+
+      <CsvImportModal
+        isOpen={isCsvModalOpen}
+        categories={categories}
+        onClose={() => setIsCsvModalOpen(false)}
+        onSuccess={async () => {
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['transactions', 'expenses'] }),
+            queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKey }),
+          ]);
+          setListFeedback('Transactions imported successfully.');
+        }}
+      />
     </>
   );
 }

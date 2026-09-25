@@ -27,6 +27,25 @@ export class ExpensesRepository {
     });
   }
 
+  async createMany(
+    items: Array<{
+      userId: string;
+      amount: number;
+      categoryId: string;
+      description: string;
+      paymentMethod: string;
+      date: string;
+      notes?: string;
+    }>,
+  ) {
+    const docs = items.map((input) => ({
+      ...input,
+      date: new Date(input.date),
+    }));
+    const created = await this.expenseModel.insertMany(docs);
+    return created.map((doc) => this.toDomain(doc as ExpenseDocument));
+  }
+
   async update(
     id: string,
     userId: string,

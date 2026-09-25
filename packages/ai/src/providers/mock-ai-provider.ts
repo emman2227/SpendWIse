@@ -48,4 +48,122 @@ export class MockAiProvider extends BaseAnalyticsProvider {
       explanation: 'Mock recommendation based on past average spending.',
     }));
   }
+
+  async parseReceipt(
+    _imageBase64: string,
+    _mimeType: string,
+    categories: Array<{ id: string; name: string }>,
+  ) {
+    const defaultCat = categories[0]?.id;
+    const defaultCatName = categories[0]?.name || 'General';
+    return {
+      merchant: 'Supermarket Demo Store',
+      amount: 42.5,
+      date: new Date().toISOString(),
+      categoryId: defaultCat,
+      categoryName: defaultCatName,
+      confidence: 0.95,
+      paymentMethod: 'credit_card' as const,
+      lineItems: [
+        { description: 'Organic Milk', amount: 4.5 },
+        { description: 'Whole Wheat Bread', amount: 3.5 },
+        { description: 'Fresh Produce Basket', amount: 34.5 },
+      ],
+      notes: 'Scanned from receipt via mock AI provider',
+    };
+  }
+
+  async parseCsvTransactions(csvContent: string, categories: Array<{ id: string; name: string }>) {
+    const lines = csvContent.trim().split(/\r?\n/).filter(Boolean);
+    const results = [];
+    const defaultCat = categories[0]?.id;
+
+    // Skip header if line 0 looks like header
+    const startIndex =
+      lines[0] &&
+      (lines[0].toLowerCase().includes('date') || lines[0].toLowerCase().includes('amount'))
+        ? 1
+        : 0;
+
+    for (let i = startIndex; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line) continue;
+      const parts = line.split(',').map((p) => p.trim().replace(/^"|"$/g, ''));
+      if (parts.length >= 2) {
+        const parsedAmount = parseFloat(
+          parts.find((p) => !isNaN(Number(p)) && Number(p) > 0) || '25.00',
+        );
+        results.push({
+          date: new Date().toISOString(),
+          description: parts[1] || parts[0] || `Transaction #${i}`,
+          amount: isNaN(parsedAmount) ? 25.0 : Math.abs(parsedAmount),
+          categoryId: defaultCat,
+          paymentMethod: 'debit_card' as const,
+          notes: 'Imported via CSV',
+        });
+      }
+    }
+
+    if (results.length === 0) {
+      results.push({
+        date: new Date().toISOString(),
+        description: 'Sample CSV Imported Transaction',
+        amount: 50.0,
+        categoryId: defaultCat,
+        paymentMethod: 'debit_card' as const,
+        notes: 'Imported from sample data',
+      });
+    }
+
+    return results;
+  }
+
+  async suggestCategory(rawDescription: string, categories: Array<{ id: string; name: string }>) {
+    const cleaned = rawDescription
+      .replace(/^(tst\*|sq\*|chck\*|amzn\*|pos purchase\*)/i, '')
+      .replace(/#\d+/g, '')
+      .trim();
+
+    // Simple keyword mapping for mock
+    const descLower = rawDescription.toLowerCase();
+    let matchedCat = categories.find((c) => {
+      const catName = c.name.toLowerCase();
+      if (
+        descLower.includes('uber') ||
+        descLower.includes('lyft') ||
+        descLower.includes('gas') ||
+        descLower.includes('shell')
+      ) {
+        return catName.includes('transport');
+      }
+      if (
+        descLower.includes('market') ||
+        descLower.includes('food') ||
+        descLower.includes('cafe') ||
+        descLower.includes('coffee') ||
+        descLower.includes('starbucks')
+      ) {
+        return catName.includes('food') || catName.includes('dining');
+      }
+      if (
+        descLower.includes('netflix') ||
+        descLower.includes('spotify') ||
+        descLower.includes('cinema')
+      ) {
+        return catName.includes('entertainment');
+      }
+      return false;
+    });
+
+    if (!matchedCat && categories.length > 0) {
+      matchedCat = categories[0];
+    }
+
+    return {
+      normalizedMerchant: cleaned.length > 0 ? cleaned : rawDescription,
+      categoryId: matchedCat?.id,
+      categoryName: matchedCat?.name,
+      confidence: matchedCat ? 0.9 : 0.5,
+    };
+  }
 }

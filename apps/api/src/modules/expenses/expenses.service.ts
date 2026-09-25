@@ -1,20 +1,34 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import type { AnalyticsProvider } from '@spendwise/ai';
+import { createAnalyticsProvider } from '@spendwise/ai';
 import type { Model } from 'mongoose';
 
+import { CategoriesService } from '../categories/categories.service';
 import { ExpensesRepository } from './expenses.repository';
 import { RecurringExpenseModel } from './recurring-expense.schema';
 
 @Injectable()
 export class ExpensesService {
   private readonly logger = new Logger(ExpensesService.name);
+  private readonly provider: AnalyticsProvider;
 
   constructor(
     @Inject(ExpensesRepository) private readonly expensesRepository: ExpensesRepository,
     @InjectModel(RecurringExpenseModel.name)
     private readonly recurringExpenseModel: Model<RecurringExpenseModel>,
-  ) {}
+    @Inject(forwardRef(() => CategoriesService))
+    private readonly categoriesService: CategoriesService,
+    @Inject(ConfigService) configService: ConfigService,
+  ) {
+    this.provider = createAnalyticsProvider(
+      configService.get<string>('AI_PROVIDER'),
+      configService.get<string>('GEMINI_API_KEY') ||
+        configService.get<string>('GOOGLE_GENERATIVE_AI_API_KEY'),
+    );
+  }
 
   async create(
     userId: string,
@@ -163,5 +177,64 @@ export class ExpensesService {
     if (processed > 0) {
       this.logger.log(`Generated ${processed} recurring expenses.`);
     }
+  }
+
+  // Automation Methods
+  async scanReceipt(userId: string, imageBase64: string, mimeType: string) {
+    const categories = await this.categoriesService.list(userId);
+    const categoryOptions = categories.map((c) => ({ id: c.id, name: c.name }));
+    return this.provider.parseReceipt(imageBase64, mimeType, categoryOptions);
+  }
+
+  async importCsv(userId: string, csvContent: string, commit: boolean) {
+    const categories = await this.categoriesService.list(userId);
+    const categoryOptions = categories.map((c) => ({ id: c.id, name: c.name }));
+    const parsedRows = await this.provider.parseCsvTransactions(csvContent, categoryOptions);
+
+    if (commit && parsedRows.length > 0) {
+      const itemsToCreate = parsedRows.map((row) => ({
+        userId,
+        amount: row.amount,
+        categoryId: row.categoryId || categories[0]?.id || '',
+        description: row.description,
+        paymentMethod: row.paymentMethod || 'debit_card',
+        date: row.date || new Date().toISOString(),
+        notes: row.notes || 'Imported via CSV',
+      }));
+
+      const created = await this.expensesRepository.createMany(itemsToCreate);
+      return {
+        committed: true,
+        count: created.length,
+        expenses: created,
+      };
+    }
+
+    return {
+      committed: false,
+      count: parsedRows.length,
+      preview: parsedRows,
+    };
+  }
+
+  async suggestCategory(userId: string, description: string) {
+    const categories = await this.categoriesService.list(userId);
+    const categoryOptions = categories.map((c) => ({ id: c.id, name: c.name }));
+    return this.provider.suggestCategory(description, categoryOptions);
+  }
+
+  async batchCreate(
+    userId: string,
+    expenses: Array<{
+      amount: number;
+      categoryId: string;
+      description: string;
+      paymentMethod: string;
+      date: string;
+      notes?: string;
+    }>,
+  ) {
+    const items = expenses.map((e) => ({ ...e, userId }));
+    return this.expensesRepository.createMany(items);
   }
 }

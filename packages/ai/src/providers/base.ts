@@ -18,4 +18,16 @@ export abstract class BaseAnalyticsProvider implements AnalyticsProvider {
   abstract recommendBudgets(
     ...args: Parameters<AnalyticsProvider['recommendBudgets']>
   ): ReturnType<AnalyticsProvider['recommendBudgets']>;
+
+  abstract parseReceipt(
+    ...args: Parameters<AnalyticsProvider['parseReceipt']>
+  ): ReturnType<AnalyticsProvider['parseReceipt']>;
+
+  abstract parseCsvTransactions(
+    ...args: Parameters<AnalyticsProvider['parseCsvTransactions']>
+  ): ReturnType<AnalyticsProvider['parseCsvTransactions']>;
+
+  abstract suggestCategory(
+    ...args: Parameters<AnalyticsProvider['suggestCategory']>
+  ): ReturnType<AnalyticsProvider['suggestCategory']>;
 }

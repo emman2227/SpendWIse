@@ -1,4 +1,11 @@
-import type { Expense, Forecast, Insight } from '@spendwise/shared';
+import type {
+  CategorySuggestion,
+  Expense,
+  Forecast,
+  Insight,
+  ParsedCsvRow,
+  ParsedReceiptResult,
+} from '@spendwise/shared';
 
 export interface AnalyticsContext {
   userId: string;
@@ -42,4 +49,17 @@ export interface AnalyticsProvider {
     categories: string[];
     currency: string;
   }): Promise<Array<{ categoryId: string; recommendedAmount: number; explanation: string }>>;
+  parseReceipt(
+    imageBase64: string,
+    mimeType: string,
+    categories: Array<{ id: string; name: string }>,
+  ): Promise<ParsedReceiptResult>;
+  parseCsvTransactions(
+    csvContent: string,
+    categories: Array<{ id: string; name: string }>,
+  ): Promise<ParsedCsvRow[]>;
+  suggestCategory(
+    rawDescription: string,
+    categories: Array<{ id: string; name: string }>,
+  ): Promise<CategorySuggestion>;
 }

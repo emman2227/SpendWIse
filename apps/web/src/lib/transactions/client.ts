@@ -1,6 +1,12 @@
 'use client';
 
-import type { Category, Expense } from '@spendwise/shared';
+import type {
+  Category,
+  CategorySuggestion,
+  Expense,
+  ParsedCsvRow,
+  ParsedReceiptResult,
+} from '@spendwise/shared';
 
 export interface ExpenseFilters {
   categoryId?: string;
@@ -117,4 +123,33 @@ export const updateExpense = (expenseId: string, payload: ExpenseUpdatePayload) 
 export const deleteExpense = (expenseId: string) =>
   request<Expense>(`/api/expenses/${expenseId}`, {
     method: 'DELETE',
+  });
+
+export const scanReceipt = (imageBase64: string, mimeType = 'image/jpeg') =>
+  request<ParsedReceiptResult>('/api/expenses/scan-receipt', {
+    method: 'POST',
+    body: JSON.stringify({ imageBase64, mimeType }),
+  });
+
+export const importCsv = (csvContent: string, commit = false) =>
+  request<{
+    committed: boolean;
+    count: number;
+    preview?: ParsedCsvRow[];
+    expenses?: Expense[];
+  }>('/api/expenses/import-csv', {
+    method: 'POST',
+    body: JSON.stringify({ csvContent, commit }),
+  });
+
+export const suggestCategory = (description: string) =>
+  request<CategorySuggestion>('/api/expenses/suggest-category', {
+    method: 'POST',
+    body: JSON.stringify({ description }),
+  });
+
+export const batchCreateExpenses = (expenses: ExpensePayload[]) =>
+  request<Expense[]>('/api/expenses/batch', {
+    method: 'POST',
+    body: JSON.stringify({ expenses }),
   });

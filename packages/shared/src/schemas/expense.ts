@@ -59,3 +59,21 @@ export const expenseQuerySchema = z.object({
   month: z.coerce.number().int().min(1).max(12).optional(),
   year: z.coerce.number().int().min(2000).max(3000).optional(),
 });
+
+export const scanReceiptSchema = z.object({
+  imageBase64: z.string().min(1, 'Image base64 data is required.'),
+  mimeType: z.string().default('image/jpeg'),
+});
+
+export const importCsvSchema = z.object({
+  csvContent: z.string().min(1, 'CSV content is required.'),
+  commit: z.boolean().default(false),
+});
+
+export const suggestCategorySchema = z.object({
+  description: z.string().min(1, 'Description is required.'),
+});
+
+export const batchCreateExpensesSchema = z.object({
+  expenses: z.array(createExpenseSchema).min(1).max(500),
+});

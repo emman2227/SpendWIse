@@ -13,7 +13,15 @@ import {
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
-import { createExpenseSchema, expenseQuerySchema, updateExpenseSchema } from '@spendwise/shared';
+import {
+  batchCreateExpensesSchema,
+  createExpenseSchema,
+  expenseQuerySchema,
+  importCsvSchema,
+  scanReceiptSchema,
+  suggestCategorySchema,
+  updateExpenseSchema,
+} from '@spendwise/shared';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -45,6 +53,46 @@ export class ExpensesController {
     @Query() query: { categoryId?: string; month?: number; year?: number },
   ) {
     return this.expensesService.list(user.userId, query);
+  }
+
+  @Post('scan-receipt')
+  @UsePipes(new ZodValidationPipe(scanReceiptSchema))
+  scanReceipt(
+    @CurrentUser() user: AuthUser,
+    @Body() body: { imageBase64: string; mimeType: string },
+  ) {
+    return this.expensesService.scanReceipt(user.userId, body.imageBase64, body.mimeType);
+  }
+
+  @Post('import-csv')
+  @UsePipes(new ZodValidationPipe(importCsvSchema))
+  importCsv(@CurrentUser() user: AuthUser, @Body() body: { csvContent: string; commit: boolean }) {
+    return this.expensesService.importCsv(user.userId, body.csvContent, body.commit);
+  }
+
+  @Post('suggest-category')
+  @UsePipes(new ZodValidationPipe(suggestCategorySchema))
+  suggestCategory(@CurrentUser() user: AuthUser, @Body() body: { description: string }) {
+    return this.expensesService.suggestCategory(user.userId, body.description);
+  }
+
+  @Post('batch')
+  @UsePipes(new ZodValidationPipe(batchCreateExpensesSchema))
+  batchCreate(
+    @CurrentUser() user: AuthUser,
+    @Body()
+    body: {
+      expenses: Array<{
+        amount: number;
+        categoryId: string;
+        description: string;
+        paymentMethod: string;
+        date: string;
+        notes?: string;
+      }>;
+    },
+  ) {
+    return this.expensesService.batchCreate(user.userId, body.expenses);
   }
 
   @Post()

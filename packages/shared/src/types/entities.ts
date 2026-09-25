@@ -156,3 +156,31 @@ export interface Alert extends BaseEntity {
   evidence?: Record<string, unknown>;
   transactionId?: string;
 }
+
+export interface ParsedReceiptResult {
+  merchant: string;
+  amount: number;
+  date: string;
+  categoryId?: string;
+  categoryName?: string;
+  confidence: number;
+  paymentMethod?: PaymentMethod;
+  lineItems?: Array<{ description: string; amount: number }>;
+  notes?: string;
+}
+
+export interface ParsedCsvRow {
+  date: string;
+  description: string;
+  amount: number;
+  categoryId?: string;
+  paymentMethod?: PaymentMethod;
+  notes?: string;
+}
+
+export interface CategorySuggestion {
+  normalizedMerchant: string;
+  categoryId?: string;
+  categoryName?: string;
+  confidence: number;
+}
