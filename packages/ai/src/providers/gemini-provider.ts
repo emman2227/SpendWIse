@@ -12,6 +12,7 @@ import type {
   StructuredInsightInput,
 } from '../types';
 import { BaseAnalyticsProvider } from './base';
+import { DeterministicAnalyticsProvider } from './deterministic-provider';
 
 const insightInterpretationSchema = z.object({
   title: z.string(),
@@ -35,6 +36,7 @@ const deepDiveResponseSchema = z.object({
 export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
   readonly name = 'gemini';
   private readonly model;
+  private readonly fallback = new DeterministicAnalyticsProvider();
 
   constructor(apiKey?: string) {
     super();
@@ -68,13 +70,11 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
 
       return object as InsightInterpretation[];
     } catch (error) {
-      console.error('[GeminiProvider] interpretInsights failed:', error);
-      // Fallback: pass through the facts
-      return facts.map((f) => ({
-        title: f.title,
-        message: f.message,
-        reason: 'Provider error',
-      }));
+      console.warn(
+        '[GeminiProvider] interpretInsights failed, falling back to deterministic:',
+        error,
+      );
+      return this.fallback.interpretInsights(facts, currency);
     }
   }
 
@@ -99,10 +99,11 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
 
       return object as { explanation: string };
     } catch (error) {
-      console.error('[GeminiProvider] interpretForecast failed:', error);
-      return {
-        explanation: 'Forecast explanation unavailable due to a provider error.',
-      };
+      console.warn(
+        '[GeminiProvider] interpretForecast failed, falling back to deterministic:',
+        error,
+      );
+      return this.fallback.interpretForecast(forecast, currency);
     }
   }
 
@@ -131,12 +132,8 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
 
       return object as DeepDiveResponse;
     } catch (error) {
-      console.error('[GeminiProvider] deepDive failed:', error);
-      return {
-        answer:
-          'I encountered an error trying to analyze this insight. Please try asking your question again later.',
-        suggestedFollowUps: [],
-      };
+      console.warn('[GeminiProvider] deepDive failed, falling back to deterministic:', error);
+      return this.fallback.deepDive(context);
     }
   }
 
@@ -165,8 +162,11 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
 
       return object as any;
     } catch (error) {
-      console.error('[GeminiProvider] recommendBudgets failed:', error);
-      return [];
+      console.warn(
+        '[GeminiProvider] recommendBudgets failed, falling back to deterministic:',
+        error,
+      );
+      return this.fallback.recommendBudgets(context);
     }
   }
 
@@ -289,25 +289,11 @@ ${csvContent.slice(0, 8000)}`;
         };
       });
     } catch (error) {
-      console.error('[GeminiProvider] parseCsvTransactions failed:', error);
-      // Fallback: simple line split
-      const lines = csvContent.trim().split(/\r?\n/).filter(Boolean);
-      const fallbackList = [];
-      for (let i = 1; i < Math.min(lines.length, 25); i++) {
-        const line = lines[i];
-        if (!line) continue;
-        const parts = line.split(',').map((s) => s.trim().replace(/^"|"$/g, ''));
-        const num = parseFloat(parts.find((p) => !isNaN(Number(p)) && Number(p) > 0) || '10.0');
-        fallbackList.push({
-          date: new Date().toISOString(),
-          description: parts[1] || parts[0] || `Transaction ${i}`,
-          amount: isNaN(num) ? 10.0 : num,
-          categoryId: categories[0]?.id,
-          paymentMethod: 'debit_card' as const,
-          notes: 'Imported via CSV parser fallback',
-        });
-      }
-      return fallbackList;
+      console.warn(
+        '[GeminiProvider] parseCsvTransactions failed, falling back to deterministic:',
+        error,
+      );
+      return this.fallback.parseCsvTransactions(csvContent, categories);
     }
   }
 
@@ -344,13 +330,11 @@ Available categories: ${JSON.stringify(categoryNames)}`;
         confidence: parsed.confidence ?? 0.8,
       };
     } catch (error) {
-      console.error('[GeminiProvider] suggestCategory failed:', error);
-      return {
-        normalizedMerchant: rawDescription,
-        categoryId: categories[0]?.id,
-        categoryName: categories[0]?.name,
-        confidence: 0.5,
-      };
+      console.warn(
+        '[GeminiProvider] suggestCategory failed, falling back to deterministic:',
+        error,
+      );
+      return this.fallback.suggestCategory(rawDescription, categories);
     }
   }
 }

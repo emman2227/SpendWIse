@@ -1,10 +1,10 @@
 'use client';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Send, Sparkles } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Send, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,9 @@ export default function InsightDeepDivePage() {
     mutationFn: (q: string) => deepDiveInsight(id, q),
     onSuccess: (data) => {
       setChatHistory((prev) => [...prev, { role: 'ai', content: data.answer }]);
-      setSuggestedQuestions(data.suggestedFollowUps);
+      if (data.suggestedFollowUps?.length) {
+        setSuggestedQuestions(data.suggestedFollowUps);
+      }
     },
   });
 
@@ -38,6 +40,43 @@ export default function InsightDeepDivePage() {
     'How can I fix this in my budget?',
     'Show me the historical trend for this category',
   ]);
+
+  // Load chat history from localStorage on mount
+  useEffect(() => {
+    if (!id) return;
+    try {
+      const saved = localStorage.getItem(`spendwise_deepdive_chat_${id}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setChatHistory(parsed);
+        }
+      }
+    } catch {
+      // Ignore localStorage read errors
+    }
+  }, [id]);
+
+  // Save chat history to localStorage whenever it updates
+  useEffect(() => {
+    if (!id) return;
+    try {
+      if (chatHistory.length > 0) {
+        localStorage.setItem(`spendwise_deepdive_chat_${id}`, JSON.stringify(chatHistory));
+      }
+    } catch {
+      // Ignore localStorage write errors
+    }
+  }, [id, chatHistory]);
+
+  const handleClearChat = () => {
+    setChatHistory([]);
+    try {
+      localStorage.removeItem(`spendwise_deepdive_chat_${id}`);
+    } catch {
+      // Ignore localStorage errors
+    }
+  };
 
   const handleAsk = (q: string) => {
     if (!q.trim() || deepDiveMutation.isPending) return;
@@ -66,21 +105,20 @@ export default function InsightDeepDivePage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-2 sm:mb-4">
-        <Link href="/insights" className="self-start">
-          <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div className="flex-1 min-w-0">
-          <PageHeader
-            eyebrow="AI Deep Dive"
-            meta={<Badge variant="info">Beta</Badge>}
-            title="Insight Analysis"
-            description="Ask questions and dive deeper into this specific insight."
-          />
-        </div>
-      </div>
+      <PageHeader
+        actions={
+          <Link href="/insights">
+            <Button variant="soft" size="sm" className="gap-2 rounded-full">
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to insights</span>
+            </Button>
+          </Link>
+        }
+        description="Ask questions and dive deeper into this specific insight."
+        eyebrow="Financial Intelligence"
+        meta={<Badge variant="info">AI Deep Dive</Badge>}
+        title="Insight Analysis"
+      />
 
       <SurfaceCard className="rounded-[22px] sm:rounded-[32px] px-4 py-5 sm:px-8 sm:py-8 space-y-4 sm:space-y-6">
         <div>
@@ -108,19 +146,31 @@ export default function InsightDeepDivePage() {
         </div>
       </SurfaceCard>
 
-      <SurfaceCard className="rounded-[22px] sm:rounded-[32px] px-0 py-0 overflow-hidden flex flex-col h-[440px] sm:h-[500px]">
-        <div className="bg-sage/10 px-4 sm:px-6 py-3.5 sm:py-4 border-b border-line">
+      <SurfaceCard className="rounded-[22px] sm:rounded-[32px] px-0 py-0 overflow-hidden flex flex-col h-[480px] sm:h-[540px]">
+        <div className="bg-sage/10 px-4 sm:px-6 py-3.5 sm:py-4 border-b border-line flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-brand" />
             <h3 className="text-sm sm:text-base font-semibold text-ink">Ask SpendWise AI</h3>
           </div>
+          {chatHistory.length > 0 && (
+            <button
+              onClick={handleClearChat}
+              className="text-xs text-ink-soft hover:text-danger transition-colors flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-sage/20"
+              title="Clear conversation history"
+            >
+              <RotateCcw className="h-3 w-3" />
+              <span>Clear chat</span>
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
           {chatHistory.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-3 sm:space-y-4 text-ink-soft px-4">
-              <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-line" />
-              <p className="text-xs sm:text-sm">Ask a question to dive deeper into this insight.</p>
+              <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-brand/40" />
+              <p className="text-xs sm:text-sm max-w-sm">
+                Ask a question to dive deeper into this insight, or pick a suggested topic below.
+              </p>
             </div>
           ) : (
             chatHistory.map((msg, idx) => (
@@ -129,20 +179,20 @@ export default function InsightDeepDivePage() {
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[88%] sm:max-w-[80%] rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 ${
-                    msg.role === 'user' ? 'bg-ink text-white' : 'bg-sage/10 text-ink'
+                  className={`max-w-[88%] sm:max-w-[80%] rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 leading-relaxed text-xs sm:text-sm whitespace-pre-wrap ${
+                    msg.role === 'user'
+                      ? 'bg-brand text-white shadow-sm font-medium'
+                      : 'bg-paper-strong border border-line text-ink shadow-xs'
                   }`}
                 >
-                  <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
-                    {msg.content}
-                  </p>
+                  <p>{msg.content}</p>
                 </div>
               </div>
             ))
           )}
           {deepDiveMutation.isPending && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 bg-sage/10 text-ink">
+              <div className="max-w-[80%] rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 bg-paper-strong border border-line text-ink">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-brand animate-bounce" />
                   <div className="h-2 w-2 rounded-full bg-brand animate-bounce delay-75" />
@@ -160,7 +210,7 @@ export default function InsightDeepDivePage() {
                 key={i}
                 onClick={() => handleAsk(sq)}
                 disabled={deepDiveMutation.isPending}
-                className="text-[11px] sm:text-xs px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-sage/10 text-ink-soft hover:bg-sage/20 hover:text-ink transition-colors disabled:opacity-50"
+                className="text-[11px] sm:text-xs px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-sage/10 text-ink-soft hover:bg-sage/20 hover:text-ink transition-colors disabled:opacity-50 text-left"
               >
                 {sq}
               </button>
@@ -173,15 +223,16 @@ export default function InsightDeepDivePage() {
               onChange={(e) => setQuestion(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAsk(question)}
               placeholder="Ask a question about this insight..."
-              className="flex-1 bg-sage/10 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-base sm:text-sm text-ink placeholder-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/50 transition-all"
+              className="flex-1 bg-sage/10 border border-transparent focus:border-brand/40 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-base sm:text-sm text-ink placeholder:text-ink-soft/70 focus:outline-none focus:ring-2 focus:ring-brand/30 transition-all"
               disabled={deepDiveMutation.isPending}
             />
             <Button
               onClick={() => handleAsk(question)}
               disabled={!question.trim() || deepDiveMutation.isPending}
-              className="rounded-xl px-3.5 sm:px-4 h-auto"
+              variant="secondary"
+              className="rounded-xl px-4 h-auto bg-brand hover:bg-brand-strong text-white shadow-sm disabled:opacity-40"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-4 w-4 text-white" />
             </Button>
           </div>
         </div>

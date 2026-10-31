@@ -177,7 +177,7 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
             </div>
           ))}
 
-          <div className="mt-auto pt-4">
+          <div className="mt-auto pt-4 pb-6 shrink-0">
             <Button
               className="h-10 w-full justify-start rounded-[18px] px-3 text-[13px]"
               disabled={isLoggingOut}
