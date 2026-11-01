@@ -180,8 +180,9 @@ export class AnalyticsService {
     ]);
 
     const categoryMap = new Map(categories.map((c) => [c.id, c]));
+    const categoryNameMap = new Map(categories.map((c) => [c.name.toLowerCase(), c]));
 
-    // Calculate current vs previous spend per category
+    // Calculate current spend per category
     const currentSpendByCat = currentExpenses.reduce<Record<string, number>>((acc, exp) => {
       acc[exp.categoryId] = (acc[exp.categoryId] || 0) + exp.amount;
       return acc;
@@ -190,32 +191,139 @@ export class AnalyticsService {
     const budgets = await this.budgetsService.list(userId, currentMonth, currentYear);
     const budgetMap = new Map(budgets.map((b) => [b.categoryId, b.limitAmount]));
 
-    const comparisons = Object.entries(currentSpendByCat).map(([categoryId, current]) => {
-      const category = categoryMap.get(categoryId);
-      const catForecast = forecast?.categoryForecasts?.find((cf) => cf.category === categoryId);
+    // Helper to find category forecast matching either category name or category id
+    const findCategoryForecast = (catId?: string, catName?: string) => {
+      if (!forecast?.categoryForecasts) return undefined;
+      return forecast.categoryForecasts.find((cf) => {
+        if (catId && (cf.category === catId || cf.category.toLowerCase() === catId.toLowerCase())) {
+          return true;
+        }
+        if (
+          catName &&
+          (cf.category === catName || cf.category.toLowerCase() === catName.toLowerCase())
+        ) {
+          return true;
+        }
+        return false;
+      });
+    };
 
-      return {
-        label: category?.name || 'Unknown',
+    type SynthesizedCategory = {
+      id?: string;
+      label: string;
+      color: string;
+      current: number;
+      projected: number;
+      budget?: number;
+    };
+
+    const synthesizedMap = new Map<string, SynthesizedCategory>();
+
+    // 1. Seed from user's configured categories
+    for (const cat of categories) {
+      const current = currentSpendByCat[cat.id] || 0;
+      const catForecast = findCategoryForecast(cat.id, cat.name);
+      const projected = catForecast?.predictedAmount ?? catForecast?.currentAmount ?? current;
+      const budget = budgetMap.get(cat.id);
+
+      synthesizedMap.set(cat.name.toLowerCase(), {
+        id: cat.id,
+        label: cat.name,
+        color: cat.color || '#0F7B71',
         current,
-        projected: catForecast?.predictedAmount || current,
-        budget: budgetMap.get(categoryId),
-      };
-    });
+        projected,
+        budget,
+      });
+    }
 
-    // Share computation
+    // 2. Add any categories from forecast that weren't in categories
+    if (forecast?.categoryForecasts) {
+      for (const cf of forecast.categoryForecasts) {
+        const key = cf.category.toLowerCase();
+        if (!synthesizedMap.has(key)) {
+          const matchedCat =
+            categoryNameMap.get(key) || (cf.category ? categoryMap.get(cf.category) : undefined);
+          synthesizedMap.set(key, {
+            id: matchedCat?.id,
+            label: matchedCat?.name || cf.category,
+            color: matchedCat?.color || '#0F7B71',
+            current: cf.currentAmount || 0,
+            projected: cf.predictedAmount || cf.currentAmount || 0,
+            budget: cf.budget || (matchedCat?.id ? budgetMap.get(matchedCat.id) : undefined),
+          });
+        }
+      }
+    }
+
+    // 3. Add any categories from current spend not already captured
+    for (const [catId, current] of Object.entries(currentSpendByCat)) {
+      const cat = categoryMap.get(catId);
+      const key = (cat?.name || catId).toLowerCase();
+      if (!synthesizedMap.has(key)) {
+        synthesizedMap.set(key, {
+          id: catId,
+          label: cat?.name || 'Unknown',
+          color: cat?.color || '#0F7B71',
+          current,
+          projected: current,
+          budget: budgetMap.get(catId),
+        });
+      }
+    }
+
+    const allSynthesized = Array.from(synthesizedMap.values());
+
+    // Filter to active categories: those with spending, projection > 0, or an active budget
+    let activeCategories = allSynthesized.filter(
+      (cat) => cat.current > 0 || cat.projected > 0 || cat.budget !== undefined,
+    );
+
+    // If completely empty (e.g. brand new user with 0 historical/current spend and 0 budgets),
+    // fallback to first 5 categories so charts and simulator remain actionable
+    if (activeCategories.length === 0 && allSynthesized.length > 0) {
+      activeCategories = allSynthesized.slice(0, 5);
+    }
+
+    // Sort by projected spend descending so top spending drivers appear first
+    activeCategories.sort((a, b) => b.projected - a.projected || b.current - a.current);
+
+    const comparisons = activeCategories.map((c) => ({
+      label: c.label,
+      current: c.current,
+      projected: c.projected,
+      budget: c.budget,
+    }));
+
+    // Share computation: based on projected spend (or current if projected is 0)
+    const totalProjectedSpend = activeCategories.reduce(
+      (sum, c) => sum + (c.projected > 0 ? c.projected : c.current),
+      0,
+    );
+    const defaultColors = [
+      '#0F7B71',
+      '#29B8A8',
+      '#CE9844',
+      '#157B63',
+      '#E2634D',
+      '#5B6A7D',
+      '#6366F1',
+    ];
+
+    const share = activeCategories
+      .filter((c) => (c.projected > 0 ? c.projected : c.current) > 0)
+      .map((c, idx) => {
+        const amount = c.projected > 0 ? c.projected : c.current;
+        return {
+          name: c.label,
+          amount,
+          share: totalProjectedSpend > 0 ? Math.round((amount / totalProjectedSpend) * 100) : 0,
+          color:
+            c.color && c.color !== '#0F7B71' ? c.color : defaultColors[idx % defaultColors.length],
+        };
+      })
+      .sort((a, b) => b.amount - a.amount);
+
     const totalCurrentSpend = Object.values(currentSpendByCat).reduce((a, b) => a + b, 0);
-    const share = Object.entries(currentSpendByCat).map(([categoryId, amount]) => {
-      const category = categoryMap.get(categoryId);
-      return {
-        name: category?.name || 'Unknown',
-        amount,
-        share: totalCurrentSpend > 0 ? Math.round((amount / totalCurrentSpend) * 100) : 0,
-        color: category?.color || '#0F7B71',
-      };
-    });
-
-    // Sort share to show largest first
-    share.sort((a, b) => b.amount - a.amount);
 
     return {
       metrics: {

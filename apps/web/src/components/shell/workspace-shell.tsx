@@ -131,11 +131,11 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
   };
 
   return (
-    <div className="min-h-screen lg:pl-[248px]">
+    <div className="min-h-screen lg:pl-[248px] print:pl-0">
       {activeFetchCount > 0 || isLoggingOut ? <LoadingIndicatorBar /> : null}
 
       {/* Desktop Sidebar (>= 1024px) */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-line-strong bg-paper-strong text-ink backdrop-blur-xl lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] flex-col border-r border-line-strong bg-paper-strong text-ink backdrop-blur-xl lg:flex print:hidden">
         <div className="sidebar-scroll flex h-full flex-col overflow-y-auto px-4 py-4">
           <Link href="/dashboard" className="flex items-center gap-2.5">
             <AppLogo size={40} className="rounded-[14px]" priority />
@@ -306,118 +306,120 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
 
       <div className="mx-auto flex min-h-screen w-full max-w-[1600px] px-3 pb-28 pt-3 sm:px-6 sm:pb-24 sm:pt-4 lg:px-8">
         <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-6 lg:pl-6">
-          <header className="sticky top-2 sm:top-4 z-30 overflow-hidden rounded-[20px] sm:rounded-[28px] border border-line bg-paper/95 px-3 py-2 sm:px-5 sm:py-3 shadow-soft backdrop-blur-2xl">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--paper-strong),transparent_42%)]" />
-            <div className="relative flex items-center justify-between gap-2 sm:gap-3">
-              <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
-                {/* Mobile Menu Hamburger Button */}
-                <button
-                  aria-label="Open navigation menu"
-                  className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-ink transition hover:border-brand/40 hover:bg-paper-strong active:scale-95 lg:hidden"
-                  onClick={() => setIsMobileDrawerOpen(true)}
-                  type="button"
-                >
-                  <Menu className="h-4.5 w-4.5" />
-                </button>
+          <div className="sticky top-0 z-30 -mt-3 pt-3 sm:-mt-4 sm:pt-4 pb-1.5 bg-cream/90 backdrop-blur-md transition-colors print:hidden">
+            <header className="overflow-hidden rounded-[20px] sm:rounded-[28px] border border-line bg-paper/95 px-3 py-2 sm:px-5 sm:py-3 shadow-soft backdrop-blur-2xl">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--paper-strong),transparent_42%)]" />
+              <div className="relative flex items-center justify-between gap-2 sm:gap-3">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+                  {/* Mobile Menu Hamburger Button */}
+                  <button
+                    aria-label="Open navigation menu"
+                    className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-ink transition hover:border-brand/40 hover:bg-paper-strong active:scale-95 lg:hidden"
+                    onClick={() => setIsMobileDrawerOpen(true)}
+                    type="button"
+                  >
+                    <Menu className="h-4.5 w-4.5" />
+                  </button>
 
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 rounded-full bg-ink px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold text-white transition hover:opacity-95 lg:hidden shrink-0 shadow-sm"
-                >
-                  <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
-                  SpendWise
-                </Link>
-                <div className="relative hidden min-w-0 flex-1 md:block md:w-[320px] lg:w-[420px] xl:w-[480px]">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
-                  <Input
-                    aria-label="Search transactions, budgets, and reports"
-                    className="border-line bg-paper pl-11 pr-12 text-sm"
-                    placeholder="Search transactions, categories, or reports"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl border border-line bg-paper-strong px-2 py-1 text-[11px] font-semibold text-ink-soft">
-                    /
-                  </span>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center gap-2 rounded-full bg-ink px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold text-white transition hover:opacity-95 lg:hidden shrink-0 shadow-sm"
+                  >
+                    <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
+                    SpendWise
+                  </Link>
+                  <div className="relative hidden min-w-0 flex-1 md:block md:w-[320px] lg:w-[420px] xl:w-[480px]">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
+                    <Input
+                      aria-label="Search transactions, budgets, and reports"
+                      className="border-line bg-paper pl-11 pr-12 text-sm"
+                      placeholder="Search transactions, categories, or reports"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl border border-line bg-paper-strong px-2 py-1 text-[11px] font-semibold text-ink-soft">
+                      /
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                  <button
+                    aria-label="Toggle search"
+                    className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-line bg-paper text-ink-soft transition hover:border-brand/40 hover:text-ink md:hidden"
+                    onClick={() => setMobileSearchOpen((open) => !open)}
+                    type="button"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="soft"
+                    className="hidden lg:inline-flex h-9 text-xs"
+                  >
+                    <Link href="/reports">Export report</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="secondary"
+                    className="hidden sm:inline-flex h-9 text-xs sm:text-sm px-3.5 rounded-full"
+                  >
+                    <Link href="/transactions">
+                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <span>Add expense</span>
+                    </Link>
+                  </Button>
+                  <HeaderNotificationModal />
+                  <Button
+                    asChild
+                    size="icon"
+                    variant="soft"
+                    className="h-9 w-9 sm:h-10 sm:w-10 rounded-full"
+                  >
+                    <Link aria-label="Help and support" href="/help">
+                      <LifeBuoy className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Link
+                    href="/profile"
+                    className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-ink text-xs sm:text-sm font-semibold text-white shadow-sm sm:hidden"
+                    title={user?.name ?? 'Profile'}
+                  >
+                    {initials}
+                  </Link>
+                  <Link
+                    href="/profile"
+                    className="hidden min-w-0 max-w-full items-center gap-2.5 sm:gap-3 rounded-full border border-line bg-paper px-3 py-1.5 sm:py-2 shadow-sm sm:flex sm:max-w-[200px] lg:max-w-[240px]"
+                    title={user?.name && user?.email ? `${user.name} (${user.email})` : undefined}
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-semibold text-white">
+                      {initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-xs font-semibold text-ink">{profileName}</p>
+                      <p className="truncate text-[10.5px] text-ink-soft">{profileEmail}</p>
+                    </div>
+                  </Link>
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-                <button
-                  aria-label="Toggle search"
-                  className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-line bg-paper text-ink-soft transition hover:border-brand/40 hover:text-ink md:hidden"
-                  onClick={() => setMobileSearchOpen((open) => !open)}
-                  type="button"
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-                <Button
-                  asChild
-                  size="sm"
-                  variant="soft"
-                  className="hidden lg:inline-flex h-9 text-xs"
-                >
-                  <Link href="/reports">Export report</Link>
-                </Button>
-                <Button
-                  asChild
-                  size="sm"
-                  variant="secondary"
-                  className="hidden sm:inline-flex h-9 text-xs sm:text-sm px-3.5 rounded-full"
-                >
-                  <Link href="/transactions">
-                    <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span>Add expense</span>
-                  </Link>
-                </Button>
-                <HeaderNotificationModal />
-                <Button
-                  asChild
-                  size="icon"
-                  variant="soft"
-                  className="h-9 w-9 sm:h-10 sm:w-10 rounded-full"
-                >
-                  <Link aria-label="Help and support" href="/help">
-                    <LifeBuoy className="h-4 w-4" />
-                  </Link>
-                </Button>
-                <Link
-                  href="/profile"
-                  className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-ink text-xs sm:text-sm font-semibold text-white shadow-sm sm:hidden"
-                  title={user?.name ?? 'Profile'}
-                >
-                  {initials}
-                </Link>
-                <Link
-                  href="/profile"
-                  className="hidden min-w-0 max-w-full items-center gap-2.5 sm:gap-3 rounded-full border border-line bg-paper px-3 py-1.5 sm:py-2 shadow-sm sm:flex sm:max-w-[200px] lg:max-w-[240px]"
-                  title={user?.name && user?.email ? `${user.name} (${user.email})` : undefined}
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-semibold text-white">
-                    {initials}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-xs font-semibold text-ink">{profileName}</p>
-                    <p className="truncate text-[10.5px] text-ink-soft">{profileEmail}</p>
-                  </div>
-                </Link>
+              <div
+                className={cn(
+                  'overflow-hidden transition-all duration-200 md:hidden',
+                  mobileSearchOpen ? 'mt-2.5 max-h-14 opacity-100' : 'max-h-0 opacity-0',
+                )}
+              >
+                <div className="relative pt-1">
+                  <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
+                  <Input
+                    aria-label="Search transactions, budgets, and reports"
+                    className="h-10 rounded-full border-line bg-paper pl-10 text-sm"
+                    placeholder="Search transactions or reports..."
+                  />
+                </div>
               </div>
-            </div>
-
-            <div
-              className={cn(
-                'overflow-hidden transition-all duration-200 md:hidden',
-                mobileSearchOpen ? 'mt-2.5 max-h-14 opacity-100' : 'max-h-0 opacity-0',
-              )}
-            >
-              <div className="relative pt-1">
-                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
-                <Input
-                  aria-label="Search transactions, budgets, and reports"
-                  className="h-10 rounded-full border-line bg-paper pl-10 text-sm"
-                  placeholder="Search transactions or reports..."
-                />
-              </div>
-            </div>
-          </header>
+            </header>
+          </div>
 
           <main className="module-page flex-1">{children}</main>
         </div>
@@ -425,13 +427,13 @@ export const WorkspaceShell = ({ children }: WorkspaceShellProps) => {
 
       <Link
         href="/transactions"
-        className="fixed bottom-20 right-3.5 sm:bottom-24 sm:right-4 z-40 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-brand text-white shadow-lift transition active:scale-95 lg:hidden"
+        className="fixed bottom-20 right-3.5 sm:bottom-24 sm:right-4 z-40 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-brand text-white shadow-lift transition active:scale-95 lg:hidden print:hidden"
         aria-label="Add expense"
       >
         <Plus className="h-5 w-5" />
       </Link>
 
-      <nav className="panel-surface fixed bottom-2.5 sm:bottom-4 left-1/2 z-40 flex w-[min(96vw,460px)] -translate-x-1/2 items-center justify-around px-1.5 py-1.5 sm:px-2 sm:py-2 rounded-[20px] sm:rounded-[26px] shadow-lift backdrop-blur-xl lg:hidden">
+      <nav className="panel-surface fixed bottom-2.5 sm:bottom-4 left-1/2 z-40 flex w-[min(96vw,460px)] -translate-x-1/2 items-center justify-around px-1.5 py-1.5 sm:px-2 sm:py-2 rounded-[20px] sm:rounded-[26px] shadow-lift backdrop-blur-xl lg:hidden print:hidden">
         {mobileNavigation.map((item) => {
           const active = isPathActive(pathname, item.href);
           const Icon = item.icon;

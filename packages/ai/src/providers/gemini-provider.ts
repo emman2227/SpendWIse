@@ -234,18 +234,11 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
         notes: parsed.notes || `Scanned receipt from ${parsed.merchant}`,
       };
     } catch (error) {
-      console.error('[GeminiProvider] parseReceipt failed:', error);
-      // Fallback response so user experience is not broken
-      const defaultCat = categories[0];
-      return {
-        merchant: 'Unrecognized Receipt',
-        amount: 0,
-        date: new Date().toISOString(),
-        categoryId: defaultCat?.id,
-        categoryName: defaultCat?.name,
-        confidence: 0.3,
-        notes: 'Could not automatically scan receipt image. Please enter details manually.',
-      };
+      console.warn(
+        '[GeminiProvider] parseReceipt failed, falling back to deterministic OCR provider:',
+        error,
+      );
+      return this.fallback.parseReceipt(imageBase64, mimeType, categories);
     }
   }
 

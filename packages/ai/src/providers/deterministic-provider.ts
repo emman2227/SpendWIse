@@ -479,21 +479,218 @@ export class DeterministicAnalyticsProvider extends BaseAnalyticsProvider {
     return rows;
   }
 
+  /**
+   * Parses extracted receipt text into structured receipt data using deterministic regex heuristics.
+   * Can be tested directly or invoked by parseReceipt after OCR recognition.
+   */
+  public async parseReceiptText(
+    text: string,
+    categories: Array<{ id: string; name: string }>,
+  ): Promise<ParsedReceiptResult> {
+    const defaultCat = categories[0];
+    const lines = text
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+
+    if (lines.length === 0) {
+      return {
+        merchant: 'Unrecognized Receipt',
+        amount: 0,
+        date: new Date().toISOString().slice(0, 10),
+        categoryId: defaultCat?.id,
+        categoryName: defaultCat?.name || 'General',
+        confidence: 0.1,
+        paymentMethod: 'credit_card',
+        notes: 'No text could be extracted from this image. Please review manually.',
+      };
+    }
+
+    // 1. Merchant Extraction:
+    // Check top 5 lines, ignoring header keywords, tax phrases, phone numbers, and dates
+    let merchant = 'Unknown Merchant';
+    const ignoreMerchantRegex =
+      /^(receipt|tax\s*invoice|official\s*receipt|invoice|bill|sales\s*receipt|welcome|customer\s*copy|merchant\s*copy|tel:|phone:|date:|order\s*#|transaction\s*#)/i;
+
+    for (const line of lines.slice(0, 5)) {
+      if (!ignoreMerchantRegex.test(line) && !/^\d+([./-]\d+)+$/.test(line) && line.length >= 3) {
+        const cleaned = line.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9.]+$/g, '').trim();
+        if (cleaned.length >= 3 && !/^\d+$/.test(cleaned)) {
+          merchant = cleaned;
+          break;
+        }
+      }
+    }
+
+    // 2. Amount Extraction:
+    // Look for lines containing total keywords: TOTAL, AMOUNT DUE, BALANCE, NET, GRAND TOTAL, CASH, PHP, ₱, $
+    let amount = 0;
+    let foundAmountWithKeyword = false;
+    const totalLineRegex =
+      /(?:grand\s*total|total|amount\s*due|balance\s*due|net\s*amount|total\s*amount|amount|paid)[\s:=]*([₱$€£]?\s*[\d,]+\.?\d{0,2})/i;
+
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i]!;
+      const match = line.match(totalLineRegex);
+      if (match && match[1]) {
+        const rawNum = match[1].replace(/[^\d.]/g, '');
+        const parsed = parseFloat(rawNum);
+        if (!isNaN(parsed) && parsed > 0) {
+          amount = parsed;
+          foundAmountWithKeyword = true;
+          break;
+        }
+      }
+    }
+
+    // Fallback: search for largest monetary pattern in the lower half of receipt
+    if (!foundAmountWithKeyword) {
+      const candidates: number[] = [];
+      const moneyRegex = /(?:[₱$€£]\s*)?(\d{1,4}(?:,\d{3})*(?:\.\d{2}))/g;
+      const lowerHalf = lines.slice(Math.floor(lines.length / 2));
+      for (const line of lowerHalf) {
+        let match;
+        while ((match = moneyRegex.exec(line)) !== null) {
+          if (match[1]) {
+            const val = parseFloat(match[1].replace(/,/g, ''));
+            if (!isNaN(val) && val > 0 && val < 500000) {
+              candidates.push(val);
+            }
+          }
+        }
+      }
+      if (candidates.length > 0) {
+        amount = Math.max(...candidates);
+      }
+    }
+
+    // 3. Date Extraction (Direct calendar extraction to avoid timezone shifts):
+    let dateStr = new Date().toISOString().slice(0, 10);
+    const monthNames: Record<string, string> = {
+      jan: '01',
+      feb: '02',
+      mar: '03',
+      apr: '04',
+      may: '05',
+      jun: '06',
+      jul: '07',
+      aug: '08',
+      sep: '09',
+      oct: '10',
+      nov: '11',
+      dec: '12',
+    };
+
+    for (const line of lines) {
+      // Pattern 1: YYYY-MM-DD
+      const isoMatch = line.match(/\b(20\d{2})[-/.](0[1-9]|1[0-2])[-/.](0[1-9]|[12]\d|3[01])\b/);
+      if (isoMatch && isoMatch[1] && isoMatch[2] && isoMatch[3]) {
+        dateStr = `${isoMatch[1]}-${isoMatch[2].padStart(2, '0')}-${isoMatch[3].padStart(2, '0')}`;
+        break;
+      }
+
+      // Pattern 2: MM/DD/YYYY or DD/MM/YYYY
+      const slashMatch = line.match(
+        /\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|[12]\d|3[01])[-/.](20\d{2})\b/,
+      );
+      if (slashMatch && slashMatch[1] && slashMatch[2] && slashMatch[3]) {
+        const p1 = Number(slashMatch[1]);
+        const p2 = Number(slashMatch[2]);
+        const y = slashMatch[3];
+        // If first number > 12, it must be DD/MM/YYYY
+        if (p1 > 12) {
+          dateStr = `${y}-${String(p2).padStart(2, '0')}-${String(p1).padStart(2, '0')}`;
+        } else {
+          // Standard US format MM/DD/YYYY
+          dateStr = `${y}-${String(p1).padStart(2, '0')}-${String(p2).padStart(2, '0')}`;
+        }
+        break;
+      }
+
+      // Pattern 3: DD Mon YYYY or Mon DD YYYY
+      const textDateMatch = line.match(
+        /\b(?:(0?[1-9]|[12]\d|3[01])\s+([A-Za-z]{3})|([A-Za-z]{3})\s+(0?[1-9]|[12]\d|3[01]))[\s,]+(20\d{2})\b/i,
+      );
+      if (textDateMatch) {
+        const d = textDateMatch[1] || textDateMatch[4];
+        const mStr = (textDateMatch[2] || textDateMatch[3] || '').slice(0, 3).toLowerCase();
+        const y = textDateMatch[5];
+        if (d && mStr && y && monthNames[mStr]) {
+          dateStr = `${y}-${monthNames[mStr]}-${d.padStart(2, '0')}`;
+          break;
+        }
+      }
+    }
+
+    // 4. Payment Method Detection:
+    let paymentMethod: PaymentMethod = 'credit_card';
+    const textLower = text.toLowerCase();
+    if (
+      textLower.includes('gcash') ||
+      textLower.includes('maya') ||
+      textLower.includes('e-wallet') ||
+      textLower.includes('paypal') ||
+      textLower.includes('qr')
+    ) {
+      paymentMethod = 'e_wallet';
+    } else if (/\bcash\b|change\s*due/i.test(textLower)) {
+      paymentMethod = 'cash';
+    } else if (
+      textLower.includes('debit') ||
+      textLower.includes('mastercard debit') ||
+      textLower.includes('visa debit')
+    ) {
+      paymentMethod = 'debit_card';
+    } else if (
+      textLower.includes('bank transfer') ||
+      textLower.includes('wire') ||
+      textLower.includes('ach')
+    ) {
+      paymentMethod = 'bank_transfer';
+    }
+
+    // 5. Category Classification:
+    const categorySuggestion = await this.suggestCategory(merchant, categories);
+    const categoryName = categorySuggestion.categoryName || defaultCat?.name || 'General';
+    const categoryId = categorySuggestion.categoryId || defaultCat?.id;
+
+    // 6. Confidence Score:
+    let confidence = 0.5;
+    if (merchant !== 'Unknown Merchant') confidence += 0.2;
+    if (amount > 0) confidence += 0.2;
+    if (foundAmountWithKeyword) confidence += 0.05;
+
+    return {
+      merchant,
+      amount,
+      date: dateStr,
+      categoryId,
+      categoryName,
+      confidence: Math.min(0.95, confidence),
+      paymentMethod,
+      notes: `Scanned via deterministic OCR from ${merchant}`,
+    };
+  }
+
   async parseReceipt(
-    _imageBase64: string,
+    imageBase64: string,
     _mimeType: string,
     categories: Array<{ id: string; name: string }>,
   ): Promise<ParsedReceiptResult> {
-    const defaultCatName = categories[0]?.name || 'General';
+    try {
+      const cleanBase64 = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '');
+      const imageBuffer = Buffer.from(cleanBase64, 'base64');
 
-    return {
-      merchant: 'Receipt Scan (Deterministic Provider)',
-      amount: 0,
-      date: new Date().toISOString().slice(0, 10),
-      categoryName: defaultCatName,
-      confidence: 0.1,
-      paymentMethod: 'credit_card',
-      notes: 'Deterministic receipt scanner placeholder. OCR integration queued for next step.',
-    };
+      const { createWorker } = await import('tesseract.js');
+      const worker = await createWorker('eng');
+      const ret = await worker.recognize(imageBuffer);
+      await worker.terminate();
+
+      const text = ret?.data?.text || '';
+      return this.parseReceiptText(text, categories);
+    } catch (err) {
+      console.warn('[DeterministicProvider] OCR processing error, using heuristic fallback:', err);
+      return this.parseReceiptText('', categories);
+    }
   }
 }

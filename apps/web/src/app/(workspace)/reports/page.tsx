@@ -299,15 +299,38 @@ export default function ReportsPage() {
     }
 
     const lines = [
-      ['Category', 'Current', 'Previous', 'Change'].join(','),
-      ...reportBars.map((item) =>
-        [
-          item.label,
+      [
+        'Category',
+        'Current Spend',
+        'Previous Spend',
+        'Spend Delta ($)',
+        'Spend Delta (%)',
+        'Budget Cap',
+        'Budget Remaining',
+        'Budget Status',
+      ].join(','),
+      ...reportBars.map((item) => {
+        const deltaAmount = item.current - item.previous;
+        const deltaPercent =
+          item.previous > 0 ? `${((deltaAmount / item.previous) * 100).toFixed(1)}%` : 'N/A';
+        const budgetItem = budgetViews.find((b) => b.name === item.label);
+        const budgetCap = budgetItem ? budgetItem.limitAmount.toFixed(2) : 'Unbudgeted';
+        const budgetRemaining = budgetItem
+          ? (budgetItem.limitAmount - item.current).toFixed(2)
+          : 'N/A';
+        const budgetStatus = budgetItem ? budgetItem.status.toUpperCase() : 'NONE';
+
+        return [
+          `"${item.label.replace(/"/g, '""')}"`,
           item.current.toFixed(2),
           item.previous.toFixed(2),
-          (item.current - item.previous).toFixed(2),
-        ].join(','),
-      ),
+          deltaAmount.toFixed(2),
+          deltaPercent,
+          budgetCap,
+          budgetRemaining,
+          budgetStatus,
+        ].join(',');
+      }),
     ];
     const blob = new Blob([lines.join('\n')], {
       type: 'text/csv;charset=utf-8;',
@@ -315,12 +338,12 @@ export default function ReportsPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `report-${year}-${String(month).padStart(2, '0')}.csv`;
+    link.download = `spendwise-report-${year}-${String(month).padStart(2, '0')}.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-    setPageMessage('CSV report exported.');
+    setPageMessage('Enriched CSV report exported successfully.');
   };
 
   const handlePrintSummary = () => {
@@ -349,7 +372,31 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Dedicated Clean Header for Browser Print / Save as PDF */}
+      <div className="hidden print:block mb-8 border-b-2 border-black pb-4 text-black">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-black">
+              SpendWise — Monthly Financial Report
+            </h1>
+            <p className="mt-1 text-sm text-gray-700">
+              Executive statement for {getMonthLabel(month, year)} • User:{' '}
+              {user?.name || 'Account Owner'} ({user?.email || 'N/A'})
+            </p>
+          </div>
+          <div className="text-right">
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
+              Generated
+            </span>
+            <p className="text-sm font-semibold text-black">
+              {new Date().toLocaleDateString('en-US', { dateStyle: 'medium' })}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <PageHeader
+        className="print:hidden"
         actions={
           <>
             <Button onClick={handleExportCsv} variant="soft">
@@ -372,13 +419,13 @@ export default function ReportsPage() {
       />
 
       {pageMessage ? (
-        <div className="rounded-[22px] border border-brand/15 bg-brand/10 px-4 py-4 text-sm text-ink">
+        <div className="rounded-[22px] border border-brand/15 bg-brand/10 px-4 py-4 text-sm text-ink print:hidden">
           {pageMessage}
         </div>
       ) : null}
 
       {errorMessage ? (
-        <div className="rounded-[22px] border border-danger/20 bg-danger/10 px-4 py-4 text-sm text-danger">
+        <div className="rounded-[22px] border border-danger/20 bg-danger/10 px-4 py-4 text-sm text-danger print:hidden">
           {errorMessage}
         </div>
       ) : null}
@@ -408,7 +455,7 @@ export default function ReportsPage() {
         />
       </section>
 
-      <SurfaceCard className="overflow-hidden rounded-[28px] px-4 py-4 sm:rounded-[34px] sm:px-5 sm:py-5 md:px-6 md:py-6">
+      <SurfaceCard className="overflow-hidden rounded-[28px] px-4 py-4 sm:rounded-[34px] sm:px-5 sm:py-5 md:px-6 md:py-6 print:hidden">
         <div className="space-y-4 sm:space-y-5">
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr),auto] lg:gap-4">
             <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">

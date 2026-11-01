@@ -279,6 +279,63 @@ describe('DeterministicAnalyticsProvider', () => {
       expect(rows[1]?.categoryId).toBe('c2');
     });
   });
+
+  describe('parseReceiptText', () => {
+    const categories = [
+      { id: 'cat-dining', name: 'Food & Dining' },
+      { id: 'cat-transport', name: 'Transportation' },
+      { id: 'cat-groceries', name: 'Groceries' },
+    ];
+
+    it('parses standard receipt text with merchant, amount, date, and payment method', async () => {
+      const receiptText = `
+        OFFICIAL RECEIPT
+        STARBUCKS COFFEE #1204
+        Date: 2026-10-15
+        Order: #49281
+        1x Caramel Macchiato   180.00
+        1x Blueberry Muffin     120.00
+        SUBTOTAL               300.00
+        TAX                     36.00
+        TOTAL AMOUNT DUE:      ₱336.00
+        PAID VIA GCASH
+      `;
+
+      const result = await provider.parseReceiptText(receiptText, categories);
+      expect(result.merchant).toContain('STARBUCKS COFFEE');
+      expect(result.amount).toBe(336);
+      expect(result.date).toBe('2026-10-15');
+      expect(result.categoryName).toBe('Food & Dining');
+      expect(result.paymentMethod).toBe('e_wallet');
+      expect(result.confidence).toBeGreaterThan(0.7);
+    });
+
+    it('extracts date in slash format and cash payment method', async () => {
+      const receiptText = `
+        SHELL MOBILITY STATION
+        10/24/2026 14:30
+        FUEL REGULAR         1,250.00
+        TOTAL: 1250.00
+        CASH TENDERED: 1500.00
+        CHANGE DUE: 250.00
+      `;
+
+      const result = await provider.parseReceiptText(receiptText, categories);
+      expect(result.merchant).toContain('SHELL MOBILITY');
+      expect(result.amount).toBe(1250);
+      expect(result.date).toBe('2026-10-24');
+      expect(result.categoryName).toBe('Transportation');
+      expect(result.paymentMethod).toBe('cash');
+    });
+
+    it('handles empty receipt text gracefully without throwing', async () => {
+      const result = await provider.parseReceiptText('', categories);
+      expect(result.merchant).toBe('Unrecognized Receipt');
+      expect(result.amount).toBe(0);
+      expect(result.confidence).toBe(0.1);
+      expect(result.notes).toContain('No text could be extracted');
+    });
+  });
 });
 
 describe('createAnalyticsProvider factory', () => {
