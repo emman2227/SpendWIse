@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     borderRadius: 28,
     borderWidth: 1,
-    padding: 20
+    padding: 20,
   },
   eyebrow: {
     color: '#0F766E',
@@ -31,15 +31,15 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1.5,
     marginBottom: 8,
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
   },
   title: {
     color: '#0F172A',
     fontSize: 22,
-    fontWeight: '700'
+    fontWeight: '700',
   },
   content: {
     gap: 14,
-    marginTop: 16
-  }
+    marginTop: 16,
+  },
 });

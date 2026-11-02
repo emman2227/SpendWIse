@@ -10,7 +10,7 @@ export const mobileExpenses: Expense[] = [
     paymentMethod: 'e_wallet',
     date: '2026-04-01T00:00:00.000Z',
     createdAt: '2026-04-01T00:00:00.000Z',
-    updatedAt: '2026-04-01T00:00:00.000Z'
+    updatedAt: '2026-04-01T00:00:00.000Z',
   },
   {
     id: 'expense-2',
@@ -21,6 +21,6 @@ export const mobileExpenses: Expense[] = [
     paymentMethod: 'debit_card',
     date: '2026-04-02T00:00:00.000Z',
     createdAt: '2026-04-02T00:00:00.000Z',
-    updatedAt: '2026-04-02T00:00:00.000Z'
-  }
+    updatedAt: '2026-04-02T00:00:00.000Z',
+  },
 ];
