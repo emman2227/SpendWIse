@@ -47,7 +47,8 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
       apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     const config = resolvedApiKey ? { apiKey: resolvedApiKey } : {};
     const google = createGoogleGenerativeAI(config);
-    this.model = google('gemini-3.8-flash');
+    const modelName = process.env.GEMINI_MODEL || 'gemini-flash-lite-latest';
+    this.model = google(modelName);
   }
 
   async interpretInsights(
@@ -202,6 +203,7 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
       const { object } = await generateObject({
         model: this.model as any,
         schema: receiptSchema as any,
+        abortSignal: AbortSignal.timeout(25000),
         messages: [
           {
             role: 'user',
