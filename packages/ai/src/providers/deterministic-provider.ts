@@ -1,3 +1,5 @@
+import { Buffer } from 'node:buffer';
+
 import type {
   CategorySuggestion,
   Expense,
@@ -5,6 +7,7 @@ import type {
   ParsedReceiptResult,
   PaymentMethod,
 } from '@spendwise/shared';
+import { createWorker } from 'tesseract.js';
 
 import type {
   DeepDiveContext,
@@ -53,6 +56,14 @@ const COMMON_MERCHANT_KEYWORDS: Record<string, string[]> = {
     'groceries',
     'publix',
     'heb',
+    'alfamart',
+    '7-eleven',
+    'seven eleven',
+    'ministop',
+    'puregold',
+    'robinsons supermarket',
+    'sm supermarket',
+    'convenience',
   ],
   Transportation: [
     'uber',
@@ -117,6 +128,11 @@ const COMMON_MERCHANT_KEYWORDS: Record<string, string[]> = {
     'uniqlo',
     'h&m',
     'sephora',
+    'alfamart',
+    '7-eleven',
+    'department store',
+    'retail',
+    'shop',
   ],
   Health: [
     'pharmacy',
@@ -515,7 +531,13 @@ export class DeterministicAnalyticsProvider extends BaseAnalyticsProvider {
     for (const line of lines.slice(0, 5)) {
       if (!ignoreMerchantRegex.test(line) && !/^\d+([./-]\d+)+$/.test(line) && line.length >= 3) {
         const cleaned = line.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9.]+$/g, '').trim();
-        if (cleaned.length >= 3 && !/^\d+$/.test(cleaned)) {
+        const letterCount = (cleaned.match(/[a-zA-Z]/g) || []).length;
+        if (
+          cleaned.length >= 3 &&
+          letterCount >= 3 &&
+          !/^\d+$/.test(cleaned) &&
+          !/[-_=~*]{3,}/.test(cleaned)
+        ) {
           merchant = cleaned;
           break;
         }
@@ -681,7 +703,6 @@ export class DeterministicAnalyticsProvider extends BaseAnalyticsProvider {
       const cleanBase64 = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '');
       const imageBuffer = Buffer.from(cleanBase64, 'base64');
 
-      const { createWorker } = await import('tesseract.js');
       const worker = await createWorker('eng');
       const ret = await worker.recognize(imageBuffer);
       await worker.terminate();

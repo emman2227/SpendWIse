@@ -16,6 +16,38 @@ interface ReceiptScannerModalProps {
   onApply: (result: ParsedReceiptResult) => void;
 }
 
+const optimizeImage = (dataUrl: string, maxDimension = 1600, quality = 0.85): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width <= maxDimension && height <= maxDimension) {
+        resolve(dataUrl);
+        return;
+      }
+      if (width > height) {
+        height = Math.round((height * maxDimension) / width);
+        width = maxDimension;
+      } else {
+        width = Math.round((width * maxDimension) / height);
+        height = maxDimension;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(dataUrl);
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+};
+
 export const ReceiptScannerModal: React.FC<ReceiptScannerModalProps> = ({
   isOpen,
   onClose,
@@ -59,14 +91,17 @@ export const ReceiptScannerModal: React.FC<ReceiptScannerModalProps> = ({
     setExtractedData(null);
 
     const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
+    reader.onload = async () => {
+      const rawDataUrl = reader.result as string;
+      const dataUrl = file.type.startsWith('image/') ? await optimizeImage(rawDataUrl) : rawDataUrl;
+
       setPreviewUrl(file.type.startsWith('image/') ? dataUrl : null);
       // Strip data url prefix for API if needed, or pass full string
       const base64Data = dataUrl.split(',')[1] || dataUrl;
+      const resolvedMime = file.type.startsWith('image/') ? 'image/jpeg' : file.type;
       setFileBase64(base64Data);
       // Trigger scan immediately
-      triggerScan(base64Data, file.type);
+      triggerScan(base64Data, resolvedMime);
     };
     reader.onerror = () => setScanError('Failed to read file.');
     reader.readAsDataURL(file);

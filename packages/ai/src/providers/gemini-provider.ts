@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Buffer } from 'node:buffer';
+import process from 'node:process';
+
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { z } from 'zod';
@@ -44,7 +47,7 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
       apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     const config = resolvedApiKey ? { apiKey: resolvedApiKey } : {};
     const google = createGoogleGenerativeAI(config);
-    this.model = google('gemini-3.5-flash');
+    this.model = google('gemini-3.8-flash');
   }
 
   async interpretInsights(
@@ -192,9 +195,8 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
     });
 
     const categoryNames = categories.map((c) => c.name);
-    const formattedImage = imageBase64.startsWith('data:')
-      ? imageBase64
-      : `data:${mimeType || 'image/jpeg'};base64,${imageBase64}`;
+    const cleanBase64 = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '');
+    const imageBuffer = Buffer.from(cleanBase64, 'base64');
 
     try {
       const { object } = await generateObject({
@@ -210,7 +212,8 @@ export class GeminiAnalyticsProvider extends BaseAnalyticsProvider {
               },
               {
                 type: 'image',
-                image: formattedImage,
+                image: imageBuffer,
+                mediaType: mimeType || 'image/jpeg',
               },
             ],
           },
