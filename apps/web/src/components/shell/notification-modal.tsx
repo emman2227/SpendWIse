@@ -298,21 +298,29 @@ export const HeaderNotificationModal = () => {
   const analyticsQuery = useQuery({
     queryKey: dashboardAnalyticsQueryKey,
     queryFn: getDashboardAnalytics,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const categoriesQuery = useQuery({
     queryKey: transactionCategoriesQueryKey,
     queryFn: listTransactionCategories,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const goalsQuery = useQuery({
     queryKey: goalsQueryKey,
     queryFn: listGoals,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const expensesQuery = useQuery({
     queryKey: ['transactions', 'expenses'] as const,
     queryFn: () => listExpenses({}),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

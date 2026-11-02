@@ -627,9 +627,9 @@ export default function BudgetsPage() {
 
     try {
       await upsertBudget(payload);
-      await invalidateBudgets();
       closeBudgetModal();
       setPageMessage(editorMode === 'create' ? 'Budget saved.' : 'Budget updated.');
+      void invalidateBudgets();
     } catch (error) {
       setFormError(resolveBudgetError(error, 'Unable to save the budget right now.'));
     } finally {
@@ -653,8 +653,8 @@ export default function BudgetsPage() {
 
     try {
       await deleteBudget(budget.id);
-      await invalidateBudgets();
       setPageMessage(`Deleted budget for ${budget.categoryName}.`);
+      void invalidateBudgets();
     } catch (error) {
       setPageMessage(resolveBudgetError(error, 'Unable to delete the budget right now.'));
     } finally {
@@ -672,9 +672,9 @@ export default function BudgetsPage() {
 
     try {
       await shareBudget(shareTargetId, shareEmail);
-      await invalidateBudgets();
       closeShareModal();
       setPageMessage(`Budget shared with ${shareEmail}.`);
+      void invalidateBudgets();
     } catch (error) {
       setShareError(resolveBudgetError(error, 'Unable to share the budget right now.'));
     } finally {

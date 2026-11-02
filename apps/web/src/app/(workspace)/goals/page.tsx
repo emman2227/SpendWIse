@@ -620,8 +620,8 @@ export default function GoalsPage() {
         setPageMessage('Goal updated.');
       }
 
-      await invalidateGoals();
       closeEditor();
+      void invalidateGoals();
     } catch (error) {
       setFormError(resolveGoalError(error, 'Unable to save the goal right now.'));
     } finally {
@@ -647,9 +647,9 @@ export default function GoalsPage() {
       await updateGoal(goal.id, {
         currentAmount: goal.currentAmount + contribution,
       });
-      await invalidateGoals();
       closeFundModal();
       setPageMessage(`Added ${formatMoney(contribution)} to ${goal.title}.`);
+      void invalidateGoals();
     } catch (error) {
       setPageMessage(resolveGoalError(error, 'Unable to fund the goal right now.'));
     } finally {
@@ -676,8 +676,8 @@ export default function GoalsPage() {
 
     try {
       await deleteGoal(goalId);
-      await invalidateGoals();
       setPageMessage('Goal deleted.');
+      void invalidateGoals();
     } catch (error) {
       setPageMessage(resolveGoalError(error, 'Unable to delete the goal right now.'));
     } finally {

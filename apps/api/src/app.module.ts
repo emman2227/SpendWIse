@@ -27,6 +27,10 @@ import { UsersModule } from './modules/users/users.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         uri: configService.getOrThrow<string>('MONGODB_URI'),
+        minPoolSize: 5,
+        maxPoolSize: 20,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
       }),
     }),
     ScheduleModule.forRoot(),

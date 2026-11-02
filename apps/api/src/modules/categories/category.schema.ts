@@ -4,7 +4,7 @@ import type { HydratedDocument } from 'mongoose';
 @Schema({
   collection: 'categories',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class CategoryModel {
   @Prop()
@@ -28,3 +28,6 @@ export class CategoryModel {
 
 export type CategoryDocument = HydratedDocument<CategoryModel>;
 export const CategorySchema = SchemaFactory.createForClass(CategoryModel);
+
+CategorySchema.index({ userId: 1, isSystemDefined: 1 });
+CategorySchema.index({ name: 1, userId: 1 });

@@ -209,8 +209,25 @@ export const refreshSession = (refreshToken: string) =>
     body: JSON.stringify({ refreshToken }),
   });
 
+export interface GetCurrentUserOptions {
+  fetchProfile?: boolean;
+}
+
+const decodeTokenPayload = (token: string): { sub?: string; email?: string } | null => {
+  const parts = token.split('.');
+  if (parts.length < 2 || !parts[1]) return null;
+  try {
+    const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = Buffer.from(normalized, 'base64').toString('utf-8');
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+};
+
 export const getCurrentUserFromRequest = async (
   request: NextRequest,
+  options?: GetCurrentUserOptions,
 ): Promise<{ user: UserProfile; tokens?: AuthTokens } | null> => {
   const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
   const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
@@ -220,6 +237,22 @@ export const getCurrentUserFromRequest = async (
   }
 
   if (accessToken && !isTokenExpired(accessToken)) {
+    if (!options?.fetchProfile) {
+      const decoded = decodeTokenPayload(accessToken);
+      return {
+        user: {
+          id: decoded?.sub ?? '',
+          email: decoded?.email ?? '',
+          name: '',
+          phone: '',
+          currency: 'PHP',
+          emailVerified: true,
+          createdAt: '',
+          updatedAt: '',
+        },
+      };
+    }
+
     try {
       const user = await fetchProfile(accessToken);
       return { user };
@@ -235,7 +268,18 @@ export const getCurrentUserFromRequest = async (
   }
 
   const session = await refreshSession(refreshToken);
-  const user = await fetchProfile(session.tokens.accessToken);
+  const user = options?.fetchProfile
+    ? await fetchProfile(session.tokens.accessToken)
+    : {
+        id: decodeTokenPayload(session.tokens.accessToken)?.sub ?? '',
+        email: decodeTokenPayload(session.tokens.accessToken)?.email ?? '',
+        name: '',
+        phone: '',
+        currency: 'PHP',
+        emailVerified: true,
+        createdAt: '',
+        updatedAt: '',
+      };
 
   return {
     user,

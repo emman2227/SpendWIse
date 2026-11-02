@@ -1,4 +1,4 @@
-import { updateProfileSchema,type UserProfile } from '@spendwise/shared';
+import { updateProfileSchema, type UserProfile } from '@spendwise/shared';
 import { type NextRequest, NextResponse } from 'next/server';
 
 import {
@@ -16,7 +16,7 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getCurrentUserFromRequest(request);
+    const session = await getCurrentUserFromRequest(request, { fetchProfile: true });
 
     if (!session) {
       const response = NextResponse.json(

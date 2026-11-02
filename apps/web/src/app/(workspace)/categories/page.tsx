@@ -624,8 +624,8 @@ export default function CategoriesPage() {
         setPageMessage('Category updated.');
       }
 
-      await invalidateCategoryData();
       closeEditor();
+      void invalidateCategoryData();
     } catch (error) {
       setFormError(resolveCategoryError(error, 'Unable to save the category right now.'));
     } finally {
@@ -649,8 +649,8 @@ export default function CategoriesPage() {
 
     try {
       await deleteCategory(category.id);
-      await invalidateCategoryData();
       setPageMessage(`Deleted ${category.name}.`);
+      void invalidateCategoryData();
     } catch (error) {
       setPageMessage(resolveCategoryError(error, 'Unable to delete the category right now.'));
     } finally {

@@ -4,7 +4,7 @@ import type { HydratedDocument } from 'mongoose';
 @Schema({
   collection: 'expenses',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class ExpenseModel {
   @Prop({ required: true, index: true })
@@ -34,3 +34,6 @@ export class ExpenseModel {
 
 export type ExpenseDocument = HydratedDocument<ExpenseModel>;
 export const ExpenseSchema = SchemaFactory.createForClass(ExpenseModel);
+
+ExpenseSchema.index({ userId: 1, date: -1 });
+ExpenseSchema.index({ userId: 1, categoryId: 1 });

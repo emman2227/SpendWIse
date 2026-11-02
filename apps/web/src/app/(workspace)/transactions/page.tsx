@@ -904,11 +904,11 @@ export default function TransactionsPage() {
         setListFeedback('Transaction updated.');
       }
 
-      await Promise.all([
+      closeEditor();
+      void Promise.all([
         queryClient.invalidateQueries({ queryKey: ['transactions', 'expenses'] }),
         queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKey }),
       ]);
-      closeEditor();
     } catch (error) {
       setFormError(resolveTransactionError(error, 'Unable to save the transaction right now.'));
     } finally {
@@ -935,11 +935,11 @@ export default function TransactionsPage() {
 
     try {
       await deleteExpense(expenseId);
-      await Promise.all([
+      setListFeedback('Transaction deleted.');
+      void Promise.all([
         queryClient.invalidateQueries({ queryKey: ['transactions', 'expenses'] }),
         queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKey }),
       ]);
-      setListFeedback('Transaction deleted.');
     } catch (error) {
       setListFeedback(
         resolveTransactionError(error, 'Unable to delete the transaction right now.'),

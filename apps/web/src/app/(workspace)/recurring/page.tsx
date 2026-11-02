@@ -1036,8 +1036,8 @@ export default function RecurringPage() {
         setBannerMessage(`"${result.data.description}" updated successfully.`);
       }
 
-      await queryClient.invalidateQueries({ queryKey: savedRecurringQueryKey });
       setIsEditorOpen(false);
+      void queryClient.invalidateQueries({ queryKey: savedRecurringQueryKey });
     } catch (error) {
       setFormError(resolveRecurringError(error, 'Unable to save recurring schedule.'));
     } finally {
@@ -1049,12 +1049,12 @@ export default function RecurringPage() {
     try {
       const nextActive = !item.isActive;
       await updateRecurringExpense(item.id, { isActive: nextActive });
-      await queryClient.invalidateQueries({ queryKey: savedRecurringQueryKey });
       setBannerMessage(
         nextActive
           ? `"${item.description}" resumed and active.`
           : `"${item.description}" paused. Auto-creation suspended.`,
       );
+      void queryClient.invalidateQueries({ queryKey: savedRecurringQueryKey });
     } catch (error) {
       setBannerMessage(resolveRecurringError(error, 'Failed to update schedule status.'));
     }
@@ -1071,8 +1071,8 @@ export default function RecurringPage() {
 
     try {
       await deleteRecurringExpense(item.id);
-      await queryClient.invalidateQueries({ queryKey: savedRecurringQueryKey });
       setBannerMessage(`"${item.description}" deleted.`);
+      void queryClient.invalidateQueries({ queryKey: savedRecurringQueryKey });
     } catch (error) {
       setBannerMessage(resolveRecurringError(error, 'Failed to delete recurring schedule.'));
     }
